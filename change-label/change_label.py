@@ -40,7 +40,7 @@ def get_request(endpoint, id):
     return response.json()
 
 def paginate(nextdata):
-    url = 'https://api.clubhouse.io' + nextdata + '&token=5b2c1afe-1f48-4245-ba95-f6b764ece369'
+    url = 'https://api.clubhouse.io' + nextdata + '&' + os.getenv('CH_API')
     response = requests.get(url)
 
     if response.status_code != 200:
