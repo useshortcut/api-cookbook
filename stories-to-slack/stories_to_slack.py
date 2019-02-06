@@ -42,7 +42,7 @@ def set_query(date_start, date_end):
     completed_range = 'completed:{}..{}'.format(date_start, date_end)
     # Add any other search limiters like project names, owners, or keywords.
     limiter = ''
-    query = {'query': completed_range + ' ' + limiter, 'page_size': 5}
+    query = {'query': completed_range + ' ' + limiter, 'page_size': 25}
 
     return query
 
