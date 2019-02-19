@@ -1,0 +1,1 @@
+These retieve the average lead and cycle time for the specified Epic or Milestone and create a CSV in your Downloads folder.
