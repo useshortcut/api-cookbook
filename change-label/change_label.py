@@ -2,13 +2,13 @@ import os
 import requests
 
 # Get your token from the local environment variable and prep it for use in the URL
-myToken = '?token=' + os.getenv('CH_API')
+clubhouse_api_token = '?token=' + os.getenv('CH_API')
 
 
 #The name of the existing label you want to search for.
-label_name = 'sprint1'
+existing_label = 'willowlabeltest'
 
-query = {'query': '!is:done label:"' + label_name + '"', 'page_size': 25}
+query = {'query': '!is:done label:"' + existing_label + '"', 'page_size': 25}
 
 
 #A list to store each page of search results for processing.
@@ -20,18 +20,8 @@ search_endpoint = '/search/stories'
 stories_endpoint = '/stories'
 
 def search_request(label_query):
-    url = api_url_base + search_endpoint + myToken
+    url = api_url_base + search_endpoint + clubhouse_api_token
     response = requests.get(url, params=label_query)
-
-    if response.status_code != 200:
-        print('Status:', response.status_code, 'Problem with the request. Exiting.')
-        exit()
-
-    return response.json()
-
-def get_request(endpoint, id):
-    url = api_url_base + endpoint + '/' + id + myToken
-    response = requests.get(url)
 
     if response.status_code != 200:
         print('Status:', response.status_code, 'Problem with the request. Exiting.')
@@ -49,29 +39,25 @@ def paginate(nextdata):
 
     return response.json()
 
-def update_story(id, label_names):
-    url = api_url_base + stories_endpoint + '/' + id + myToken
-    params = {'labels': label_names}
+def update_story(id, list_of_labels_on_story):
+    url = api_url_base + stories_endpoint + '/' + id + clubhouse_api_token
+    params = {'labels': list_of_labels_on_story}
     response = requests.put(url, json=params)
     return response.json()
 
-def add_label(name, hex_color):
-    new_label = {'name': name, 'color': hex_color}
-    return new_label
-
-def update_story_labels(data):
-    for story in data:
+def update_story_labels(results, existing_label):
+    for story in results:
         story_id = str(story['id'])
         labels = story['labels']
-        label_names = [new_label]
+        list_of_labels_on_story = [new_label]
         for label in labels:
-            if label['name'] != label_name:
-                label_names.append({'name': label['name']})
-        update_story(story_id, label_names)
+            if label['name'] != existing_label:
+                list_of_labels_on_story.append({'name': label['name']})
+        update_story(story_id, list_of_labels_on_story)
     return None
 
 #The name and hex color for the label you want to add
-new_label = add_label('sprint2', '#ff00d5')
+new_label = {'name': name, 'color': hex_color}
 search_results = search_request(query)
 
 while search_results['next'] is not None:
@@ -80,5 +66,5 @@ while search_results['next'] is not None:
 else:
     stories_list.append(search_results['data'])
     for results in stories_list:
-         update_story_labels(results)
+         update_story_labels(results, existing_label)
     print('Stories updated')
