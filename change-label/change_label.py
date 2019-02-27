@@ -1,8 +1,9 @@
 import os
+import sys
 import requests
 
 # Get your token from the local environment variable and prep it for use in the URL
-clubhouse_api_token = '?token=' + os.getenv('CH_API')
+clubhouse_api_token = '?token=' + os.getenv('CLUBHOUSE_API_TOKEN')
 
 # API URL and endpoint references.
 api_url_base = 'https://api.clubhouse.io/api/beta'
@@ -30,24 +31,24 @@ def change_story_labels(story_id, labels_on_story):
 
 
 def paginate_results(next_page_data):
-    url = 'https://api.clubhouse.io' + next_page_data + '&token=' + os.getenv('CH_API')
-    response = requests.get(url)
-
-    if response.status_code != 200:
-        print('Status:', response.status_code, 'Problem with the request. Exiting.')
-        exit()
-
+    try:
+        url = 'https://api.clubhouse.io' + next_page_data + '&token=' + os.getenv('CLUBHOUSE_API_TOKEN')
+        response = requests.get(url)
+        response.raise_for_status()
+    except requests.exceptions.RequestException as e:
+        print(e)
+        sys.exit(1)
     return response.json()
 
 
 def search_stories(query):
-    url = api_url_base + search_endpoint + clubhouse_api_token
-    response = requests.get(url, params=query)
-
-    if response.status_code != 200:
-        print('Status:', response.status_code, 'Problem with the request. Exiting.')
-        exit()
-
+    try:
+        url = api_url_base + search_endpoint + clubhouse_api_token
+        response = requests.get(url, params=query)
+        response.raise_for_status()
+    except requests.exceptions.RequestException as e:
+        print(e)
+        sys.exit(1)
     return response.json()
 
 
@@ -67,7 +68,7 @@ def main():
 
     while search_results['next'] is not None:
         pages_of_search_results.append(search_results['data'])
-        search_results = paginate(search_results['next'])
+        search_results = paginate_results(search_results['next'])
     else:
         pages_of_search_results.append(search_results['data'])
         for page_of_stories in pages_of_search_results:
