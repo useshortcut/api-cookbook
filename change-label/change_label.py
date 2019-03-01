@@ -11,13 +11,13 @@ search_endpoint = '/search/stories'
 stories_endpoint = '/stories'
 
 
-def assess_story_labels(story_results, remove_old_label, add_new_label):
+def assess_story_labels(story_results, old_label, new_label):
     for story in story_results:
         story_id = str(story['id'])
         list_of_labels_on_story = story['labels']
-        list_of_labels_to_keep = [add_new_label]
+        list_of_labels_to_keep = [new_label]
         for label in list_of_labels_on_story:
-            if label['name'] != remove_old_label:
+            if label['name'] != old_label:
                 list_of_labels_to_keep.append({'name': label['name']})
         change_story_labels(story_id, list_of_labels_to_keep)
     return None
