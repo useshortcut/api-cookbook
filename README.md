@@ -1,44 +1,28 @@
-# api-cookbook
-A collection of information people can use for reference when writing API scripts. 
+# Welcome to the Clubhouse REST API Cookbook
+The Clubhouse REST API is a powerful tool that can make your work easier and enhance the ways that you use your Clubhouse data. 
+We created this material to get you started using the Clubhouse REST API to solve common requests, even if you don't regularly use APIs.
 
-Example code for specific tasks that can be used as is, or adjusted for a variety of use cases.
+Maybe you need to get average Cycle time for the Epic your team just completed, or you need to change the Label for uncompleted work in a Sprint; this will show you how.
 
-#### Check Python version and install Requests
-***
-
-All of the cookbook scripts are written in Python 3. The first thing to do is to make sure you have Python 3 installed.
-
-Open Terminal 
-Type `python3 --version` and press Return
-
-You'll see the default version of Python 3 that is installed on your Mac. It's probably Python 3.6.4 or 3.6.5. That's totally fine. We do *not* want to change that since there may be other things on your system that use Python 3.6.x.
+All of the example code for specific tasks will show you where to make small changes to interact with the data in your Clubhouse account.  
+You can also use this material as a starting place and make further adjustments for your particular needs.
 
 
-We'll need the [Requests Library](http://docs.python-requests.org/en/master/) which you can install with pip.
-First though, check if you have pip installed.
+Do you have an example you think we should cover? Please let us know! You can open an Issue on this repository so other teams can publicly add their interest, or email support@clubbouse.io.
 
-In Terminal type `pip3 --version`
-If it's installed, you'll get back something like `pip 10.0.1 from /usr/local/lib/python3.6/site-packages/pip (python 3.6)`. 
+Found a typo or other small issue? Please feel free to submit a PR!
 
-If it's not installed, this would be a good time to ask for help. :D
+Questions and suggestions are welcome as Issues, or send us an email support@clubhouse.io. We'd love to hear from you!
 
-All set? Let's get Requests installed:
+## Requirements
+All of the cookbook scripts are written in Python 3 and use the [Requests Library](http://docs.python-requests.org/en/master/).
+If you're comfortable checking your Python installation, installing Requests, and setting environment variables, please jump to [the main tabe of contents](link to cookbook-contents doc)
 
-In Terminal type `pip3 install requests`
+If you'd like a walk-through of getting set-up to run these example scripts, please check out [name of this spot](link to the spot)
 
-***
-#### Environment Variable
-***
+## Quick reference to common questions
 
-Get your [Clubouse API token](https://help.clubhouse.io/hc/en-us/articles/205701199-Clubhouse-API-Tokens).
+[How do I authenticate?](link to page)
 
-Set your Clubhouse API token as an environment variable in .profile :
+[How do I get the next page of results?](link to page)
 
-1. `cd ~` - to go to your home directory
-2. `nano .profile` - to open that file in the nano text editor
-3. Add the line `export CH_API='YOUR_TOKEN'` to the file in nano, where YOUR_TOKEN is your actual API token from Clubhouse. Keep the single quotes around the token.
-4. Press ⌃O (control key and the letter 'o') then return to save the changes - this is like the ⌘S (Command-S )to save in most programs.
-5. Press ⌃X (control key and letter 'x') to exit.
-6. Close your Terminal window - this is necessary for the change to be applied!
-7. Open new Terminal window and test your environment variable by typing:
-`echo $CH_API`
