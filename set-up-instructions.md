@@ -171,7 +171,7 @@ There are a few options around how to get the Clubhouse API Cookbook scripts ont
 Since we set up the Requests library in a virtual environment, we'll want to put the Cookbook in that same environment.
 
 If you've been following along in your command line window, you should still be in the ClubhouseCookbook folder. If not you'll need to navigate to that folder or the folder you're using to hold the Cookbook scripts.
-Once you're in that folder in your command line window paste `git clone https:linkitylink` and press Enter/Return
+Once you're in that folder in your command line window paste `git clone https://github.com/clubhouse/api-cookbook.git` and press Enter/Return
 
 If you'd prefer to get the Cookbook without using the command line, you can down load a zipped folder from GitHub's UI. You'll need to unzip the folder and then move all of the contents in to the location that you set up your virtual environment.
 
