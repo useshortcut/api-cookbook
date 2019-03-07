@@ -18,7 +18,7 @@ Questions and suggestions are welcome as Issues, or send us an email support@clu
 All of the cookbook scripts are written in Python 3 and use the [Requests Library](http://docs.python-requests.org/en/master/).
 If you're comfortable checking your Python installation, installing Requests, and setting environment variables, please jump to [the main tabe of contents](link to cookbook-contents doc)
 
-If you'd like a walk-through of getting set-up to run these example scripts, please check out [name of this spot](link to the spot)
+If you'd like a walk-through of getting set up to run these example scripts, please check out [the setup instructions](link to the spot)
 
 ## Quick reference to common questions
 
