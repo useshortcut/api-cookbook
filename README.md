@@ -16,13 +16,13 @@ Questions and suggestions are welcome as Issues, or send us an email support@clu
 
 ## Requirements
 All of the cookbook scripts are written in Python 3 and use the [Requests Library](http://docs.python-requests.org/en/master/).
-If you're comfortable checking your Python installation, installing Requests, and setting environment variables, please jump to [the main tabe of contents](link to cookbook-contents doc)
+If you're comfortable checking your Python installation, installing Requests, using a virtual environment, and setting environment variables, please jump to [the main table of contents](link to cookbook-contents doc)
 
-If you'd like a walk-through of getting set up to run these example scripts, please check out [the setup instructions](link to the spot)
+If you'd like a walk-through of getting set up to run these example scripts, please check out the setup instructions [for Mac](https://github.com/clubhouse/api-cookbook/blob/master/set-up-instructions.md) or [for PC](link)
 
 ## Quick reference to common questions
 
-[How do I authenticate?](link to page)
+[How do I authenticate?](https://github.com/clubhouse/api-cookbook/blob/master/Authentication.md)
 
 [How do I get the next page of results?](link to page)
 

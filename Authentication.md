@@ -1,6 +1,6 @@
 The Clubhouse API uses token-based authentication. Tokens are linked to a specific Clubhouse user. This makes it easy for you to make updates to work via the API and keep your team in the loop about who made changes.
 
-To generate an API token, go to https://app.clubhouse.io/settings/account/api-tokens. 
+To generate an API token, go to https://app.clubhouse.io/settings/account/api-tokens. You can also access this from your user Settings.
 
 We recommend saving this token as an environment variable. This helps keep your token secure and makes it easier to work with the API. 
 

@@ -1,6 +1,6 @@
 In this guide, we'll take you through all the things you might need to get set up to run the Clubhouse API Cookbook scripts.
 
-You'll need Administrator access to your Mac (Linux ok, [Windows use this guide](link)) and an active internet connection to get everything set up.
+You'll need Administrator access to your Windows computer ([Mac and Linux use this guide](link)) and an active internet connection to get everything set up.
 Plan for up to 30 minutes to get everything installed - it may be much faster though!
 
 We'll cover:
@@ -11,7 +11,6 @@ We'll cover:
 - [Setting up and using a virtual environment](#setting-up-and-using-a-virtual-environment)
 - [Installing the Requests library](#installing-the-requests-library)
 - [Downloading the Clubhouse API Cookbook](#downloading-the-clubhouse-api-cookbook)
-
 
 ***
 
@@ -26,12 +25,12 @@ Command line cheat sheets are a great way to get familiar with the commonly used
 
 Different operating systems have different command line interfaces. 
 
-**On Mac:**
-Open Applications, then click Utilities. Click the Terminal app to open the command line.
+**On Windows:**
+You may have to try a few ways to find your command line - different versions of Windows have different ways of accessing the command line.
 
-**On Linux:**
-Check in Applications in either the Accessories folder or the Applications folder for the Terminal app. 
-If you're running a distro that doesn't have Terminal in one of those places, you probably know how to launch it. :)
+- Go to the Start menu or screen, and enter "Command Prompt" in the search field.
+- Go to Start menu then click Windows System. Click Command Prompt to open the command line.
+- Go to Start menu the click All Programs. Click into Accessories, then click Command Prompt.
 
 
 Once you have a command line window open, its time to check your current Python version.
@@ -49,10 +48,11 @@ If nothing is present, you'll need to install Python 3.
 
 #### Installing Python 3
 
-If you already use a package manager like Homebrew(Mac) install Python 3 with your package manager.
+If you already use a package manager like Chocolatey install Python 3 with your package manager.
 
 Otherwise, grab the appropriate download for your operating system from the [Python Software Foundation](https://www.python.org/downloads/).
 
+_Special note for Windows users:_ During installation make sure you tick the "Add Python 3.x to PATH" or 'Add Python to your environment variables' in the Setup window.
 
 ***
 #### Setting your Environment Variable
@@ -64,7 +64,6 @@ While you can manually add your token to any script you use, we recommend saving
 
 Get your [Clubhouse API token](https://app.clubhouse.io/settings/account/api-tokens) from the Clubhouse UI.
 
-
 If you are just testing things out, or don't need to regularly access the Clubhouse API, you can set a temporary environment variable.
 
 In your command line window, type `export CLUBHOUSE_API_TOKEN='YOUR_TOKEN_VALUE'` where YOUR_TOKEN_VALUE is your actual API token from Clubhouse. Keep the single quotes around the token.
@@ -74,24 +73,14 @@ When you close your command line window, this variable will be removed, and you'
 If you're going to use the API often, it will save you time if you set your API token as a system variable. 
 
 
+On Windows 10 (other version of Windows may have slightly different menus):
 
-On Mac:
-
-We're assuming you're using bash since it's the default user shell. If you're using a different shell (like zsh or tcsh), and aren't sure how to set a variable for your set-up, check the documentation for the shell you're using.
-
-If you have other system variables set, like AWS credentials, and aren't sure where those credentials are, you may want to check with a technical lead on your team so you can set your Clubhouse API variable in the same file.
-
-
-You'll use Terminal to set your Clubhouse API token as an environment variable in ~/.bash_profile :
-
-1. Type `cd ~` and press Return to go to your home directory
-2. Type `nano .bash_profile` and press Return to open .bash_profile in the nano text editor (Feel free to use your preferred text editor instead)
-3. Add the line `export CLUBHOUSE_API_TOKEN='YOUR_TOKEN_VALUE'` to the file in nano, where YOUR_TOKEN_VALUE is your actual API token from Clubhouse. Keep the single quotes around the token.
-4. Press ⌃O (control key and the letter 'o') then return to save the changes - this is like the ⌘S (Command-S )to save in most programs.
-5. Press ⌃X (control key and letter 'x') to exit.
-6. Close your Terminal window - this is necessary for the change to be applied!
-7. Open new Terminal window and test your environment variable by typing:
-`echo $CLUBHOUSE_API_TOKEN`
+1. Open the Power User Task Menu, by right-clicking the very bottom-left corner of the screen.
+2. Click System.
+3. In the Settings window, scroll down to the Related settings section and click the System info link.
+4. In the System window, click the Advanced system settings link in the left navigation pane.
+5. In the System Properties window, click on the Advanced tab, then click the Environment Variables button near the bottom of that tab.
+6. At the bottom of the window, click New and enter the `CLUBHOUSE_API_TOKEN` as the variable name and the token that you created in Clubhouse as the variable value.
 
 
 #### Setting up and using a virtual environment
@@ -115,7 +104,7 @@ In your [command line](#opening-a-command-line-interface) window type:
 `mkdir ClubhouseCookbook`
 and press Enter/Return.
 
-2. We want to create the virtual environment in the directory(folder) that we just created, so we need to navigate to inside that folder.
+2. We want to create the virtual environment in the directory(folder) that we just created.
 In your command line window type:
 `cd ClubhouseCookbook`
 and press Enter/Return.
@@ -123,12 +112,13 @@ and press Enter/Return.
 3. Make a virtual environment. 
 We'll make one called `cookbook`. You can use any name, but be sure to avoid spaces, accents, or special characters and keep it all lowercase.
 In your command line window type:
-`python3 -m venv cookbook`
+
+`python -m venv cookbook`
 
 4. Start your virtual environment.
 In your command line window type:
-`source cookbook/bin/activate`
-
+ `cookbook\Scripts\activate`
+ 
 When your virtual environment is active, you'll see `(cookbook)` at the beginning of your command line prompt.
 
 Now we're ready to install Requests!
@@ -138,7 +128,7 @@ Now we're ready to install Requests!
 
 We'll need the [Requests Library](http://docs.python-requests.org/en/master/) which you can install with pip.
 
-In Terminal type `pip install requests` and press Enter/Return.
+In your command line window  type `pip install requests` and press Enter/Return.
 If you see a message about needing to update pip, follow the instructions in the command line window.
 
 That covers the last installation requirement. Let's go get the Cookbook!
@@ -162,5 +152,3 @@ To run each script, navigate to the folder for the script.
 
 Make sure your [virtual environment](#setting-up-and-using-a-virtual-environment) is active.
 Then type `python name_of_the_script.py` and press Return/Enter to run the script. Make sure you've replaced name_of_the_script.py with the actual file name.
-
-
