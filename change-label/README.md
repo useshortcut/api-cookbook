@@ -6,12 +6,12 @@ To use this script, open change_label.py in a text editor. This file will be in 
 
 You'll need to make two changes in the file:
 
-1. The name of the existing label you want to search for.
-   Line 57: `existing_label = 'Sprint 1'`
+1. The name of the existing label you want to search for.  
+   Line 57: `existing_label = 'Sprint 1'`  
    Change Sprint 1 to the name of the label you want to search for. Keep the single quotes around the label name.
 
-2. The name and hex color for the label you want to add
-    Line 60: `new_label = {'name': 'Sprint 2', 'color': '#ff0022'}`
+2. The name and hex color for the label you want to add.  
+    Line 60: `new_label = {'name': 'Sprint 2', 'color': '#ff0022'}`  
     Change Sprint 2 to the name of the label you want to add. Change #ff0022 to the hex color you want to add. Keep the single quotes around the label name and the hex color.
     
     
