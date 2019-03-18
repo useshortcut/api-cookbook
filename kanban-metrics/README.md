@@ -22,7 +22,7 @@ From the main Cookbook folder:
 
 Make sure your virtual environment is active.
 For Epics type:
-`python epics_metrics.py` and press Return/Enter to run the script. 
+`python epic_metrics.py` and press Return/Enter to run the script. 
 
 For Milestones type:
 `python milestone_metrics.py` and press Return/Enter to run the script. 
