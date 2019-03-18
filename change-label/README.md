@@ -2,7 +2,7 @@ If you're using labels to model sprint, you may need to change the label on inco
 
 This script searches for incomplete work in an existing label and replaces the existing label with a new label.
 
-To use this script, open change_label.py in a text editor.
+To use this script, open change_label.py in a text editor. This file will be in the folder where you downloaded the Cookbook repository.
 
 You'll need to make two changes in the file:
 
