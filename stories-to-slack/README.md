@@ -2,7 +2,7 @@ The support team at Clubhouse uses a version of this script to help us get back 
 It searches for work completed between the last business day and today, checks for support tickets on each Story, and preps data to send to Slack.
 The name of the Story, a link to the Story, and a count of the number of tickets on the Story are sent to a specific Slack channel, so the support team can quickly find Stories where they need to follow up.
 
-To use this script, open send-stories-to-slack.py in a text editor.
+To use this script, open send-stories-to-slack.py in a text editor. This file will be in the folder where you downloaded the Cookbook repository.
 
 You'll need to have a Slack App set up to use an [Incoming Webhook URL](https://api.slack.com/incoming-webhooks) to get information from Clubhouse into Slack. [Slack's guide to setting this up](https://api.slack.com/slack-apps) is very friendly!
 
