@@ -1,7 +1,7 @@
 These retrieve the average lead and cycle time for the specified Epic or Milestone and create a CSV in your Downloads folder.
 The time for both lead and cycle time is displayed in seconds.
 
-To use this script, open the script in a text editor.
+To use this script, open the script in a text editor. The script file will be in the folder where you downloaded the Cookbook repository.
 
 
 To get the average lead and cycle time for an Epic, use epic_metrics.py.
