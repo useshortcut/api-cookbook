@@ -53,11 +53,15 @@ def search_stories(query):
 
 
 def main():
-    # The name of the existing label you want to search for.
-    existing_label = 'Sprint 1'
+
+    existing_label = input('Enter the name of the existing label you want to search for: ')
 
     # The name and hex color for the label you want to add
-    new_label = {'name': 'Sprint 2', 'color': '#ff0022'}
+    new_label_name = input('Enter the name for the new label: ')
+
+    label_color_hex = input('Enter the hex value for your label color: ')
+
+    new_label = {'name': new_label_name, 'color': label_color_hex}
 
     search_for_label_with_incomplete_work = {'query': '!is:done label:"' + existing_label + '"', 'page_size': 25}
 
