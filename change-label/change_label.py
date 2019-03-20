@@ -59,7 +59,7 @@ def main():
     # The name and hex color for the label you want to add
     new_label_name = input('Enter the name for the new label: ')
 
-    label_color_hex = input('Enter the hex value for your label color: ')
+    label_color_hex = input('Enter the hex value for your label color. Include the #: ')
 
     new_label = {'name': new_label_name, 'color': label_color_hex}
 
