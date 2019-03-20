@@ -45,12 +45,13 @@ def write_to_csv(epic_name_cycle_lead_values, csv_document_name):
 def main():
     # Set up the name for the CSV document that will capture the cycle and lead time for the specified Epic.
     # Do not include file type in the name.
-    new_document_name = 'Epic_lead_cycle'
-    epic_id = '43962'
+    new_document_name = input('Enter the name for your file. Do not include file type in the name: ')
+    epic_id = str(input('Enter the ID of the Epic: '))
 
     output_csv = create_csv_with_epic_headers(new_document_name)
     epic_output_details = epic_lead_cycle_times(get_api_response(epic_endpoint, epic_id))
     write_to_csv(epic_output_details, output_csv)
+    print(new_document_name + ".csv is now in your Downloads folder.")
 
 
 if __name__ == "__main__":

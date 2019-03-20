@@ -46,12 +46,14 @@ def main():
 
     # Set up the name for the CSV document that will capture the cycle and lead time for the specified Milestone.
     # Do not include file type in the name.
-    new_document_name = 'Milestone_lead_cycle'
-    milestone_id = '38900'
+
+    new_document_name = input('Enter the name for your file. Do not include file type in the name: ')
+    milestone_id = str(input('Enter the ID of the Milestone: '))
 
     output_csv = create_csv_with_milestone_headers(new_document_name)
     milestone_output_details = milestone_lead_cycle_times(get_api_response(milestone_endpoint, milestone_id))
     write_to_csv(milestone_output_details, output_csv)
+    print(new_document_name + ".csv is now in your Downloads folder.")
 
 
 if __name__ == "__main__":
