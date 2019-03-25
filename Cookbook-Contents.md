@@ -24,11 +24,9 @@ Cycle time information for Epics and Milestones can be useful reporting tools. T
 
 ### General questions
 [How do I authenticate?](https://github.com/clubhouse/api-cookbook/blob/master/Authentication.md)
-
 Not sure how to get access to your Clubhouse with the API? Start here.
 
 [How do I get the next page of results?](https://github.com/clubhouse/api-cookbook/blob/master/Pagination.md)
-
 Pagination can be tough! This will help you through it.
 
 [How do I get set up to use these scripts on my Mac?](https://github.com/clubhouse/api-cookbook/blob/master/set-up-instructions.md)
