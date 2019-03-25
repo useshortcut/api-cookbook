@@ -155,10 +155,14 @@ Once you're in that folder in your command line window, paste `git clone https:/
 
 If you'd prefer to get the Cookbook without using the command line, you can [download a zipped folder from GitHub's UI](https://help.github.com/en/articles/cloning-a-repository). You'll need to unzip the folder and then move all of the contents in to the location that you set up your virtual environment.
 
-To run each script, navigate to the folder for the script.
+To run each script, navigate to into the downloaded API cookbooks with `cd api-cookbook` then swicth to the folder for the specific script.
+Once you have your API token set as an envirnomnet variable, the scripts in these folders can be run without modification
 `cd change-label`
-`cd stories-to-slack`
 `cd kanban-metrics`
+
+The script in this folder requires editing to be able to send Stories to your Slack workspace.
+`cd stories-to-slack`
+
 
 Make sure your [virtual environment](#setting-up-and-using-a-virtual-environment) is active.
 Then type `python name_of_the_script.py` and press Return/Enter to run the script. Make sure you've replaced name_of_the_script.py with the actual file name.
