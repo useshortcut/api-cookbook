@@ -18,7 +18,7 @@ The support team at Clubhouse uses a version of this script to help us get back 
 
 It searches for work completed between the last business day and today, checks for support tickets on each Story, and preps data to send to Slack. The name of the Story, a link to the Story, and a count of the number of tickets on the Story are sent to a specific Slack channel, so the support team can quickly find Stories where they need to follow up.
 
-[I need to rollover work from one sprint to another](https://github.com/clubhouse/api-cookbook/tree/master/change-label)
+[I need to roll work from one sprint over to another.](https://github.com/clubhouse/api-cookbook/tree/master/change-label)
 Many teams use Labels to represent sprints. When there's unfinished work that needs to be rolled into the next sprint, this script can help automate that process.
 
 [How to I get the lead and cycle time for a Milestone?](https://github.com/clubhouse/api-cookbook/tree/master/kanban-metrics)
