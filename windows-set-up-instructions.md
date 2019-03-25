@@ -64,23 +64,20 @@ While you can manually add your token to any script you use, we recommend saving
 
 Get your [Clubhouse API token](https://app.clubhouse.io/settings/account/api-tokens) from the Clubhouse UI.
 
+If you're going to use the API often, it will save you time if you set your API token as a system variable. 
+
+On Windows 10 (other version of Windows may have slightly different menus):
+
+1. Go to the Start menu or screen, and enter "Environment Variables" in the search field. 
+2. At the bottom of the window, click New. 
+3. The variable name you enter should be `CLUBHOUSE_API_TOKEN` and the variable value should be the token that you created in Clubhouse.
+
 If you are just testing things out, or don't need to regularly access the Clubhouse API, you can set a temporary environment variable.
 
 In your command line window, type `export CLUBHOUSE_API_TOKEN='YOUR_TOKEN_VALUE'` where YOUR_TOKEN_VALUE is your actual API token from Clubhouse. Keep the single quotes around the token.
 
 When you close your command line window, this variable will be removed, and you'll need to add it again every time to you want to use something in the Cookbook.
 
-If you're going to use the API often, it will save you time if you set your API token as a system variable. 
-
-
-On Windows 10 (other version of Windows may have slightly different menus):
-
-1. Open the Power User Task Menu, by right-clicking the very bottom-left corner of the screen.
-2. Click System.
-3. In the Settings window, scroll down to the Related settings section and click the System info link.
-4. In the System window, click the Advanced system settings link in the left navigation pane.
-5. In the System Properties window, click on the Advanced tab, then click the Environment Variables button near the bottom of that tab.
-6. At the bottom of the window, click New and enter the `CLUBHOUSE_API_TOKEN` as the variable name and the token that you created in Clubhouse as the variable value.
 
 
 #### Setting up and using a virtual environment
@@ -141,11 +138,11 @@ Since we set up the Requests library in a virtual environment, we'll want to put
 If you've been following along in your command line window, you should still be in the ClubhouseCookbook folder. If not you'll need to navigate to that folder or the folder you're using to hold the Cookbook scripts.
 Use `cd` to change directories (aka folders). For example, when we made the ClubhouseCookbook folder in our home directory, we then navigated into that folder with `cd ClubhouseCookbook`.
 
-Once you're in that folder in your command line window, paste `git clone https://github.com/clubhouse/api-cookbook.git` and press Enter/Return
+Once you're in that folder in your command line window, paste `git clone https://github.com/clubhouse/api-cookbook.git` and press Enter/Return.
 
-If you'd prefer to get the Cookbook without using the command line, you can [download a zipped folder from GitHub's UI](https://help.github.com/en/articles/cloning-a-repository). You'll need to unzip the folder and then move all of the contents in to the location that you set up your virtual environment.
+If you'd prefer to get the Cookbook without using the command line, or you don't have git installed, you can [download a zipped folder from GitHub's UI](https://help.github.com/en/articles/cloning-a-repository). You'll need to unzip the folder and then move all of the contents in to the location that you set up your virtual environment.
 
-To run each script, navigate to into the downloaded API cookbooks with `cd api-cookbook` then swicth to the folder for the specific script.
+To run each script, navigate to into the downloaded API Cookbook with `cd api-cookbook` then swicth to the folder for the specific script.
 Once you have your API token set as an envirnomnet variable, the scripts in these folders can be run without modification.
 `cd change-label`
 `cd kanban-metrics`
