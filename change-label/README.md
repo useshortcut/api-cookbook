@@ -1,4 +1,4 @@
-If you're using labels to model sprint, you may need to change the label on incomplete work to move it to the next sprint.
+If you're using labels to model sprints, you may need to change the label on incomplete work to move it to the next sprint.
 
 This script searches for incomplete work in an existing label and replaces the existing label with a new label.
 
@@ -15,11 +15,6 @@ When the script finishes running, you'll see "Stories Updated" in your command p
 
 ----
 
-If you to maodify this script for other use, consider starting with the included [search operators](https://help.clubhouse.io/hc/en-us/articles/360000046646-Search-Operators). 
+If you want to modify this script for other uses, consider starting with the included [search operators](https://help.clubhouse.io/hc/en-us/articles/360000046646-Search-Operators). 
 
 `search_for_label_with_incomplete_work = {'query': '!is:done label:"' + existing_label + '"', 'page_size': 25}`
-
-
-
-
-
