@@ -5,12 +5,14 @@ To use these scripts:
 Make sure your virtual environment is active.`source cookbook/bin/activate` for Mac and `cookbook\Scripts\activate` for Windows.
 
 **Milestone Lead and Cycle time**
+
 To fetch the lead and cycle time for a specific Milestone type `python milestone_metrics.py` and press Return/Enter to run the script. 
 
 You'll be asked to enter the name for the export file and the ID for the Milestone.
 When the script has finished running, you'll see a message that your file is availble in your Downloads folder.
 
 **Epic Lead and Cycle time**
+
 To fetch the lead and cycle time for a specific Epic type `python epic_metrics.py` and press Return/Enter to run the script. 
 
 You'll be asked to enter the name for the export file and the ID for the Epic.
