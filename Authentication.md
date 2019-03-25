@@ -6,7 +6,9 @@ We recommend saving this token as an environment variable. This helps keep your 
 
 `export CLUBHOUSE_API_TOKEN="YOUR API TOKEN HERE"`
 
-All of the scripts in the Clubhouse API Cookbook assume that you have set an environment variable `CLUBHOUSE_API_TOKEN` to hold your token. Not sure how to do that? We walk you through it [here](link).
+All of the scripts in the Clubhouse API Cookbook assume that you have set an environment variable `CLUBHOUSE_API_TOKEN` to hold your token. Not sure how to do that? We walk you through it!
+- [Mac](https://github.com/clubhouse/api-cookbook/blob/master/set-up-instructions.md#setting-your-environment-variable).
+- [Windows](https://github.com/clubhouse/api-cookbook/blob/master/windows-set-up-instructions.md#setting-your-environment-variable)
 
 ### Troubleshooting
 Requests made with a missing or invalid token will get a 401 Unauthorized response. Make sure your token is correct, and that your environment variable is correct.
