@@ -4,7 +4,7 @@ We created this material to get you started using the Clubhouse REST API to solv
 
 Maybe you need to get average Cycle time for the Epic your team just completed, or you need to change the Label for uncompleted work in a Sprint; this will show you how.
 
-All of the example code for specific tasks will show you where to make small changes to interact with the data in your Clubhouse account.  
+Some of these examples can be run as is. All of the example code for specific tasks will show you where to make small changes to interact with the data in your Clubhouse account.  
 You can also use this material as a starting place and make further adjustments for your particular needs.
 
 
