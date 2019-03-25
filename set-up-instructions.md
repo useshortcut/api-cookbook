@@ -32,7 +32,7 @@ Open Applications, then click Utilities. Click the Terminal app to open the comm
 Check in Applications in either the Accessories folder or the Applications folder for the Terminal app. 
 If you're running a distro that doesn't have Terminal in one of those places, you probably know how to launch it. :)
 
-Once you have a command line window open, its time to check your current Python version.
+Once you have a command line window open, it's time to check your current Python version.
 
 #### Checking what version of Python you have installed
 
@@ -57,8 +57,7 @@ Otherwise, grab the appropriate download for your operating system from the [Pyt
 ***
 
 All access to the Clubhouse API is [token based](https://github.com/clubhouse/api-cookbook/blob/master/Authentication.md). Your token will be a string of characters that is generated in the Clubhouse UI. Unlike a password, these tokens cannot be changed (just deleted). Each time that a script you are using needs to access the API, your token must be included in the request. 
-
-While you can manually add your token to any script you use, we recommend saving this token as an environment variable. This helps keep your token secure and makes it easier to work with the API. 
+While you can manually add your token to any script you use, we recommend saving this token as an environment variable. This helps keep your token secure and makes working with the API easier.
 
 Get your [Clubhouse API token](https://app.clubhouse.io/settings/account/api-tokens) from the Clubhouse UI.
 
@@ -139,21 +138,21 @@ That covers the last installation requirement. Let's go get the Cookbook!
 
 There are a few options around how to get the Clubhouse API Cookbook scripts onto your computer, so that you can run them on your device. Since we set up the Requests library in a virtual environment, we'll want to put the Cookbook in that same environment.
 
-If you've been following along in your command line window, you should still be in the ClubhouseCookbook folder. If not you'll need to navigate to that folder or the folder you're using to hold the Cookbook scripts.
+If you've been following along in your command line window, you should still be in the ClubhouseCookbook folder. If not, you'll need to navigate to that folder or the folder you're using to hold the Cookbook scripts.
+
 Use `cd` to change directories (aka folders). For example, when we made the ClubhouseCookbook folder in our home directory, we then navigated into that folder with `cd ClubhouseCookbook`.
 
 Once you're in that folder in your command line window, paste `git clone https://github.com/clubhouse/api-cookbook.git` and press Enter/Return
 
 If you'd prefer to get the Cookbook without using the command line, or you don't have git installed, you can [download a zipped folder from GitHub's UI](https://help.github.com/en/articles/cloning-a-repository). You'll need to unzip the folder and then move all of the contents in to the location that you set up your virtual environment.
 
-To run each script, navigate to into the downloaded API cookbooks with `cd api-cookbook` then swicth to the folder for the specific script.
+To run each script, navigate to into the downloaded API cookbooks with `cd api-cookbook` then switch to the folder for the specific script.
 
-Once you have your API token set as an envirnomnet variable, the scripts in these folders can be run without modification
+Once you have your API token set as an environment variable, the scripts in these folders can be run without modification
 `cd change-label`
 `cd kanban-metrics`
 
 The script in this folder requires editing to be able to send Stories to your Slack workspace.
 `cd stories-to-slack`
 
-Make sure your [virtual environment](#setting-up-and-using-a-virtual-environment) is active.
-Then type `python name_of_the_script.py` and press Return/Enter to run the script. Make sure you've replaced name_of_the_script.py with the actual file name.
+Make sure your [virtual environment](#setting-up-and-using-a-virtual-environment) is active. Then type `python name_of_the_script.py` and press Return/Enter to run the script. Make sure you've replaced name_of_the_script.py with the actual file name.
