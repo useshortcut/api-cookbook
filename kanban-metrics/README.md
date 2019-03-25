@@ -1,29 +1,22 @@
 These retrieve the average lead and cycle time for the specified Epic or Milestone and create a CSV in your Downloads folder.
 The time for both lead and cycle time is displayed in seconds.
 
-To use this script, open the script in a text editor. The script file will be in the folder where you downloaded the Cookbook repository.
+To use these scripts:
+Make sure your virtual environment is active.`source cookbook/bin/activate` for Mac and `cookbook\Scripts\activate` for Windows.
 
+**Milestone Lead and Cycle time**
+To fetch the lead and cycle time for a specific Milestone type `python milestone_metrics.py` and press Return/Enter to run the script. 
 
-To get the average lead and cycle time for an Epic, use epic_metrics.py.
-Adjust the values on line 48 and 49 to reflect the name of the csv and the ID of the Epic
-    `new_document_name = 'Epic_lead_cycle'
-    epic_id = '38900'`
-    
-To get the average lead and cycle time for a Milestone, use milestone_metrics.py.
-Adjust the values on line 49 and 50 to reflect the name of the csv and the ID of the Milestone    
-    `new_document_name = 'Milestone_lead_cycle'
-    milestone_id = '38900'`
-    
-When you've made your changes save the file.
+You'll be asked to enter the name for the export file and the ID for the Milestone.
+When the script has finished running, you'll see a message that your file is availble in your Downloads folder.
 
-To run the script, navigate to the folder for the script.
-From the main Cookbook folder:
-`cd kanban-metrics`
+**Epic Lead and Cycle time**
+To fetch the lead and cycle time for a specific Epic type `python epic_metrics.py` and press Return/Enter to run the script. 
 
-Make sure your virtual environment is active.
-For Epics type:
-`python epic_metrics.py` and press Return/Enter to run the script. 
+You'll be asked to enter the name for the export file and the ID for the Epic.
+When the script has finished running, you'll see a message that your file is availble in your Downloads folder.
 
-For Milestones type:
-`python milestone_metrics.py` and press Return/Enter to run the script. 
+---
+
+You might consider adjusting these scripts to use a list of Epic or Milestone IDs. Other examples scripts in this Cookbook loop through Story IDs - those may be good examples for determinig how to loop through a list of IDs and make a Get request for each ID in the list.
 
