@@ -1,16 +1,5 @@
 Looking for an overview of what you can find in the Clubhouse API Cookbook? You've come to the right place!
 
-### General questions
-[How do I authenticate?](https://github.com/clubhouse/api-cookbook/blob/master/Authentication.md)
-Not sure how to get access to your Clubhouse with the API? Start here.
-
-[How do I get the next page of results?](https://github.com/clubhouse/api-cookbook/blob/master/Pagination.md)
-Pagination can be tough! This will help you through it.
-
-[How do I get set up to use these scripts on my Mac?](https://github.com/clubhouse/api-cookbook/blob/master/set-up-instructions.md)
-
-[How do I get set up to use these scripts on my PC?](https://github.com/clubhouse/api-cookbook/blob/master/windows-set-up-instructions.md)
-
 ### Specific use case examples
 
 ## [I want to regularly send some Stories to Slack](https://github.com/clubhouse/api-cookbook/tree/master/stories-to-slack)
@@ -32,3 +21,16 @@ Cycle time information for Epics and Milestones can be useful reporting tools. T
 [How to I get the lead and cycle time for a Milestone?](https://github.com/clubhouse/api-cookbook/tree/master/kanban-metrics)
 
 [How do I get the lead and cycle time for an Epic?](https://github.com/clubhouse/api-cookbook/tree/master/kanban-metrics)
+
+### General questions
+[How do I authenticate?](https://github.com/clubhouse/api-cookbook/blob/master/Authentication.md)
+
+Not sure how to get access to your Clubhouse with the API? Start here.
+
+[How do I get the next page of results?](https://github.com/clubhouse/api-cookbook/blob/master/Pagination.md)
+
+Pagination can be tough! This will help you through it.
+
+[How do I get set up to use these scripts on my Mac?](https://github.com/clubhouse/api-cookbook/blob/master/set-up-instructions.md)
+
+[How do I get set up to use these scripts on my PC?](https://github.com/clubhouse/api-cookbook/blob/master/windows-set-up-instructions.md)
