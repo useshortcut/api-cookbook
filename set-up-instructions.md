@@ -64,16 +64,7 @@ While you can manually add your token to any script you use, we recommend saving
 
 Get your [Clubhouse API token](https://app.clubhouse.io/settings/account/api-tokens) from the Clubhouse UI.
 
-
-If you are just testing things out, or don't need to regularly access the Clubhouse API, you can set a temporary environment variable.
-
-In your command line window, type `export CLUBHOUSE_API_TOKEN='YOUR_TOKEN_VALUE'` where YOUR_TOKEN_VALUE is your actual API token from Clubhouse. Keep the single quotes around the token.
-
-When you close your command line window, this variable will be removed, and you'll need to add it again every time to you want to use something in the Cookbook.
-
 If you're going to use the API often, it will save you time if you set your API token as a system variable. 
-
-
 
 On Mac:
 
@@ -92,6 +83,13 @@ You'll use Terminal to set your Clubhouse API token as an environment variable i
 6. Close your Terminal window - this is necessary for the change to be applied!
 7. Open new Terminal window and test your environment variable by typing:
 `echo $CLUBHOUSE_API_TOKEN`
+
+
+If you are just testing things out, or don't need to regularly access the Clubhouse API, you can set a temporary environment variable.
+
+In your command line window, type `export CLUBHOUSE_API_TOKEN='YOUR_TOKEN_VALUE'` where YOUR_TOKEN_VALUE is your actual API token from Clubhouse. Keep the single quotes around the token.
+
+When you close your command line window, this variable will be removed, and you'll need to add it again every time to you want to use something in the Cookbook.
 
 
 #### Setting up and using a virtual environment
@@ -153,7 +151,7 @@ Use `cd` to change directories (aka folders). For example, when we made the Club
 
 Once you're in that folder in your command line window, paste `git clone https://github.com/clubhouse/api-cookbook.git` and press Enter/Return
 
-If you'd prefer to get the Cookbook without using the command line, you can [download a zipped folder from GitHub's UI](https://help.github.com/en/articles/cloning-a-repository). You'll need to unzip the folder and then move all of the contents in to the location that you set up your virtual environment.
+If you'd prefer to get the Cookbook without using the command line, or you do't have git installed, you can [download a zipped folder from GitHub's UI](https://help.github.com/en/articles/cloning-a-repository). You'll need to unzip the folder and then move all of the contents in to the location that you set up your virtual environment.
 
 To run each script, navigate to into the downloaded API cookbooks with `cd api-cookbook` then swicth to the folder for the specific script.
 Once you have your API token set as an envirnomnet variable, the scripts in these folders can be run without modification
