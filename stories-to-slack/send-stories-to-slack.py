@@ -90,7 +90,7 @@ def main():
     # Use your URL for the Slack webhook.
     slack_webhook_url = 'https://hooks.slack.com/services/YOUR_DETAILS'
 
-    # Add any other search limiters like project names, owners, or keywords.
+    # Add any other search limiters like project names, owners, or keywords, by using additional search operators.
     limiter = ''
 
     start_of_date_range, end_of_date_range = date_range_for_search()
