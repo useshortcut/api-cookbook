@@ -12,7 +12,7 @@ const putOptions = {
   method: 'PUT',
   uri: '',
   qs: {
-    token: '5d5fe756-2081-4e8a-a56a-273c54361322'    
+    token: 'xxx' // API token   
   },   
   body: { },
   json: true
