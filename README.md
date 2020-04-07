@@ -6,7 +6,7 @@ Maybe you need to get average Cycle time for the Epic you just completed, or you
 
 Some of these examples will guide you through using your command line to run the script. In other cases, we'll provide example code for specific tasks which will show you where to make small changes to interact with the data in your Clubhouse account. You can also use this material as a starting place and make further adjustments for your particular needs.
 
-Do you have an example you think we should cover? Please let us know! You can open an Issue on this repository so other teams can publicly add their interest, or email support@clubbouse.io.
+Do you have an example you think we should cover? Please let us know! You can open an Issue on this repository so other teams can publicly add their interest, or email support@clubhouse.io.
 
 Found a typo or other small issue? Please feel free to submit a PR!
 
