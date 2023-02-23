@@ -3,9 +3,9 @@ import sys
 import requests
 
 # Get your token from the local environment variable and prep it for use in the URL
-clubhouse_api_token = '?token=' + os.getenv('CLUBHOUSE_API_TOKEN')
+shortcut_api_token = '?token=' + os.getenv('shortcut_api_token')
 
-api_url_base = 'https://api.clubhouse.io/api/beta'
+api_url_base = 'https://api.shortcut.com/api/beta'
 epic_endpoint = '/epics'
 
 
@@ -28,7 +28,7 @@ def epic_lead_cycle_times(get_epic_api_response):
 
 def get_api_response(endpoint, entity_id):
     try:
-        url = api_url_base + endpoint + '/' + entity_id + clubhouse_api_token
+        url = api_url_base + endpoint + '/' + entity_id + shortcut_api_token
         response = requests.get(url)
         response.raise_for_status()
     except requests.exceptions.RequestException as e:
