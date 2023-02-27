@@ -3,9 +3,9 @@ import sys
 import requests
 
 # This gets your token from the local environment variable.
-clubhouse_api_token = '?token=' + os.getenv('CLUBHOUSE_API_TOKEN')
+shortcut_api_token = '?token=' + os.getenv('shortcut_api_token')
 
-api_url_base = 'https://api.clubhouse.io/api/beta'
+api_url_base = 'https://api.app.shortcut.com/api/beta'
 milestone_endpoint = '/milestones'
 
 
@@ -19,7 +19,7 @@ def create_csv_with_milestone_headers(document_name):
 
 def get_api_response(endpoint, entity_id):
     try:
-        url = api_url_base + endpoint + '/' + entity_id + clubhouse_api_token
+        url = api_url_base + endpoint + '/' + entity_id + shortcut_api_token
         response = requests.get(url)
         response.raise_for_status()
     except requests.exceptions.RequestException as e:
