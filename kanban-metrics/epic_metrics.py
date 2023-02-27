@@ -5,7 +5,7 @@ import requests
 # Get your token from the local environment variable and prep it for use in the URL
 shortcut_api_token = '?token=' + os.getenv('shortcut_api_token')
 
-api_url_base = 'https://api.shortcut.com/api/beta'
+api_url_base = 'https://api.app.shortcut.com/api/beta'
 epic_endpoint = '/epics'
 
 

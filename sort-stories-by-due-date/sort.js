@@ -1,6 +1,6 @@
 const rp = require('request-promise')
 const getOptions = {
-  uri: 'https://api.shortcut.com/api/v2/search/stories',
+  uri: 'https://api.app.shortcut.com/api/v2/search/stories',
   json: true,
   qs: {
     token: 'xxx', // API token
@@ -31,7 +31,7 @@ rp(getOptions).then((searchResults) => { // Get stories using request-promise.
   // Send priority order updates to Shortcut. Wait for each call to finish before going to the next one.
   async function sendPriorityOrderUpdates() {
     for (let i = 1; i < stories.length; i++) {
-      putOptions.uri = 'https://api.shortcut.com/api/v2/stories/' + stories[i].id
+      putOptions.uri = 'https://api.app.shortcut.com/api/v2/stories/' + stories[i].id
       putOptions.body.after_id = stories[i - 1].id
       await rp(putOptions)
     }

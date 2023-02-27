@@ -7,7 +7,7 @@ import requests
 shortcut_api_token = '?token=' + os.getenv('shortcut_api_token')
 
 # API URL and endpoint references.
-api_url_base = 'https://api.shortcut.com/api/beta'
+api_url_base = 'https://api.app.shortcut.com/api/beta'
 search_endpoint = '/search/stories'
 
 
@@ -42,7 +42,7 @@ def search_stories(query):
 
 def paginate_results(next_page_data):
     try:
-        url = 'https://api.shortcut.com' + next_page_data + '&token=' + os.getenv('shortcut_api_token')
+        url = 'https://api.app.shortcut.com' + next_page_data + '&token=' + os.getenv('shortcut_api_token')
         response = requests.get(url)
         response.raise_for_status()
     except requests.exceptions.RequestException as e:

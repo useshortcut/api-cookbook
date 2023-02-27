@@ -5,7 +5,7 @@ import requests
 # This gets your token from the local environment variable.
 shortcut_api_token = '?token=' + os.getenv('shortcut_api_token')
 
-api_url_base = 'https://api.shortcut.com/api/beta'
+api_url_base = 'https://api.app.shortcut.com/api/beta'
 milestone_endpoint = '/milestones'
 
 

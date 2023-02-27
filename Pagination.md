@@ -9,10 +9,9 @@ That may look like this:
 shortcut_api_token = os.getenv('SHORTCUT_API_TOKEN')
 next_page = results['next']
 
-next_url = 'https://api.shortcut.com' + next_page + '&token='+ shortcut_api_token
+next_url = 'https://api.app.shortcut.com' + next_page + '&token='+ shortcut_api_token
 ```
 
 Use the next_url that you've created to make another call to the API to get the next page of results.
 
 The scripts [change-label.py](https://github.com/useshortcut/api-cookbook/blob/master/change-label/change_label.py) and [send-stories-to-slack.py](https://github.com/useshortcut/api-cookbook/blob/master/stories-to-slack/send-stories-to-slack.py) both contain examples of pagination.
-
