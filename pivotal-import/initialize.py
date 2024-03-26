@@ -14,6 +14,8 @@ which are detailed here at the time of this writing:
 https://www.pivotaltracker.com/help/articles/story_states/
 """
 
+from collections.abc import Mapping
+import json
 import logging
 import os
 import sys
@@ -71,25 +73,77 @@ pt_states = {
 }
 
 
-def validate_config():
-    if sc_token is None:
-        logger.fatal(
-            "You must define a SHORTCUT_API_TOKEN environment variable with your Shortcut API token."
+def default_workflow_id():
+    workflow_id = None
+    workflows = sc_get("/workflows")
+    output_lines = []
+    for workflow in workflows:
+        if workflow["name"] == "Engineering":
+            workflow_id = workflow["id"]
+
+    if workflow_id is None:
+        print(
+            """Failed to find the default Story Workflow in your workspace, please:
+  1. Review the Shortcut Story Workflows printed below
+  2. Copy the numeric ID of your desired workflow
+  3. Paste it as the "workflow_id" value in your config.json file.
+""",
+            file=sys.stderr,
         )
-        sys.exit(1)
+        for workflow in workflows:
+            output_lines.append('  {id} : "{name}"'.format_map(workflow))
+            for workflow_state in workflow["states"]:
+                output_lines.append(
+                    '    {id} : [{type}] "{name}"'.format_map(workflow_state)
+                )
+        print("\n".join(output_lines), file=sys.stderr)
+        return None
+    else:
+        return workflow_id
+
+
+def populate_config():
+    """
+    Using data from the Shortcut workspace associated with the API token,
+    populate a local `config.json` file if one does not already exist.
+
+    Returns the configuration dictionary.
+    """
+    try:
+        with open("config.json", "x", encoding="utf-8") as f:
+            data = {"workflow_id": default_workflow_id()}
+            json.dump(data, f, indent=2)
+            return data
+    except FileExistsError:
+        logger.debug(
+            "Skipping populating config.json, because the file already exists."
+        )
+        with open("config.json", "r") as f:
+            return json.load(f)
+
+
+def validate_config(cfg):
+    problems = []
+    if sc_token is None:
+        problems.append(
+            "- You must define a SHORTCUT_API_TOKEN environment variable with your Shortcut API token."
+        )
+    if not isinstance(cfg, Mapping):
+        problems.append(
+            "- Your config.json file must be a JSON object, please check its formatting."
+        )
+        if cfg["workflow_id"] is None:
+            problems.append(
+                '- Your config.json file needs a "workflow_id" entry whose value is the ID of the Shortcut Story Workflow this importer should use.'
+            )
+    if problems:
+        msg = "\n".join(problems)
+        print(msg, file=sys.stderr)
 
 
 def main():
-    validate_config()
-    workflows = sc_get("/workflows")
-    print("Your Shortcut workspace's Story Worklows:")
-    for workflow in workflows:
-        if workflow["name"] == "Engineering":
-            print('  {id} : "{name}" [default]'.format_map(workflow))
-        else:
-            print('  {id} : "{name}"'.format_map(workflow))
-        for workflow_state in workflow["states"]:
-            print('    {id} : [{type}] "{name}"'.format_map(workflow_state))
+    cfg = populate_config()
+    validate_config(cfg)
     return 0
 
 
