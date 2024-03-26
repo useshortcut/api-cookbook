@@ -61,15 +61,15 @@ def sc_put(path, data={}):
     return resp.json()
 
 
-# Mapping of Pivotal Tracker story states to Shortcut default Story Workflow State names
+# Mapping of Pivotal Tracker story states to Shortcut ones
 pt_states = {
-    "Unscheduled": "Unscheduled",
-    "Unstarted": "Unscheduled",
-    "Planned": "Ready for Development",
-    "Started": "In Development",
-    "Finished": "Ready for Review",
-    "Rejected": "Completed",
-    "Accepted": "Completed",
+    "Unscheduled": {"type": "unstarted", "default_workflow_state": "Unscheduled"},
+    "Unstarted": {"type": "unstarted", "default_workflow_state": "Unscheduled"},
+    "Planned": {"type": "unstarted", "default_workflow_state": "Ready for Development"},
+    "Started": {"type": "started", "default_workflow_state": "In Development"},
+    "Finished": {"type": "started", "default_workflow_state": "Ready for Review"},
+    "Rejected": {"type": "done", "default_workflow_state": "Completed"},
+    "Accepted": {"type": "done", "default_workflow_state": "Completed"},
 }
 
 
@@ -83,18 +83,21 @@ def default_workflow_id():
 
     if workflow_id is None:
         print(
-            """Failed to find the default Story Workflow in your workspace, please:
+            """Failed to find the default Story Workflow in your Shortcut workspace, please:
   1. Review the Shortcut Story Workflows printed below
-  2. Copy the numeric ID of your desired workflow
+  2. Copy the numeric ID of your desired Workflow below
   3. Paste it as the "workflow_id" value in your config.json file.
+  4. Rerun initialize.py.
 """,
             file=sys.stderr,
         )
         for workflow in workflows:
-            output_lines.append('  {id} : "{name}"'.format_map(workflow))
+            output_lines.append('Workflow {id} : "{name}"'.format_map(workflow))
             for workflow_state in workflow["states"]:
                 output_lines.append(
-                    '    {id} : [{type}] "{name}"'.format_map(workflow_state)
+                    '    Worflow State {id} : [{type}] "{name}"'.format_map(
+                        workflow_state
+                    )
                 )
         print("\n".join(output_lines), file=sys.stderr)
         return None
@@ -111,6 +114,9 @@ def populate_config():
     """
     try:
         with open("config.json", "x", encoding="utf-8") as f:
+            workflow_id = default_workflow_id()
+            if workflow_id is None:
+                sys.exit(1)
             data = {"workflow_id": default_workflow_id()}
             json.dump(data, f, indent=2)
             return data
