@@ -97,6 +97,7 @@ story_keys = [
     'description',
     'external_links',
     'workflow_state_id',
+    'story_type',
 ]
 
 def build_story(row: list[str], header: list[str], wf_map):
@@ -122,13 +123,13 @@ def build_story(row: list[str], header: list[str], wf_map):
             key = nested_col_map[col]
             d.setdefault(key, list()).append(v)
 
+    if d['story_type'] not in ['bug','feature','chore']:
+        return None
+
     # process workflow state
     pt_state = d.get('pt_state')
     if pt_state:
         d['workflow_state_id'] = wf_map[pt_state]
-
-    if d['story_type'] not in ['bug','feature','chore']:
-        return None
 
     return {k:d[k] for k in story_keys if k in d}
 
