@@ -7,6 +7,7 @@ import csv
 import logging
 import sys
 from datetime import datetime
+from collections import Counter
 
 from lib import *
 
@@ -16,8 +17,9 @@ parser = argparse.ArgumentParser(
 parser.add_argument('--apply', action='store_true', required=False)
 parser.add_argument('--bulk', action='store_true', required=False)
 
+stats = Counter()
 def console_emitter(item):
-    print(item)
+    print('Creating {story_type} story {name} created at {created_at}'.format_map(item))
 
 def single_story_emitter(item):
     sc_post('/stories', item)
@@ -146,6 +148,10 @@ def load_workflow_states(csv_file):
               d[row['pt_state']] = int(sc_state_id)
     return d
 
+def print_stats(stats):
+    print('Import stats')
+    for k,v in stats.items():
+        print(f'  - {k} : {v}')
 
 def main(argv):
     args = parser.parse_args(argv[1:])
@@ -171,9 +177,13 @@ def main(argv):
             story = build_story(row, header, wf_map)
             if story:
                 emitter(story)
+                stats['story'] += 1
 
     if hasattr(emitter, 'flush'):
         emitter.flush()
+
+    print_stats(stats)
+
 
     return 0
 
