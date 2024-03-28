@@ -91,6 +91,11 @@ def print_workflow_tree(workflows):
 
 
 def default_workflow_id():
+    """
+    Determine the default Shortcut Workflow, or provide instructions to the user
+    to select a specific Workflow if the default "Engineering" Workflow is not
+    found.
+    """
     workflow_id = None
     workflows = sc_get("/workflows")
     for workflow in workflows:
@@ -185,6 +190,11 @@ def populate_states_csv(states_csv_file, workflow_id):
 
 
 def exit_unhandled_pt_states(states_csv_file, unhandled_pt_states):
+    """
+    If there are Pivotal Tracker states for which a Shorcut Workflow State
+    mapping could not be determined, notify the user of this and provide
+    instructions for rectifying the problem.
+    """
     msg = "\n  - ".join(unhandled_pt_states)
     printerr(
         f"[Problem] These Pivotal Tracker states couldn't be automatically mapped to Shortcut workflow states:\n  - {msg}\n"
@@ -202,6 +212,11 @@ def exit_unhandled_pt_states(states_csv_file, unhandled_pt_states):
 
 
 def pt_state_mapping_for_workflow(workflow_id):
+    """
+    Returns a dict mapping Pivotal Tracker story states to Shortcut Workflow States.
+    If no mapping can be determined automatically for a particular Pivotal Tracker
+    state, then it is mapped to `None`.
+    """
     workflow = sc_get(f"/workflows/{workflow_id}")
     pt_state_mapping = {k: None for k in pt_all_states}
     for wf_state in workflow["states"]:
@@ -251,6 +266,10 @@ def pt_state_mapping_for_workflow(workflow_id):
 
 
 def validate_config(cfg):
+    """
+    Validate all configuration and setup, printing a description of problems
+    and exiting with 1 if any problems found.
+    """
     problems = []
     if sc_token is None:
         problems.append(
@@ -280,6 +299,9 @@ def validate_config(cfg):
 
 
 def main():
+    """
+    Script entry-point for importing a Pivotal Tracker CSV export into a Shortcut workspace.
+    """
     cfg = populate_config()
     validate_config(cfg)
     populate_states_csv(cfg["states_csv_file"], cfg["workflow_id"])
