@@ -25,8 +25,6 @@ from api import *
 
 # Logging
 logger = logging.getLogger(__name__)
-# FIXME Make INFO default upon public release
-logging.basicConfig(level=logging.DEBUG)  # Change to INFO or DEBUG as needed
 
 
 def printerr(s):
