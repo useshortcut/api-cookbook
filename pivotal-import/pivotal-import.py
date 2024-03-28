@@ -98,6 +98,7 @@ story_keys = [
     'external_links',
     'workflow_state_id',
     'story_type',
+    'created_at',
 ]
 
 def build_story(row: list[str], header: list[str], wf_map):
