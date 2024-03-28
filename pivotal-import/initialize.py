@@ -33,6 +33,9 @@ def printerr(s):
     print(s, file=sys.stderr)
 
 
+# File locations
+shortcut_workflows_csv = "data/shortcut_workflows.csv"
+
 # API Helpers
 sc_token = os.getenv("SHORTCUT_API_TOKEN")
 api_url_base = "https://api.app.shortcut.com/api/v3"
@@ -80,13 +83,38 @@ pt_all_states = [
 
 
 def print_workflow_tree(workflows):
+    """
+    Print and write to `shortcut_workflows_csv` the content of all Workflows
+    in the user's Shortcut workspace, including all Workflow States and their IDs.
+    """
     output_lines = []
-    for workflow in workflows:
-        output_lines.append('Workflow {id} : "{name}"'.format_map(workflow))
-        for workflow_state in workflow["states"]:
-            output_lines.append(
-                '    Workflow State {id} : [{type}] "{name}"'.format_map(workflow_state)
-            )
+    with open(shortcut_workflows_csv, "w") as f:
+        writer = csv.DictWriter(
+            f,
+            [
+                "workflow_name",
+                "workflow_id",
+                "workflow_state_name",
+                "workflow_state_id",
+            ],
+        )
+        writer.writeheader()
+        for workflow in workflows:
+            output_lines.append('Workflow {id} : "{name}"'.format_map(workflow))
+            for workflow_state in workflow["states"]:
+                writer.writerow(
+                    {
+                        "workflow_name": workflow["name"],
+                        "workflow_id": workflow["id"],
+                        "workflow_state_name": workflow_state["name"],
+                        "workflow_state_id": workflow_state["id"],
+                    }
+                )
+                output_lines.append(
+                    '    Workflow State {id} : [{type}] "{name}"'.format_map(
+                        workflow_state
+                    )
+                )
     printerr("\n".join(output_lines))
 
 
@@ -104,8 +132,8 @@ def default_workflow_id():
 
     if workflow_id is None:
         printerr(
-            """[Problem] Failed to find the default Story Workflow in your Shortcut workspace, please:
-  1. Review the Shortcut Workflows printed below
+            f"""[Problem] Failed to find the default Story Workflow in your Shortcut workspace, please:
+  1. Review the Shortcut Workflows printed below (also written to {shortcut_workflows_csv} for reference)
   2. Copy the numeric ID of your desired Workflow below
   3. Paste it as the "workflow_id" value in your config.json file.
   4. Rerun initialize.py.
@@ -201,7 +229,7 @@ def exit_unhandled_pt_states(states_csv_file, unhandled_pt_states):
     )
     printerr(
         f"""To resolve this, please:
-1. Review the Shortcut Workflow States printed below.
+1. Review the Shortcut Workflow States printed below (also written to {shortcut_workflows_csv} for reference)
 2. Copy the numeric IDs of Workflow States you want to map to Pivotal states where there are blanks in your {states_csv_file} file.
 3. Save your {states_csv_file} file and rerun initalize.py to validate it.
 """
