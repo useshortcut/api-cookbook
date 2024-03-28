@@ -4,11 +4,11 @@
 # See README.md for prerequisites, setup, and usage.
 import argparse
 import csv
+import logging
 import sys
 from datetime import datetime
 
-
-from api import *
+from lib import *
 
 parser = argparse.ArgumentParser(
     description='Imports the Pivotal Tracker CSV export to Shortcut',
@@ -70,7 +70,7 @@ col_map = {
     'type': 'story_type',
     'estimate': ('estimate', int),
     'priority': 'priority',
-    'current state': ('workflow_state_id', pivotal_state_to_workflow_state_id),
+    'current state': 'pt_state',
     'labels': ('labels', split_labels),
     'url': ('external_links', url_to_external_links),
     'created at': ('created_at', parse_date),
@@ -89,8 +89,17 @@ nested_col_map = {
     'comment': 'comment'
 }
 
+# These are the keys that are currently correctly populated in the
+# build_story map. They can be passed to the SC api unchanged. This
+# list is effectively an allow list of top level attributes.
+story_keys = [
+    'name',
+    'description',
+    'external_links',
+    'workflow_state_id',
+]
 
-def build_story(row: list[str], header: list[str]):
+def build_story(row: list[str], header: list[str], wf_map):
 
     d = dict()
 
@@ -113,8 +122,28 @@ def build_story(row: list[str], header: list[str]):
             key = nested_col_map[col]
             d.setdefault(key, list()).append(v)
 
-    if d['story_type'] in ['bug','feature','chore']:
-        return d
+    # process workflow state
+    pt_state = d.get('pt_state')
+    if pt_state:
+        d['workflow_state_id'] = wf_map[pt_state]
+
+    if d['story_type'] not in ['bug','feature','chore']:
+        return None
+
+    return {k:d[k] for k in story_keys if k in d}
+
+
+def load_workflow_states(csv_file):
+    logger.debug(f'Loading workflow states from {csv_file}')
+    d = {}
+    with open(csv_file) as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            sc_state_id = row.get('shortcut_state_id')
+            if sc_state_id:
+              d[row['pt_state']] = int(sc_state_id)
+    return d
+
 
 def main(argv):
     args = parser.parse_args(argv[1:])
@@ -131,11 +160,13 @@ def main(argv):
         else:
             emitter = console_emitter
 
-    with open("data/pivotal_export.csv", ) as csvfile:
+    cfg = load_config()
+    wf_map = load_workflow_states(cfg["states_csv_file"])
+    with open(cfg["pt_csv_file"]) as csvfile:
         reader = csv.reader(csvfile)
         header = [col.lower() for col in next(reader)]
         for row in reader:
-            story = build_story(row, header)
+            story = build_story(row, header, wf_map)
             if story:
                 emitter(story)
 
