@@ -43,7 +43,7 @@ def bulk_console_emitter(items):
     print(items)
 
 def bulk_story_creator(items):
-    sc_post('/stories/bulk', items)
+    sc_post('/stories/bulk', { 'stories': items })
 
 
 def url_to_external_links(url):
