@@ -4,6 +4,7 @@
 # See README.md for prerequisites, setup, and usage.
 import argparse
 import csv
+import logging
 import sys
 from datetime import datetime
 
@@ -89,6 +90,15 @@ nested_col_map = {
     'comment': 'comment'
 }
 
+# These are the keys that are currently correctly populated in the
+# build_story map. They can be passed to the SC api unchanged. This
+# list is effectively an allow list of top level attributes.
+story_keys = [
+    'name',
+    'description',
+    'external_links',
+
+]
 
 def build_story(row: list[str], header: list[str]):
 
@@ -113,8 +123,11 @@ def build_story(row: list[str], header: list[str]):
             key = nested_col_map[col]
             d.setdefault(key, list()).append(v)
 
-    if d['story_type'] in ['bug','feature','chore']:
-        return d
+    if d['story_type'] not in ['bug','feature','chore']:
+        return None
+
+    return {k:d[k] for k in story_keys if k in d}
+
 
 def main(argv):
     args = parser.parse_args(argv[1:])
