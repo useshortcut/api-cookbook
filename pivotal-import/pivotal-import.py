@@ -57,8 +57,8 @@ def url_to_external_links(url):
     return [url]
 
 
-def split_labels(labels: str):
-    return labels.split(", ")
+def parse_labels(labels: str):
+    return [{"name": label} for label in labels.split(", ")]
 
 
 def pivotal_state_to_workflow_state_id(state: str):
@@ -93,7 +93,7 @@ col_map = {
     "estimate": ("estimate", int),
     "priority": "priority",
     "current state": "pt_state",
-    "labels": ("labels", split_labels),
+    "labels": ("labels", parse_labels),
     "url": ("external_links", url_to_external_links),
     "created at": ("created_at", parse_date),
     "accepted at": ("accepted_at", parse_date),
@@ -122,6 +122,7 @@ story_keys = [
     "created_at",
     "comments",
     "tasks",
+    "labels",
 ]
 
 
