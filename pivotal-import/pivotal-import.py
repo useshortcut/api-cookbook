@@ -126,7 +126,7 @@ story_keys = [
 ]
 
 
-def build_story(row, header, wf_map):
+def build_story(ctx, row, header):
     d = dict()
 
     for ix, val in enumerate(row):
@@ -159,7 +159,7 @@ def build_story(row, header, wf_map):
     # process workflow state
     pt_state = d.get("pt_state")
     if pt_state:
-        d["workflow_state_id"] = wf_map[pt_state]
+        d["workflow_state_id"] = ctx["workflow_config"][pt_state]
 
     # process tasks
     tasks = [
@@ -206,14 +206,15 @@ def main(argv):
             emitter = console_emitter
 
     cfg = load_config()
-    wf_map = load_workflow_states(cfg["states_csv_file"])
+    ctx = {}
+    ctx["workflow_config"] = load_workflow_states(cfg["states_csv_file"])
     stats = Counter()
 
     with open(cfg["pt_csv_file"]) as csvfile:
         reader = csv.reader(csvfile)
         header = [col.lower() for col in next(reader)]
         for row in reader:
-            story = build_story(row, header, wf_map)
+            story = build_story(ctx, row, header)
             if story:
                 emitter(story)
                 logger.debug("Emitting Story: %s", story)
