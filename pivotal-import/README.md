@@ -1,16 +1,17 @@
-This script imports a Pivotal CSV export file into a Shortcut organization.
+This script imports a Pivotal Tracker CSV export file into a Shortcut workspace.
 
 # Prerequisites and Setup
 
-In order to run this, you will require a Pivotal workflow and the ability to sign up for a Shortcut account, as well as a working internet connection.
+In order to run this, you will require a Pivotal account and the ability to sign up for a Shortcut account, as well as a working internet connection.
 
-1. Sign up for a Shortcut account at [https://www.shortcut.com/signup](https://www.shortcut.com/signup)
-2. [Create an API token](https://app.shortcut.com/settings/account/api-tokens) and [export it into your environment](../Authentication.md)
-3. Export to CSV from your Pivotal installation and save the file to `data/pivotal_export.csv`
-4. Create/Invite all users you want to reference into your Shortcut org
-5. Run [`initialize.py`](initialize.py) to initialize `data/users.csv` and `data/states.csv`.
-6. Ensure there is exactly one Shortcut user mapped for all referenced users in `data/users.csv`
-7. Ensure there is exactly one Shortcut workflow state mapped for all referenced states in `data/states.csv`
+1. Sign up for a Shortcut account at [https://www.shortcut.com/signup](https://www.shortcut.com/signup).
+1. [Create an API token](https://app.shortcut.com/settings/account/api-tokens) and [export it into your environment](../Authentication.md).
+1. Export your Pivotal project to CSV and save the file to `data/pivotal_export.csv`.
+1. Create/Invite all users you want to reference into your Shortcut workspace.
+1. Run `./setup` to install Python dependencies.
+1. Run [`initialize.py`](initialize.py) to initialize `data/users.csv` and `data/states.csv`.
+1. Ensure there is exactly one Shortcut user mapped for all referenced users in `data/users.csv`.
+1. Ensure there is exactly one Shortcut workflow state mapped for all referenced Pivotal states in `data/states.csv`.
 
 # Operation
 
@@ -20,7 +21,7 @@ If `pivotal-import.py` completes without errors, you can run the script with the
 
 # Known Limitations
 
-This script has some limitations you should know about. Most prominently, it will not redirect any URLs in the description of your Pivotal stories or epics. Also, as of this version, file attachments (including Google Drive attachments), project history, and story history are not included in the exported csv file by Pivotal Tracker, and therefore are not imported into Shortcut in any way.
+This script has some limitations you should know about. Most prominently, it will not redirect any URLs in the description of your Pivotal stories or epics. Also, as of this version, file attachments (including Google Drive attachments), project history, and story history are not imported into Shortcut in any way.
 
 # Customization
 

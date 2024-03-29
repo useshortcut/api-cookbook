@@ -39,7 +39,6 @@ pt_all_states = [
 ]
 
 
-
 def populate_states_csv(states_csv_file, workflow_id):
     """
     Writes a CSV file mapping Pivotal Tracker's 7 story states to appropriate
@@ -158,8 +157,6 @@ def pt_state_mapping_for_workflow(workflow_id):
                 }
 
     return pt_state_mapping
-
-
 
 
 def main():
