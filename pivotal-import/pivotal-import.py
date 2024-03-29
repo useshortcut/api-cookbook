@@ -20,11 +20,20 @@ parser.add_argument("--bulk", action="store_true", required=False)
 
 
 def console_emitter(item):
-    print("Creating {story_type} story {name} created at {created_at}".format_map(item))
+    print(
+        "Creating {type} {entity[name]} created at {entity[created_at]}".format_map(
+            item
+        )
+    )
+    return {item["type"]: 1}
 
 
-def single_story_emitter(item):
-    sc_post("/stories", item)
+def single_entity_emitter(item):
+    if item["type"] == "story":
+        sc_post("/stories", item["entity"])
+    else:
+        sc_post("/epics", item["entity"])
+    return {item["type"]: 1}
 
 
 def bulk_emitter(bulk_commit_fn):
@@ -40,17 +49,31 @@ def bulk_emitter(bulk_commit_fn):
 
         if len(_bulk_accumulator) >= _bulk_limit:
             flush()
+        return {item["type"]: 1}
 
     emitter.flush = flush
     return emitter
 
 
 def bulk_console_emitter(items):
-    print(items)
+    for item in items:
+        console_emitter(item)
 
 
-def bulk_story_creator(items):
-    sc_post("/stories/bulk", {"stories": items})
+def bulk_entity_creator(items):
+    stories = []
+    epics = []
+    for item in items:
+        if item["type"] == "story":
+            stories.append(item["entity"])
+        elif item["type"] == "epic":
+            epics.append(item["entity"])
+
+    if stories:
+        sc_post("/stories/bulk", {"stories": stories})
+
+    for epic in epics:
+        sc_post("/epics", epic)
 
 
 def url_to_external_links(url):
@@ -87,6 +110,7 @@ def parse_comment(txt):
 
 
 col_map = {
+    "id": "external_id",
     "title": "name",
     "description": "description",
     "type": "story_type",
@@ -110,31 +134,40 @@ nested_col_map = {
 }
 
 # These are the keys that are currently correctly populated in the
-# build_story map. They can be passed to the SC api unchanged. This
+# build_entity map. They can be passed to the SC api unchanged. This
 # list is effectively an allow list of top level attributes.
-story_keys = [
-    "name",
-    "description",
-    "external_links",
-    "estimate",
-    "workflow_state_id",
-    "story_type",
-    "created_at",
-    "comments",
-    "tasks",
-    "labels",
-]
+select_keys = {
+    "story": [
+        "name",
+        "description",
+        "external_links",
+        "estimate",
+        "workflow_state_id",
+        "story_type",
+        "created_at",
+        "comments",
+        "tasks",
+        "labels",
+        "external_id",
+    ],
+    "epic": [
+        "name",
+        "description",
+        "labels",
+        "created_at",
+        "external_id",
+    ],
+}
 
 
-def build_story(ctx, row, header):
+def parse_row(row, headers):
     d = dict()
-
     for ix, val in enumerate(row):
         v = val.strip()
         if not v:
             continue
 
-        col = header[ix]
+        col = headers[ix]
         if col in col_map:
             col_info = col_map[col]
             if isinstance(col_info, str):
@@ -152,24 +185,46 @@ def build_story(ctx, row, header):
                 (key, translator) = col_info
                 v = translator(v)
             d.setdefault(key, []).append(v)
+    return d
 
-    if d["story_type"] not in ["bug", "feature", "chore"]:
-        return None
 
-    # process workflow state
-    pt_state = d.get("pt_state")
-    if pt_state:
-        d["workflow_state_id"] = ctx["workflow_config"][pt_state]
+def build_entity(ctx, row, headers):
+    d = parse_row(row, headers)
 
-    # process tasks
-    tasks = [
-        {"description": title, "complete": state == "completed"}
-        for (title, state) in zip(d.get("task_titles", []), d.get("task_states", []))
-    ]
-    if tasks:
-        d["tasks"] = tasks
+    # ensure import label
+    d.setdefault("labels", []).append({"name": "pivotal->shortcut"})
 
-    return {k: d[k] for k in story_keys if k in d}
+    # reconcile entity types
+    type = "story"
+    if d["story_type"] == "epic":
+        type = "epic"
+
+    # releases become chores
+    if d["story_type"] == "release":
+        d["story_type"] = "chore"
+        d.setdefault("labels", []).append({"name": "pivotal-release"})
+
+    if type == "story":
+        # process workflow state
+        pt_state = d.get("pt_state")
+        if pt_state:
+            d["workflow_state_id"] = ctx["workflow_config"][pt_state]
+
+        # process tasks
+        tasks = [
+            {"description": title, "complete": state == "completed"}
+            for (title, state) in zip(
+                d.get("task_titles", []), d.get("task_states", [])
+            )
+        ]
+        if tasks:
+            d["tasks"] = tasks
+
+    elif type == "epic":
+        pass
+
+    entity = {k: d[k] for k in select_keys[type] if k in d}
+    return {"type": type, "entity": entity, "parsed_row": d}
 
 
 def load_workflow_states(csv_file):
@@ -196,9 +251,9 @@ def main(argv):
 
     if args.apply:
         if args.bulk:
-            emitter = bulk_emitter(bulk_story_creator)
+            emitter = bulk_emitter(bulk_entity_creator)
         else:
-            emitter = single_story_emitter
+            emitter = single_entity_emitter
     else:
         if args.bulk:
             emitter = bulk_emitter(bulk_console_emitter)
@@ -214,11 +269,9 @@ def main(argv):
         reader = csv.reader(csvfile)
         header = [col.lower() for col in next(reader)]
         for row in reader:
-            story = build_story(ctx, row, header)
-            if story:
-                emitter(story)
-                logger.debug("Emitting Story: %s", story)
-                stats["story"] += 1
+            entity = build_entity(ctx, row, header)
+            logger.debug("Emitting Entity: %s", entity)
+            stats.update(emitter(entity))
 
     if hasattr(emitter, "flush"):
         emitter.flush()
