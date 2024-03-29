@@ -12,20 +12,26 @@ from collections import Counter
 from lib import *
 
 parser = argparse.ArgumentParser(
-    description='Imports the Pivotal Tracker CSV export to Shortcut',
+    description="Imports the Pivotal Tracker CSV export to Shortcut",
 )
-parser.add_argument('--apply', action='store_true', required=False)
-parser.add_argument('--bulk', action='store_true', required=False)
+parser.add_argument("--apply", action="store_true", required=False)
+parser.add_argument("--bulk", action="store_true", required=False)
 
 stats = Counter()
+
+
 def console_emitter(item):
-    print('Creating {story_type} story {name} created at {created_at}'.format_map(item))
+    print("Creating {story_type} story {name} created at {created_at}".format_map(item))
+
 
 def single_story_emitter(item):
-    sc_post('/stories', item)
+    sc_post("/stories", item)
+
 
 _bulk_accumulator = []
 _bulk_limit = 20
+
+
 def bulk_emitter(bulk_commit_fn):
 
     def flush():
@@ -41,25 +47,31 @@ def bulk_emitter(bulk_commit_fn):
     emitter.flush = flush
     return emitter
 
+
 def bulk_console_emitter(items):
     print(items)
 
+
 def bulk_story_creator(items):
-    sc_post('/stories/bulk', { 'stories': items })
+    sc_post("/stories/bulk", {"stories": items})
 
 
 def url_to_external_links(url):
     return [url]
 
+
 def split_labels(labels: str):
-    return labels.split(', ')
+    return labels.split(", ")
+
 
 def pivotal_state_to_workflow_state_id(state: str):
     # TODO use the actual workflow state mapping
     return state
 
+
 def parse_date(d: str):
-    return datetime.strptime(d, '%b %d, %Y').isoformat()
+    return datetime.strptime(d, "%b %d, %Y").isoformat()
+
 
 def parse_username(name):
     # TODO convert the name to the best guess for the users
@@ -67,41 +79,40 @@ def parse_username(name):
 
 
 col_map = {
-    'title': 'name',
-    'description': 'description',
-    'type': 'story_type',
-    'estimate': ('estimate', int),
-    'priority': 'priority',
-    'current state': 'pt_state',
-    'labels': ('labels', split_labels),
-    'url': ('external_links', url_to_external_links),
-    'created at': ('created_at', parse_date),
-    'accepted at': ('accepted_at', parse_date),
-    'deadline': ('deadline', parse_date),
-    'requested by': ('requester', parse_username),
-
-
+    "title": "name",
+    "description": "description",
+    "type": "story_type",
+    "estimate": ("estimate", int),
+    "priority": "priority",
+    "current state": "pt_state",
+    "labels": ("labels", split_labels),
+    "url": ("external_links", url_to_external_links),
+    "created at": ("created_at", parse_date),
+    "accepted at": ("accepted_at", parse_date),
+    "deadline": ("deadline", parse_date),
+    "requested by": ("requester", parse_username),
 }
 
 nested_col_map = {
-    'blocker': 'blocker',
-    'blocker status': 'blocker_state',
-    'task': 'task',
-    'task status': 'task_state',
-    'comment': 'comment'
+    "blocker": "blocker",
+    "blocker status": "blocker_state",
+    "task": "task",
+    "task status": "task_state",
+    "comment": "comment",
 }
 
 # These are the keys that are currently correctly populated in the
 # build_story map. They can be passed to the SC api unchanged. This
 # list is effectively an allow list of top level attributes.
 story_keys = [
-    'name',
-    'description',
-    'external_links',
-    'workflow_state_id',
-    'story_type',
-    'created_at',
+    "name",
+    "description",
+    "external_links",
+    "workflow_state_id",
+    "story_type",
+    "created_at",
 ]
+
 
 def build_story(row: list[str], header: list[str], wf_map):
 
@@ -111,7 +122,6 @@ def build_story(row: list[str], header: list[str], wf_map):
         v = val.strip()
         if not v:
             continue
-
 
         col = header[ix]
         if col in col_map:
@@ -126,32 +136,34 @@ def build_story(row: list[str], header: list[str], wf_map):
             key = nested_col_map[col]
             d.setdefault(key, list()).append(v)
 
-    if d['story_type'] not in ['bug','feature','chore']:
+    if d["story_type"] not in ["bug", "feature", "chore"]:
         return None
 
     # process workflow state
-    pt_state = d.get('pt_state')
+    pt_state = d.get("pt_state")
     if pt_state:
-        d['workflow_state_id'] = wf_map[pt_state]
+        d["workflow_state_id"] = wf_map[pt_state]
 
-    return {k:d[k] for k in story_keys if k in d}
+    return {k: d[k] for k in story_keys if k in d}
 
 
 def load_workflow_states(csv_file):
-    logger.debug(f'Loading workflow states from {csv_file}')
+    logger.debug(f"Loading workflow states from {csv_file}")
     d = {}
     with open(csv_file) as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
-            sc_state_id = row.get('shortcut_state_id')
+            sc_state_id = row.get("shortcut_state_id")
             if sc_state_id:
-              d[row['pt_state']] = int(sc_state_id)
+                d[row["pt_state"]] = int(sc_state_id)
     return d
 
+
 def print_stats(stats):
-    print('Import stats')
-    for k,v in stats.items():
-        print(f'  - {k} : {v}')
+    print("Import stats")
+    for k, v in stats.items():
+        print(f"  - {k} : {v}")
+
 
 def main(argv):
     args = parser.parse_args(argv[1:])
@@ -177,15 +189,15 @@ def main(argv):
             story = build_story(row, header, wf_map)
             if story:
                 emitter(story)
-                stats['story'] += 1
+                stats["story"] += 1
 
-    if hasattr(emitter, 'flush'):
+    if hasattr(emitter, "flush"):
         emitter.flush()
 
     print_stats(stats)
 
-
     return 0
+
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv))

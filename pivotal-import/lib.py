@@ -29,6 +29,7 @@ headers = {
     "Content-Type": "application/json",
 }
 
+
 def sc_get(path, params={}):
     """
     Make a GET api call.
@@ -70,7 +71,6 @@ def sc_put(path, data={}):
     resp = requests.put(url, headers=headers, json=data)
     resp.raise_for_status()
     return resp.json()
-
 
 
 def printerr(s):
@@ -171,6 +171,7 @@ def populate_config():
         with open("config.json", "r") as f:
             return json.load(f)
 
+
 def validate_config(cfg):
     """
     Validate all configuration and setup, printing a description of problems
@@ -202,6 +203,7 @@ def validate_config(cfg):
         msg = "\n".join(problems)
         printerr(f"Problems:\n{msg}")
         sys.exit(1)
+
 
 def load_config():
     cfg = populate_config()

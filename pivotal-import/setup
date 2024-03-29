@@ -10,7 +10,7 @@ then
     exit 1
 fi
 
-pipenv install
+pipenv install "$*"
 
 echo ""
 echo "[Success] Python dependencies installed."
