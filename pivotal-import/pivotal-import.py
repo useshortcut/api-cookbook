@@ -4,11 +4,12 @@
 # See README.md for prerequisites, setup, and usage.
 import argparse
 import csv
+import logging
 import sys
 from datetime import datetime
+from collections import Counter
 
-
-from api import *
+from lib import *
 
 parser = argparse.ArgumentParser(
     description='Imports the Pivotal Tracker CSV export to Shortcut',
@@ -16,8 +17,9 @@ parser = argparse.ArgumentParser(
 parser.add_argument('--apply', action='store_true', required=False)
 parser.add_argument('--bulk', action='store_true', required=False)
 
+stats = Counter()
 def console_emitter(item):
-    print(item)
+    print('Creating {story_type} story {name} created at {created_at}'.format_map(item))
 
 def single_story_emitter(item):
     sc_post('/stories', item)
@@ -43,7 +45,7 @@ def bulk_console_emitter(items):
     print(items)
 
 def bulk_story_creator(items):
-    sc_post('/stories/bulk', items)
+    sc_post('/stories/bulk', { 'stories': items })
 
 
 def url_to_external_links(url):
@@ -70,7 +72,7 @@ col_map = {
     'type': 'story_type',
     'estimate': ('estimate', int),
     'priority': 'priority',
-    'current state': ('workflow_state_id', pivotal_state_to_workflow_state_id),
+    'current state': 'pt_state',
     'labels': ('labels', split_labels),
     'url': ('external_links', url_to_external_links),
     'created at': ('created_at', parse_date),
@@ -89,8 +91,19 @@ nested_col_map = {
     'comment': 'comment'
 }
 
+# These are the keys that are currently correctly populated in the
+# build_story map. They can be passed to the SC api unchanged. This
+# list is effectively an allow list of top level attributes.
+story_keys = [
+    'name',
+    'description',
+    'external_links',
+    'workflow_state_id',
+    'story_type',
+    'created_at',
+]
 
-def build_story(row: list[str], header: list[str]):
+def build_story(row: list[str], header: list[str], wf_map):
 
     d = dict()
 
@@ -113,8 +126,32 @@ def build_story(row: list[str], header: list[str]):
             key = nested_col_map[col]
             d.setdefault(key, list()).append(v)
 
-    if d['story_type'] in ['bug','feature','chore']:
-        return d
+    if d['story_type'] not in ['bug','feature','chore']:
+        return None
+
+    # process workflow state
+    pt_state = d.get('pt_state')
+    if pt_state:
+        d['workflow_state_id'] = wf_map[pt_state]
+
+    return {k:d[k] for k in story_keys if k in d}
+
+
+def load_workflow_states(csv_file):
+    logger.debug(f'Loading workflow states from {csv_file}')
+    d = {}
+    with open(csv_file) as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            sc_state_id = row.get('shortcut_state_id')
+            if sc_state_id:
+              d[row['pt_state']] = int(sc_state_id)
+    return d
+
+def print_stats(stats):
+    print('Import stats')
+    for k,v in stats.items():
+        print(f'  - {k} : {v}')
 
 def main(argv):
     args = parser.parse_args(argv[1:])
@@ -131,16 +168,22 @@ def main(argv):
         else:
             emitter = console_emitter
 
-    with open("data/pivotal_export.csv", ) as csvfile:
+    cfg = load_config()
+    wf_map = load_workflow_states(cfg["states_csv_file"])
+    with open(cfg["pt_csv_file"]) as csvfile:
         reader = csv.reader(csvfile)
         header = [col.lower() for col in next(reader)]
         for row in reader:
-            story = build_story(row, header)
+            story = build_story(row, header, wf_map)
             if story:
                 emitter(story)
+                stats['story'] += 1
 
     if hasattr(emitter, 'flush'):
         emitter.flush()
+
+    print_stats(stats)
+
 
     return 0
 
