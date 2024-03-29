@@ -116,6 +116,7 @@ story_keys = [
     "name",
     "description",
     "external_links",
+    "estimate",
     "workflow_state_id",
     "story_type",
     "created_at",
