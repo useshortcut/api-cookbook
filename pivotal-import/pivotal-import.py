@@ -5,6 +5,7 @@
 import argparse
 import csv
 import logging
+import re
 import sys
 from datetime import datetime
 from collections import Counter
@@ -78,6 +79,17 @@ def parse_username(name):
     return name
 
 
+def parse_comment(txt):
+    """Parse comment text into text, author name and created date."""
+    match = re.match(r"(.*)\((.*) - (.*)\)", txt)
+    (txt, author, created_at) = (txt, None, None)
+    if match:
+        txt = match.group(1)
+        author_id = None  # match.group(2)
+        created_at = parse_date(match.group(3))
+    return {"text": txt, "created_at": created_at}
+
+
 col_map = {
     "title": "name",
     "description": "description",
@@ -98,7 +110,7 @@ nested_col_map = {
     "blocker status": "blocker_state",
     "task": "task",
     "task status": "task_state",
-    "comment": "comment",
+    "comment": ("comments", parse_comment),
 }
 
 # These are the keys that are currently correctly populated in the
@@ -111,6 +123,7 @@ story_keys = [
     "workflow_state_id",
     "story_type",
     "created_at",
+    "comments",
 ]
 
 
@@ -133,8 +146,14 @@ def build_story(row: list[str], header: list[str], wf_map):
                 d[key] = translator(v)
 
         if col in nested_col_map:
-            key = nested_col_map[col]
-            d.setdefault(key, list()).append(v)
+            col_info = nested_col_map[col]
+            key = None
+            if isinstance(col_info, str):
+                key = col_info
+            else:
+                (key, translator) = col_info
+                v = translator(v)
+            d.setdefault(key, []).append(v)
 
     if d["story_type"] not in ["bug", "feature", "chore"]:
         return None
