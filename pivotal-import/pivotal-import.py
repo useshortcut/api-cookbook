@@ -104,8 +104,8 @@ col_map = {
 nested_col_map = {
     "blocker": "blocker",
     "blocker status": "blocker_state",
-    "task": "task",
-    "task status": "task_state",
+    "task": "task_titles",
+    "task status": "task_states",
     "comment": ("comments", parse_comment),
 }
 
@@ -120,6 +120,7 @@ story_keys = [
     "story_type",
     "created_at",
     "comments",
+    "tasks",
 ]
 
 
@@ -157,6 +158,14 @@ def build_story(row, header, wf_map):
     pt_state = d.get("pt_state")
     if pt_state:
         d["workflow_state_id"] = wf_map[pt_state]
+
+    # process tasks
+    tasks = [
+        {"description": title, "complete": state == "completed"}
+        for (title, state) in zip(d.get("task_titles", []), d.get("task_states", []))
+    ]
+    if tasks:
+        d["tasks"] = tasks
 
     return {k: d[k] for k in story_keys if k in d}
 
@@ -205,6 +214,7 @@ def main(argv):
             story = build_story(row, header, wf_map)
             if story:
                 emitter(story)
+                logger.debug("Emitting Story: %s", story)
                 stats["story"] += 1
 
     if hasattr(emitter, "flush"):
