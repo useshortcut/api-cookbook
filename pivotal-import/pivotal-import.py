@@ -18,8 +18,6 @@ parser = argparse.ArgumentParser(
 parser.add_argument("--apply", action="store_true", required=False)
 parser.add_argument("--bulk", action="store_true", required=False)
 
-stats = Counter()
-
 
 def console_emitter(item):
     print("Creating {story_type} story {name} created at {created_at}".format_map(item))
@@ -29,11 +27,9 @@ def single_story_emitter(item):
     sc_post("/stories", item)
 
 
-_bulk_accumulator = []
-_bulk_limit = 20
-
-
 def bulk_emitter(bulk_commit_fn):
+    _bulk_accumulator = []
+    _bulk_limit = 20
 
     def flush():
         bulk_commit_fn(_bulk_accumulator)
@@ -127,8 +123,7 @@ story_keys = [
 ]
 
 
-def build_story(row: list[str], header: list[str], wf_map):
-
+def build_story(row, header, wf_map):
     d = dict()
 
     for ix, val in enumerate(row):
@@ -201,6 +196,8 @@ def main(argv):
 
     cfg = load_config()
     wf_map = load_workflow_states(cfg["states_csv_file"])
+    stats = Counter()
+
     with open(cfg["pt_csv_file"]) as csvfile:
         reader = csv.reader(csvfile)
         header = [col.lower() for col in next(reader)]
