@@ -1,5 +1,6 @@
 data/pivotal_export.csv
 data/shortcut_workflows.csv
+data/shortcut_users.csv
 data/states.csv
 data/users.csv
 config.json
