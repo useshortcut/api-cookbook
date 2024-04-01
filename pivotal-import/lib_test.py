@@ -19,5 +19,21 @@ def test_parse_comment_authorship_in_text():
     }
 
 
+def test_parse_comment_multiline():
+    s = """Here's
+a
+multiline
+comment
+no
+extra
+newlines."""
+    comment = f"{s} (Daniel Gregoire - Apr 1, 2024)"
+    assert parse_comment(comment) == {
+        "text": s,
+        "author": "Daniel Gregoire",
+        "created_at": "2024-04-01T00:00:00",
+    }
+
+
 def test_parse_date():
     assert parse_date("Oct 15, 2014") == "2014-10-15T00:00:00"
