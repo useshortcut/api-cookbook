@@ -40,7 +40,7 @@ def bulk_emitter(bulk_commit_fn):
     _bulk_accumulator = []
     _bulk_limit = 20
 
-    def flush():
+    def commit():
         bulk_commit_fn(_bulk_accumulator)
         _bulk_accumulator.clear()
 
@@ -48,10 +48,10 @@ def bulk_emitter(bulk_commit_fn):
         _bulk_accumulator.append(item)
 
         if len(_bulk_accumulator) >= _bulk_limit:
-            flush()
+            commit()
         return {item["type"]: 1}
 
-    emitter.flush = flush
+    emitter.commit = commit
     return emitter
 
 
@@ -258,8 +258,8 @@ def main(argv):
             logger.debug("Emitting Entity: %s", entity)
             stats.update(emitter(entity))
 
-    if hasattr(emitter, "flush"):
-        emitter.flush()
+    if hasattr(emitter, "commit"):
+        emitter.commit()
 
     print_stats(stats)
 
