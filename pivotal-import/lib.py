@@ -6,6 +6,8 @@ environment variable.
 """
 
 from collections.abc import Mapping
+from datetime import datetime
+import re
 import sys
 import csv
 import json
@@ -79,6 +81,7 @@ def printerr(s):
 
 # File locations
 shortcut_workflows_csv = "data/shortcut_workflows.csv"
+shortcut_users_csv = "data/shortcut_users.csv"
 
 
 def print_workflow_tree(workflows):
@@ -209,3 +212,34 @@ def load_config():
     cfg = populate_config()
     validate_config(cfg)
     return cfg
+
+
+#
+# Pivotal Parsing Functions
+#
+
+
+def parse_comment(txt):
+    """Parse comment text into a dict with entries:
+    - text (comment text, excluding final authorship content)
+    - author (Pivotal user name of commenter)
+    - created_at (date time, ISO 8601)"""
+    match = re.match(r"(.*)\((.*) - (.*)\)", txt)
+    if match:
+        txt = match.group(1)
+        if txt is not None:
+            txt = txt.strip()
+        author = match.group(2)
+        if author is not None:
+            author = author.strip()
+        created_at = match.group(3)
+        if created_at is not None:
+            created_at = parse_date(created_at.strip())
+        return {"text": txt, "author": author, "created_at": created_at}
+    else:
+        return None
+
+
+def parse_date(d: str):
+    """Parse the string as a datetime, then return as a string in ISO 8601 format."""
+    return datetime.strptime(d, "%b %d, %Y").isoformat()

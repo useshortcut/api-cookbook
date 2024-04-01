@@ -89,24 +89,9 @@ def pivotal_state_to_workflow_state_id(state: str):
     return state
 
 
-def parse_date(d: str):
-    return datetime.strptime(d, "%b %d, %Y").isoformat()
-
-
 def parse_username(name):
     # TODO convert the name to the best guess for the users
     return name
-
-
-def parse_comment(txt):
-    """Parse comment text into text, author name and created date."""
-    match = re.match(r"(.*)\((.*) - (.*)\)", txt)
-    (txt, author, created_at) = (txt, None, None)
-    if match:
-        txt = match.group(1)
-        author_id = None  # match.group(2)
-        created_at = parse_date(match.group(3))
-    return {"text": txt, "created_at": created_at}
 
 
 col_map = {
