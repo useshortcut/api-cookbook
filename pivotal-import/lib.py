@@ -219,12 +219,12 @@ def load_config():
 #
 
 
-def parse_comment(txt):
+def parse_comment(s):
     """Parse comment text into a dict with entries:
     - text (comment text, excluding final authorship content)
     - author (Pivotal user name of commenter)
     - created_at (date time, ISO 8601)"""
-    match = re.match(r"(.*)\((.*) - (.*)\)", txt)
+    match = re.match(r"(.*)\((.*) - (.*)\)", s, re.DOTALL)
     if match:
         txt = match.group(1)
         if txt is not None:
