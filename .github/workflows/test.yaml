@@ -1,8 +1,8 @@
 ###
-### Workflow that lints code in pull requests
+### Workflow that test code in pull requests
 ###
 
-name: Lint
+name: Test
 
 # Note: No name so it uses the name associated with the pull request merge to main
 
@@ -12,7 +12,7 @@ on:
     - 'pivotal-import/**'
 
 jobs:
-  lint-pivotal-import:
+  test-pivotal-import:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -36,6 +36,6 @@ jobs:
         working-directory: ./pivotal-import
         run: pipenv install --dev
 
-      - name: Lint Python with Black linter
+      - name: Test pivotal-import
         working-directory: ./pivotal-import
-        run: make lint
+        run: make test
