@@ -5,6 +5,3 @@ data/shortcut_users.csv
 data/states.csv
 data/users.csv
 config.json
-
-# Emacs tmp files
-*\~
