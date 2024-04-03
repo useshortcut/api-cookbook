@@ -215,6 +215,23 @@ def load_config():
     return cfg
 
 
+def get_user_info(member):
+    profile = member["profile"]
+    return {
+        "name": profile.get("name"),
+        "mention_name": profile.get("mention_name"),
+        "email": profile.get("email_address"),
+        # the unique id of the member
+        "id": member["id"],
+        # partial or full based on acceptance state
+        "state": member["state"],
+    }
+
+
+def fetch_members():
+    return [get_user_info(member) for member in sc_get("/members")]
+
+
 #
 # Pivotal Parsing Functions
 #
@@ -244,3 +261,8 @@ def parse_comment(s):
 def parse_date(d: str):
     """Parse the string as a datetime, then return as a string in ISO 8601 format."""
     return datetime.strptime(d, "%b %d, %Y").isoformat()
+
+
+### Utility functions
+def identity(x):
+    return x

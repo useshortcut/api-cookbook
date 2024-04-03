@@ -89,17 +89,11 @@ def url_to_external_links(url):
 
 
 def parse_labels(labels: str):
-    return [{"name": label} for label in labels.split(", ")]
+    return [{"name": label} for label in re.split(r"\s*,\s*", labels)]
 
 
-def pivotal_state_to_workflow_state_id(state: str):
-    # TODO use the actual workflow state mapping
-    return state
-
-
-def parse_username(name):
-    # TODO convert the name to the best guess for the users
-    return name
+def split_by_comma(owners: str):
+    return re.split(r"[,\s]", owners)
 
 
 col_map = {
@@ -115,7 +109,8 @@ col_map = {
     "created at": ("created_at", parse_date),
     "accepted at": ("accepted_at", parse_date),
     "deadline": ("deadline", parse_date),
-    "requested by": ("requester", parse_username),
+    "requested by": "requester",
+    "owned by": ("owners", split_by_comma),
 }
 
 nested_col_map = {
@@ -142,6 +137,8 @@ select_keys = {
         "tasks",
         "labels",
         "external_id",
+        "owner_ids",
+        "requested_by_id",
     ],
     "epic": [
         "name",
@@ -198,10 +195,9 @@ def build_entity(ctx, d):
         author = new_comment.get("author")
         if author:
             del new_comment["author"]
-            # TODO: process the user csv to get the permission ids
-            # author_id = ctx["user_config"].get(author)
-            # if author_id:
-            #     new_comment["author_id"] = author_id
+            author_id = ctx["user_config"].get(author)
+            if author_id:
+                new_comment["author_id"] = author_id
         comments.append(new_comment)
     if comments:
         d["comments"] = comments
@@ -229,6 +225,25 @@ def build_entity(ctx, d):
         if tasks:
             d["tasks"] = tasks
 
+        # process user fields
+        user_to_sc_id = ctx["user_config"]
+        requester = d.get("requester")
+        if requester:
+            # if requester isn't found, this will cause the api to use
+            # the owner of the token as the requester
+            sc_requester_id = user_to_sc_id.get(requester)
+            if sc_requester_id:
+                d["requested_by_id"] = sc_requester_id
+
+        owners = d.get("owners")
+        if owners:
+            d["owner_ids"] = [
+                # filter out woners that aren't found
+                user_to_sc_id[owner]
+                for owner in owners
+                if owner in user_to_sc_id
+            ]
+
     elif type == "epic":
         pass
 
@@ -236,16 +251,34 @@ def build_entity(ctx, d):
     return {"type": type, "entity": entity, "parsed_row": d}
 
 
-def load_workflow_states(csv_file):
-    logger.debug(f"Loading workflow states from {csv_file}")
+def load_mapping_csv(csv_file, from_key, to_key, to_transform=identity):
     d = {}
     with open(csv_file) as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
-            sc_state_id = row.get("shortcut_state_id")
-            if sc_state_id:
-                d[row["pt_state"]] = int(sc_state_id)
+            val_str = row.get(to_key)
+            val = None
+            if val_str:
+                val = to_transform(val_str)
+            d[row[from_key]] = val
+
     return d
+
+
+def load_workflow_states(csv_file):
+    logger.debug(f"Loading workflow states from {csv_file}")
+    return load_mapping_csv(csv_file, "pt_state", "shortcut_state_id", int)
+
+
+def load_users(csv_file):
+    logger.debug(f"Loading users from {csv_file}")
+    email_to_id = {user["email"]: user["id"] for user in fetch_members()}
+    user_to_email = load_mapping_csv(csv_file, "pt_user_name", "shortcut_user_email")
+    return {
+        pt_user: email_to_id.get(sc_email)
+        for pt_user, sc_email in user_to_email.items()
+        if sc_email
+    }
 
 
 def print_stats(stats):
@@ -330,8 +363,12 @@ def process_pt_csv_export(ctx, pt_csv_file, entity_collector):
 
 
 def build_ctx(cfg):
-    ctx = {}
-    ctx["workflow_config"] = load_workflow_states(cfg["states_csv_file"])
+    ctx = {
+        "workflow_config": load_workflow_states(cfg["states_csv_file"]),
+        "user_config": load_users(cfg["users_csv_file"]),
+    }
+    logger.debug("Built context %s", ctx)
+    return ctx
 
 
 def main(argv):

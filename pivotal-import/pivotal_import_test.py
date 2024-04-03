@@ -2,7 +2,13 @@ from pivotal_import import *
 
 
 def create_test_ctx():
-    return {"workflow_config": {"unstarted": 400001, "started": 400002, "done": 400003}}
+    return {
+        "workflow_config": {"unstarted": 400001, "started": 400002, "done": 400003},
+        "user_config": {
+            "Daniel McFadden": "daniel_member_id",
+            "Amy Williams": "amy_member_id",
+        },
+    }
 
 
 def test_parse_row_basic():
@@ -24,7 +30,23 @@ def test_parse_comments():
     )
 
 
-def test_build_story():
+def test_parse_labels():
+    assert {
+        "labels": [
+            {"name": "a label"},
+            {"name": "oneword"},
+            {"name": "two words"},
+            {"name": "three word salad"},
+        ]
+    } == parse_row(
+        # purposefully using different variations of comma separated
+        # labels
+        ["a label , oneword, two words,three word salad"],
+        ["labels"],
+    )
+
+
+def test_build_story_with_comments():
     ctx = create_test_ctx()
     d = {
         "story_type": "feature",
@@ -48,6 +70,76 @@ def test_build_story():
         },
         "parsed_row": d,
     } == build_entity(ctx, d)
+
+
+def test_build_story_workflow_mapping():
+    ctx = create_test_ctx()
+    rows = [
+        {
+            "story_type": "feature",
+            "pt_state": "unstarted",
+        },
+        {
+            "story_type": "bug",
+            "pt_state": "started",
+        },
+    ]
+
+    assert [
+        {
+            "type": "story",
+            "entity": {
+                "story_type": "feature",
+                "workflow_state_id": ctx["workflow_config"]["unstarted"],
+                "labels": [{"name": PIVOTAL_TO_SHORTCUT_LABEL}],
+            },
+            "parsed_row": rows[0],
+        },
+        {
+            "type": "story",
+            "entity": {
+                "story_type": "bug",
+                "workflow_state_id": ctx["workflow_config"]["started"],
+                "labels": [{"name": PIVOTAL_TO_SHORTCUT_LABEL}],
+            },
+            "parsed_row": rows[1],
+        },
+    ] == [build_entity(ctx, d) for d in rows]
+
+
+def test_build_story_user_mapping():
+    ctx = create_test_ctx()
+    rows = [
+        {
+            "story_type": "feature",
+            "requester": "Daniel McFadden",
+        },
+        {
+            "story_type": "bug",
+            "owners": ["Amy Williams"],
+        },
+    ]
+
+    assert [
+        {
+            "type": "story",
+            "entity": {
+                "story_type": "feature",
+                "requested_by_id": ctx["user_config"]["Daniel McFadden"],
+                "labels": [{"name": PIVOTAL_TO_SHORTCUT_LABEL}],
+            },
+            "parsed_row": rows[0],
+        },
+        {
+            "type": "story",
+            "entity": {
+                "story_type": "bug",
+                "owner_ids": [ctx["user_config"]["Amy Williams"]],
+                "labels": [{"name": PIVOTAL_TO_SHORTCUT_LABEL}],
+            },
+            "parsed_row": rows[1],
+        },
+    ] == [build_entity(ctx, d) for d in rows]
 
 
 def test_build_release():
