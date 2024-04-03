@@ -178,7 +178,7 @@ def populate_users_csv(users_csv_file, pt_csv_file):
     period, or (b) reach out to support@shortcut.com to request assistance so you're not
     billed for extraneous users.
     """
-    sc_users = [get_user_info(member) for member in sc_get("/members")]
+    sc_users = fetch_members()
     user_matching_map = _build_user_matching_map(sc_users)
     try:
         with open(users_csv_file, "x") as f:
@@ -225,10 +225,6 @@ def populate_users_csv(users_csv_file, pt_csv_file):
         if uninvited_pt_users:
             exit_uninvited_pt_users(uninvited_pt_users)
     return 0
-
-
-def identity(x):
-    return x
 
 
 def parse_comment_author(s):
@@ -288,19 +284,6 @@ def extract_pt_users(pt_csv_file):
         for row in reader:
             pt_users.update(extract_pt_users_from_row(row, header))
     return pt_users
-
-
-def get_user_info(member):
-    profile = member["profile"]
-    return {
-        "name": profile.get("name"),
-        "mention_name": profile.get("mention_name"),
-        "email": profile.get("email_address"),
-        # the unique id of the member
-        "id": member["id"],
-        # partial or full based on acceptance state
-        "state": member["state"],
-    }
 
 
 def _unspace(s):
