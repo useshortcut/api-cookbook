@@ -15,9 +15,9 @@ In order to run this, you will require a Pivotal account and the ability to sign
 
 # Operation
 
-Before you run the import, you should go through the steps in **Prerequisites and Setup**. You can check that the prerequisites are superficially met by running [`pivotal-import.py`](pivotal-import.py) which by default will not write any changes to your Shortcut workspace. You can use this mode to validate that you've configured the import correctly.
+Before you run the import, you should go through the steps in **Prerequisites and Setup**. You can check that the prerequisites are superficially met by running [`pivotal_import.py`](pivotal_import.py) which by default will not write any changes to your Shortcut workspace. You can use this mode to validate that you've configured the import correctly.
 
-If `pivotal-import.py` completes without errors, you can run the script with the `--apply` flag, which will enable writing to the Shortcut API.
+If `pivotal_import.py` completes without errors, you can run the script with the `--apply` flag, which will enable writing to the Shortcut API.
 
 # Known Limitations
 

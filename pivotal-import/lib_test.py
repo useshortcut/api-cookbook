@@ -35,5 +35,10 @@ newlines."""
     }
 
 
+def test_parse_comment_without_suffix():
+    s = "A comment without a suffix"
+    assert parse_comment(s) == {"text": s}
+
+
 def test_parse_date():
     assert parse_date("Oct 15, 2014") == "2014-10-15T00:00:00"

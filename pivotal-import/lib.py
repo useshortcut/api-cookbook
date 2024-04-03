@@ -237,7 +237,7 @@ def parse_comment(s):
             created_at = parse_date(created_at.strip())
         return {"text": txt, "author": author, "created_at": created_at}
     else:
-        return None
+        return {"text": s}
 
 
 def parse_date(d: str):
