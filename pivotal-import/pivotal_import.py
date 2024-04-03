@@ -21,9 +21,11 @@ parser.add_argument("--bulk", action="store_true", required=False)
 """The batch size when running in batch mode"""
 BATCH_SIZE = 20
 
-
-"""The name of the label associated with all stories and epics that are created with this import script"""
+"""The label associated with all stories and epics that are created with this import script."""
 PIVOTAL_TO_SHORTCUT_LABEL = "pivotal->shortcut"
+
+"""The label associated with all chore stories created from release types in Pivotal."""
+PIVOTAL_RELEASE_TYPE_LABEL = "pivotal-release"
 
 
 def single_sc_creator(items):
@@ -201,12 +203,15 @@ def build_entity(ctx, d):
             # if author_id:
             #     new_comment["author_id"] = author_id
         comments.append(new_comment)
-    d["comments"] = comments
+    if comments:
+        d["comments"] = comments
+    elif "comments" in d:
+        del d["comments"]
 
     # releases become chores
     if d["story_type"] == "release":
         d["story_type"] = "chore"
-        d.setdefault("labels", []).append({"name": "pivotal-release"})
+        d.setdefault("labels", []).append({"name": PIVOTAL_RELEASE_TYPE_LABEL})
 
     if type == "story":
         # process workflow state
@@ -324,6 +329,11 @@ def process_pt_csv_export(ctx, pt_csv_file, entity_collector):
     print_stats(stats)
 
 
+def build_ctx(cfg):
+    ctx = {}
+    ctx["workflow_config"] = load_workflow_states(cfg["states_csv_file"])
+
+
 def main(argv):
     args = parser.parse_args(argv[1:])
     emitter = mock_emitter
@@ -336,9 +346,7 @@ def main(argv):
     entity_collector = EntityCollector(emitter)
 
     cfg = load_config()
-    ctx = {}
-    ctx["workflow_config"] = load_workflow_states(cfg["states_csv_file"])
-
+    ctx = build_ctx(cfg)
     process_pt_csv_export(ctx, cfg["pt_csv_file"], entity_collector)
 
     entity_collector.commit()
