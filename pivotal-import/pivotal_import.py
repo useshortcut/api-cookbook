@@ -89,7 +89,7 @@ def url_to_external_links(url):
 
 
 def parse_labels(labels: str):
-    return [{"name": label} for label in re.split(r"[,\s]+", labels)]
+    return [{"name": label} for label in re.split(r"\s*,\s*", labels)]
 
 
 def split_by_comma(owners: str):

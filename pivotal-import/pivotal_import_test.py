@@ -30,6 +30,22 @@ def test_parse_comments():
     )
 
 
+def test_parse_labels():
+    assert {
+        "labels": [
+            {"name": "a label"},
+            {"name": "oneword"},
+            {"name": "two words"},
+            {"name": "three word salad"},
+        ]
+    } == parse_row(
+        # purposefully using different variations of comma separated
+        # labels
+        ["a label , oneword, two words,three word salad"],
+        ["labels"],
+    )
+
+
 def test_build_story_with_comments():
     ctx = create_test_ctx()
     d = {
