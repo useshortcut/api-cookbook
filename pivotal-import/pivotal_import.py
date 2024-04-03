@@ -304,7 +304,7 @@ class EntityCollector:
 
         # update all the stories with the appropriate epic ids
         for story in self.stories:
-            for label in story["entity"]["labels"]:
+            for label in story["entity"].get("labels", []):
                 label_name = label["name"]
                 epic_id = epic_label_map.get(label_name)
                 if epic_id is not None:
