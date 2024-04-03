@@ -176,11 +176,11 @@ def populate_users_csv(users_csv_file, pt_csv_file):
     period, or (b) reach out to support@shortcut.com to request assistance so you're not
     billed for extraneous users.
     """
+    sc_user_to_email = fetch_sc_user_to_email()
     try:
         with open(users_csv_file, "x") as f:
             pt_all_users = sorted(extract_pt_users(pt_csv_file))
             unmapped_pt_users = []
-            sc_user_to_email = fetch_sc_user_to_email()
             writer = csv.DictWriter(f, ["pt_user_name", "shortcut_user_email"])
             writer.writeheader()
             for pt_user in pt_all_users:
@@ -193,7 +193,20 @@ def populate_users_csv(users_csv_file, pt_csv_file):
                     users_csv_file, unmapped_pt_users, sc_user_to_email
                 )
     except FileExistsError:
-        logger.debug("[NOT IMPLEMENTED] populate_users_csv when exists")
+        unmapped_pt_users = []
+        uninvited_pt_users = []
+        invited_emails = set(sc_user_to_email.values())
+        with open(users_csv_file, "r", newline="") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                if not row["shortcut_user_email"]:
+                    unmapped_pt_users.append(row["pt_user_name"])
+                elif row["shortcut_user_email"] not in invited_emails:
+                    uninvited_pt_users.append(row["shortcut_user_email"])
+        if unmapped_pt_users:
+            exit_unmapped_pt_users(users_csv_file, unmapped_pt_users)
+        if uninvited_pt_users:
+            exit_uninvited_pt_users(uninvited_pt_users)
     return 0
 
 
@@ -300,6 +313,36 @@ so you can easily invite them to your workspace.
         writer.writeheader()
         for name, email in sc_user_to_email.items():
             writer.writerow({"shortcut_user_name": name, "shortcut_user_email": email})
+    sys.exit(1)
+
+
+def exit_uninvited_pt_users(uninvited_pt_users):
+    """
+    Users can add people to data/users.csv that have not been added to their Shortcut
+    workspace. This step identifies that situation and provides instructions to the user.
+    """
+    msg = "\n  ".join(uninvited_pt_users)
+    printerr(
+        f"[Problem] No users in your Shortcut workspace have these emails:\n  {msg}\n"
+    )
+    printerr(
+        f"""To resolve this, invite these people to your Shortcut workspace.
+
+1. Copy the list of emails printed above (also written to {emails_to_invite} for reference).
+2. Navigate to https://app.shortcut.com/settings/users/invite
+3. Click "Invite Emails".
+4. Paste the list of emails into the text area.
+5. Submit the form.
+
+Run the initialize.py script again to verify that all users have been mapped and
+have accounts in your Shortcut workspace.
+"""
+    )
+    with open(emails_to_invite, "w") as f:
+        writer = csv.DictWriter(f, ["email_to_invite"])
+        writer.writeheader()
+        for email in uninvited_pt_users:
+            writer.writerow({"email_to_invite": email})
     sys.exit(1)
 
 
