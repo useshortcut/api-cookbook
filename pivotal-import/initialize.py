@@ -16,8 +16,10 @@ https://www.pivotaltracker.com/help/articles/story_states/
 
 from collections.abc import Mapping
 import csv
+import difflib
 import logging
 import sys
+
 
 from lib import *
 
@@ -176,26 +178,41 @@ def populate_users_csv(users_csv_file, pt_csv_file):
     period, or (b) reach out to support@shortcut.com to request assistance so you're not
     billed for extraneous users.
     """
-    sc_user_to_email = fetch_sc_user_to_email()
+    sc_users = [get_user_info(member) for member in sc_get("/members")]
+    user_matching_map = _build_user_matching_map(sc_users)
     try:
         with open(users_csv_file, "x") as f:
             pt_all_users = sorted(extract_pt_users(pt_csv_file))
             unmapped_pt_users = []
-            writer = csv.DictWriter(f, ["pt_user_name", "shortcut_user_email"])
+            writer = csv.DictWriter(
+                f, ["pt_user_name", "shortcut_user_email", "shortcut_user_mention_name"]
+            )
             writer.writeheader()
             for pt_user in pt_all_users:
-                email = sc_user_to_email.get(pt_user, "")
-                if email == "":
+                user_info = find_sc_user_from_pt_user(pt_user, user_matching_map)
+                email = ""
+                mention_name = ""
+                if not user_info:
                     unmapped_pt_users.append(pt_user)
-                writer.writerow({"pt_user_name": pt_user, "shortcut_user_email": email})
-            if unmapped_pt_users:
-                exit_unmapped_pt_users(
-                    users_csv_file, unmapped_pt_users, sc_user_to_email
+                else:
+                    email = user_info["email"]
+                    mention_name = user_info["mention_name"]
+
+                writer.writerow(
+                    {
+                        "pt_user_name": pt_user,
+                        "shortcut_user_email": email,
+                        "shortcut_user_mention_name": mention_name,
+                    }
                 )
+            if unmapped_pt_users:
+                exit_unmapped_pt_users(users_csv_file, unmapped_pt_users, sc_users)
     except FileExistsError:
         unmapped_pt_users = []
         uninvited_pt_users = []
-        invited_emails = set(sc_user_to_email.values())
+        invited_emails = set(
+            [user_info["email"] for user_info in user_matching_map.values()]
+        )
         with open(users_csv_file, "r", newline="") as f:
             reader = csv.DictReader(f)
             for row in reader:
@@ -204,7 +221,7 @@ def populate_users_csv(users_csv_file, pt_csv_file):
                 elif row["shortcut_user_email"] not in invited_emails:
                     uninvited_pt_users.append(row["shortcut_user_email"])
         if unmapped_pt_users:
-            exit_unmapped_pt_users(users_csv_file, unmapped_pt_users)
+            exit_unmapped_pt_users(users_csv_file, unmapped_pt_users, sc_users)
         if uninvited_pt_users:
             exit_uninvited_pt_users(uninvited_pt_users)
     return 0
@@ -273,18 +290,61 @@ def extract_pt_users(pt_csv_file):
     return pt_users
 
 
-def fetch_sc_user_to_email():
-    """
-    Returns a dict mapping the Shortcut user's name to their email address
-    for all members in the Shortcut workspace.
-    """
+def get_user_info(member):
+    profile = member["profile"]
     return {
-        member["profile"]["name"]: member["profile"]["email_address"]
-        for member in sc_get("/members")
+        "name": profile.get("name"),
+        "mention_name": profile.get("mention_name"),
+        "email": profile.get("email_address"),
+        # the unique id of the member
+        "id": member["id"],
+        # partial or full based on acceptance state
+        "state": member["state"],
     }
 
 
-def exit_unmapped_pt_users(users_csv_file, unmapped_pt_users, sc_user_to_email):
+def _unspace(s):
+    return s.replace(" ", "")
+
+
+def _casefold_then_remove_spaces_and_specials(s):
+    return re.sub(r"[\W_]", "", s.casefold())
+
+
+def find_sc_user_from_pt_user(pt_user, user_map):
+    simplified_user = _casefold_then_remove_spaces_and_specials(pt_user)
+
+    user_info = user_map.get(simplified_user)
+    if user_info:
+        logger.debug("Found user %s: %s", pt_user, user_info)
+        return user_info
+
+    all_identifiers = user_map.keys()
+
+    best_matches = difflib.get_close_matches(simplified_user, all_identifiers)
+    if best_matches:
+        return user_map[best_matches[0]]
+
+    return None
+
+
+def _build_user_matching_map(user_info_list):
+    user_map = {}
+    indexed_keys = ["name", "mention_name"]
+    transformers = [identity, _casefold_then_remove_spaces_and_specials]
+    for user_info in user_info_list:
+        for k in indexed_keys:
+            val = user_info.get(k)
+            if val:
+                for transformer in transformers:
+                    transformed_val = transformer(val)
+                    if transformed_val and transformed_val not in user_map:
+                        user_map[transformed_val] = user_info
+
+    return user_map
+
+
+def exit_unmapped_pt_users(users_csv_file, unmapped_pt_users, user_info_list):
     """
     If there are Pivotal Tracker users which could not be mapped automatically
     to Shortcut users, notify the user of this and provide instructions for
@@ -311,8 +371,14 @@ so you can easily invite them to your workspace.
     with open(shortcut_users_csv, "w") as f:
         writer = csv.DictWriter(f, ["shortcut_user_name", "shortcut_user_email"])
         writer.writeheader()
-        for name, email in sc_user_to_email.items():
-            writer.writerow({"shortcut_user_name": name, "shortcut_user_email": email})
+        for user_info in user_info_list:
+            writer.writerow(
+                {
+                    "shortcut_user_name": user_info["name"],
+                    "shortcut_user_email": user_info["email"],
+                    "shortcut_user_mention_name": user_info["mention_name"],
+                }
+            )
     sys.exit(1)
 
 
