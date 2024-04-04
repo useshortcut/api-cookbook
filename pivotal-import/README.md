@@ -42,7 +42,11 @@ It's possible that this tool does not do exactly what you'd like it to - if that
 
 Any contributions you make are greatly appreciated!
 
-If you have a suggestion that would make this better, please fork this repository and create a pull request. Don't forget to give the project a star! Thanks again!
+If you have a bug report or feature request, please [create a GitHub Issue](https://github.com/useshortcut/api-cookbook/issues/new).
+
+If you need to share sensitive information or need help specific to your Shortcut workspace, please [submit a help center request](https://help.shortcut.com/hc/en-us/requests/new) instead.
+
+If you have code changes that would make this better, please fork this repository and create a pull request. Don't forget to give the project a star! Thanks again!
 
 1. Fork the Project
 2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
