@@ -13,8 +13,11 @@ from lib import *
 parser = argparse.ArgumentParser(
     description="Imports the Pivotal Tracker CSV export to Shortcut",
 )
-parser.add_argument("--apply", action="store_true", required=False)
-parser.add_argument("--bulk", action="store_true", required=False)
+parser.add_argument(
+    "--apply", action="store_true", help="Actually creates the entities inside Shortcut"
+)
+parser.add_argument("--debug", action="store_true", help="Turns on debugging logs")
+
 
 """The batch size when running in batch mode"""
 BATCH_SIZE = 20
@@ -26,29 +29,8 @@ PIVOTAL_TO_SHORTCUT_LABEL = "pivotal->shortcut"
 PIVOTAL_RELEASE_TYPE_LABEL = "pivotal-release"
 
 
-def single_sc_creator(items):
-    """Create a Shortcut entities on at a time.
 
-    Accepts a list of dicts that must have at least two keys `type`
-    and `entity`. `type` must be either story or epic. `entity` must
-    be the payload that is sent to the Shortcut API.
-
-    Returns a list of created entity ids.
-
-    """
-    ids = []
-    for item in items:
-        if item["type"] == "story":
-            res = sc_post("/stories", item["entity"])
-            ids.append(res["id"])
-        else:
-            res = sc_post("/epics", item["entity"])
-            ids.append(res["id"])
-
-    return ids
-
-
-def bulk_sc_creator(items):
+def sc_creator(items):
     """Create Shortcut entities utilizing bulk APIs whenever possible.
 
     Accepts a list of dicts that must have at least two keys `type`
@@ -90,10 +72,6 @@ def parse_labels(labels: str):
     return [{"name": label} for label in re.split(r"\s*,\s*", labels)]
 
 
-def split_by_comma(owners: str):
-    return re.split(r"[,\s]", owners)
-
-
 col_map = {
     "id": "external_id",
     "title": "name",
@@ -108,7 +86,6 @@ col_map = {
     "accepted at": ("accepted_at", parse_date),
     "deadline": ("deadline", parse_date),
     "requested by": "requester",
-    "owned by": ("owners", split_by_comma),
 }
 
 nested_col_map = {
@@ -117,6 +94,7 @@ nested_col_map = {
     "task": "task_titles",
     "task status": "task_states",
     "comment": ("comments", parse_comment),
+    "owned by": "owners",
 }
 
 # These are the keys that are currently correctly populated in the
@@ -282,13 +260,13 @@ def load_users(csv_file):
 def print_stats(stats):
     print("Import stats")
     for k, v in stats.items():
-        print(f"  - {k} : {v}")
+        print(f"  - {k.capitalize()}s : {v}")
 
 
 def mock_emitter(items):
     ret = []
     for ix, item in enumerate(items):
-        print("Creating {} {}".format(ix, item["entity"]))
+        print("Creating {} {}".format(ix, item["entity"]["name"]))
         ret.append(ix)
     return ret
 
@@ -371,12 +349,11 @@ def build_ctx(cfg):
 
 def main(argv):
     args = parser.parse_args(argv[1:])
+    if args.debug:
+        logging.basicConfig(level=logging.DEBUG)
     emitter = mock_emitter
     if args.apply:
-        if args.bulk:
-            emitter = bulk_sc_creator
-        else:
-            emitter = single_sc_creator
+        emitter = sc_creator
 
     entity_collector = EntityCollector(emitter)
 

@@ -16,9 +16,6 @@ import logging
 
 import requests
 
-# FIXME Make INFO default upon public release
-logging.basicConfig(level=logging.DEBUG)  # Change to INFO or DEBUG as needed
-
 # Logging
 logger = logging.getLogger(__name__)
 

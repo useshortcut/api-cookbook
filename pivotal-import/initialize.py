@@ -27,6 +27,7 @@ from lib import *
 parser = argparse.ArgumentParser(
     description="""Run this script with no arguments to configure how story state and users will be mapped from Pivotal to Shortcut.""",
 )
+parser.add_argument("--debug", action="store_true", help="Turns on debugging logs")
 
 # Logging
 logger = logging.getLogger(__name__)
@@ -407,13 +408,15 @@ have accounts in your Shortcut workspace.
 
 
 def main(argv):
-    # Support -h/--help
-    parser.parse_args(argv[1:])
     """
     Script entry-point for initializing an import of Pivotal data into Shortcut.
 
     Once initialized, use pivotal_import.py to see a dry-run and perform the import.
     """
+    args = parser.parse_args(argv[1:])
+    if args.debug:
+        logging.basicConfig(level=logging.DEBUG)
+
     cfg = load_config()
     populate_states_csv(cfg["states_csv_file"], cfg["workflow_id"])
     populate_users_csv(cfg["users_csv_file"], cfg["pt_csv_file"])
