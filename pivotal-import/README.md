@@ -21,7 +21,9 @@ If `pivotal_import.py` completes without errors, you can run the script with the
 
 # Known Limitations
 
-This script has some limitations you should know about:
+**This is alpha software.** Not only is not guaranteed to be without bugs, but it is under active development and has several known feature gaps to be filled before we consider it complete.
+
+The following are known limitations:
 
 - **No story reviewers:** Pivotal story reviewers are not imported.
 - **No story priority:** Pivotal story priorities are not imported.
@@ -32,7 +34,9 @@ This script has some limitations you should know about:
 - **No attachments:** The attachments (including Google Drive attachments) are not imported into Shortcut.
 - **No history:** Project history is not imported into Shortcut.
 
-A future version of this importer may fill some of the above gaps.
+Our intention is to attend to items higher on the list sooner than those lower.
+
+Please check [currently open issues](https://github.com/useshortcut/api-cookbook/issues) for further reported limitations.
 
 # Customization
 
@@ -45,6 +49,8 @@ Any contributions you make are greatly appreciated!
 If you have a bug report or feature request, please [create a GitHub Issue](https://github.com/useshortcut/api-cookbook/issues/new).
 
 If you need to share sensitive information or need help specific to your Shortcut workspace, please [submit a help center request](https://help.shortcut.com/hc/en-us/requests/new) instead.
+
+You can also chat with us anytime on our [Shortcut Communuity Discord](https://discord.gg/shortcut-community-887801174496006216).
 
 If you have code changes that would make this better, please fork this repository and create a pull request. Don't forget to give the project a star! Thanks again!
 
