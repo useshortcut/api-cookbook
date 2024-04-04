@@ -29,29 +29,8 @@ PIVOTAL_TO_SHORTCUT_LABEL = "pivotal->shortcut"
 PIVOTAL_RELEASE_TYPE_LABEL = "pivotal-release"
 
 
-def single_sc_creator(items):
-    """Create a Shortcut entities on at a time.
 
-    Accepts a list of dicts that must have at least two keys `type`
-    and `entity`. `type` must be either story or epic. `entity` must
-    be the payload that is sent to the Shortcut API.
-
-    Returns a list of created entity ids.
-
-    """
-    ids = []
-    for item in items:
-        if item["type"] == "story":
-            res = sc_post("/stories", item["entity"])
-            ids.append(res["id"])
-        else:
-            res = sc_post("/epics", item["entity"])
-            ids.append(res["id"])
-
-    return ids
-
-
-def bulk_sc_creator(items):
+def sc_creator(items):
     """Create Shortcut entities utilizing bulk APIs whenever possible.
 
     Accepts a list of dicts that must have at least two keys `type`
@@ -374,10 +353,7 @@ def main(argv):
         logging.basicConfig(level=logging.DEBUG)
     emitter = mock_emitter
     if args.apply:
-        if args.bulk:
-            emitter = bulk_sc_creator
-        else:
-            emitter = single_sc_creator
+        emitter = sc_creator
 
     entity_collector = EntityCollector(emitter)
 
