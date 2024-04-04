@@ -6,6 +6,9 @@ clean:
 initialize:
 	pipenv run python initialize.py
 
+import: initialize
+	pipenv run python pivotal_import.py
+
 lint:
 	./lint
 
