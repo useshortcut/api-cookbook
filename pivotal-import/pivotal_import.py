@@ -13,8 +13,11 @@ from lib import *
 parser = argparse.ArgumentParser(
     description="Imports the Pivotal Tracker CSV export to Shortcut",
 )
-parser.add_argument("--apply", action="store_true", required=False)
-parser.add_argument("--bulk", action="store_true", required=False)
+parser.add_argument(
+    "--apply", action="store_true", help="Actually creates the entities inside Shortcut"
+)
+parser.add_argument("--debug", action="store_true", help="Turns on debugging logs")
+
 
 """The batch size when running in batch mode"""
 BATCH_SIZE = 20
@@ -282,13 +285,13 @@ def load_users(csv_file):
 def print_stats(stats):
     print("Import stats")
     for k, v in stats.items():
-        print(f"  - {k} : {v}")
+        print(f"  - {k.capitalize()}s : {v}")
 
 
 def mock_emitter(items):
     ret = []
     for ix, item in enumerate(items):
-        print("Creating {} {}".format(ix, item["entity"]))
+        print("Creating {} {}".format(ix, item["entity"]["name"]))
         ret.append(ix)
     return ret
 
@@ -371,6 +374,8 @@ def build_ctx(cfg):
 
 def main(argv):
     args = parser.parse_args(argv[1:])
+    if args.debug:
+        logging.basicConfig(level=logging.DEBUG)
     emitter = mock_emitter
     if args.apply:
         if args.bulk:

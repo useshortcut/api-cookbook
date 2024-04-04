@@ -116,7 +116,7 @@ def test_build_story_user_mapping():
         },
         {
             "story_type": "bug",
-            "owners": ["Amy Williams"],
+            "owners": ["Amy Williams", "Daniel McFadden"],
         },
     ]
 
@@ -134,7 +134,10 @@ def test_build_story_user_mapping():
             "type": "story",
             "entity": {
                 "story_type": "bug",
-                "owner_ids": [ctx["user_config"]["Amy Williams"]],
+                "owner_ids": [
+                    ctx["user_config"]["Amy Williams"],
+                    ctx["user_config"]["Daniel McFadden"],
+                ],
                 "labels": [{"name": PIVOTAL_TO_SHORTCUT_LABEL}],
             },
             "parsed_row": rows[1],
