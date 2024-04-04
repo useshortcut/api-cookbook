@@ -32,7 +32,8 @@ parser = argparse.ArgumentParser(
 logger = logging.getLogger(__name__)
 
 
-# Mapping of Pivotal Tracker story states to Shortcut ones
+# Pivotal Tracker story states, including "planned" which is used
+# if automatic Pivotal iterations are disabled.
 pt_all_states = [
     "unscheduled",
     "unstarted",
@@ -282,6 +283,9 @@ def extract_pt_users_from_row(row, header):
 
 
 def extract_pt_users(pt_csv_file):
+    """
+    Given the Pivotal export CSV, return a unique set of all users found in all rows.
+    """
     pt_users = set()
     with open(pt_csv_file) as csvfile:
         reader = csv.reader(csvfile)
@@ -291,15 +295,17 @@ def extract_pt_users(pt_csv_file):
     return pt_users
 
 
-def _unspace(s):
-    return s.replace(" ", "")
-
-
 def _casefold_then_remove_spaces_and_specials(s):
     return re.sub(r"[\W_]", "", s.casefold())
 
 
 def find_sc_user_from_pt_user(pt_user, user_map):
+    """
+    Return the Shortcut user that maps to the given Pivotal user.
+    Compares full names (since that is was the Pivotal export contains).
+
+    Return None if a suitable Shortcut user could not be identified.
+    """
     simplified_user = _casefold_then_remove_spaces_and_specials(pt_user)
 
     user_info = user_map.get(simplified_user)
