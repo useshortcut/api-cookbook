@@ -1,0 +1,41 @@
+###
+### Workflow that test code in pull requests
+###
+
+name: Test
+
+# Note: No name so it uses the name associated with the pull request merge to main
+
+on:
+  pull_request:
+    paths:
+    - 'pivotal-import/**'
+
+jobs:
+  test-pivotal-import:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - name: Get Python Version
+        run: echo "PYTHON_VERSION=$(cat .python-version | grep ^[^#])" >> $GITHUB_ENV
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: "pipenv"
+
+      - name: Install pipenv
+        run: pip install --user pipenv
+
+      - name: Install Python dependencies
+        working-directory: ./pivotal-import
+        run: pipenv install --dev
+
+      - name: Test pivotal-import
+        working-directory: ./pivotal-import
+        run: make test
