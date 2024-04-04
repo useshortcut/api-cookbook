@@ -14,7 +14,7 @@ which are detailed here at the time of this writing:
 https://www.pivotaltracker.com/help/articles/story_states/
 """
 
-from collections.abc import Mapping
+import argparse
 import csv
 import difflib
 import logging
@@ -22,6 +22,11 @@ import sys
 
 
 from lib import *
+
+# CLI arguments
+parser = argparse.ArgumentParser(
+    description="""Run this script with no arguments to configure how story state and users will be mapped from Pivotal to Shortcut.""",
+)
 
 # Logging
 logger = logging.getLogger(__name__)
@@ -395,22 +400,22 @@ have accounts in your Shortcut workspace.
     sys.exit(1)
 
 
-def main():
+def main(argv):
+    # Support -h/--help
+    parser.parse_args(argv[1:])
     """
-    Script entry-point for importing a Pivotal Tracker CSV export into a Shortcut workspace.
+    Script entry-point for initializing an import of Pivotal data into Shortcut.
+
+    Once initialized, use pivotal_import.py to see a dry-run and perform the import.
     """
     cfg = load_config()
     populate_states_csv(cfg["states_csv_file"], cfg["workflow_id"])
     populate_users_csv(cfg["users_csv_file"], cfg["pt_csv_file"])
     print(
-        f"""[Success] Pivotal Tracker export and local configuration have been validated.
-          Identified %d epics, %d stories, %d iterations, and %d labels to import.
-
-[Next] Run 'python pivotal_import.py' to see a dry-run or to perform the actual import into Shortcut."""
-        % (0, 0, 0, 0)
+        "[Success] Pivotal Tracker export and local configuration have been validated."
     )
     return 0
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(main(sys.argv))
