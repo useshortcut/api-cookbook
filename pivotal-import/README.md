@@ -21,7 +21,18 @@ If `pivotal_import.py` completes without errors, you can run the script with the
 
 # Known Limitations
 
-This script has some limitations you should know about. Most prominently, it will not redirect any URLs in the description of your Pivotal stories or epics. Also, as of this version, file attachments (including Google Drive attachments), project history, and story history are not imported into Shortcut in any way.
+This script has some limitations you should know about:
+
+- **No story reviewers:** Pivotal story reviewers are not imported.
+- **No story priority:** Pivotal story priorities are not imported.
+- **No story blockers:** Pivotal story blockers (the relationships between stories) are not imported.
+- **No iterations:** Pivotal iterations are not imported.
+- **Epics are imported as unstarted:** Imported epics are set to an unstarted "Todo" state.
+- **No redirects:** The URLs in the descriptions and comments of your Pivotal stories/epics are not rewritten to point to imported Shortcut stories/epics; they remain unchanged.
+- **No attachments:** The attachments (including Google Drive attachments) are not imported into Shortcut.
+- **No history:** Project history is not imported into Shortcut.
+
+A future version of this importer may fill some of the above gaps.
 
 # Customization
 
