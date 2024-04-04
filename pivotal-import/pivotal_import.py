@@ -93,10 +93,6 @@ def parse_labels(labels: str):
     return [{"name": label} for label in re.split(r"\s*,\s*", labels)]
 
 
-def split_by_comma(owners: str):
-    return re.split(r"[,\s]", owners)
-
-
 col_map = {
     "id": "external_id",
     "title": "name",
@@ -111,7 +107,6 @@ col_map = {
     "accepted at": ("accepted_at", parse_date),
     "deadline": ("deadline", parse_date),
     "requested by": "requester",
-    "owned by": ("owners", split_by_comma),
 }
 
 nested_col_map = {
@@ -120,6 +115,7 @@ nested_col_map = {
     "task": "task_titles",
     "task status": "task_states",
     "comment": ("comments", parse_comment),
+    "owned by": "owners",
 }
 
 # These are the keys that are currently correctly populated in the

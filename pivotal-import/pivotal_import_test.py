@@ -46,6 +46,20 @@ def test_parse_labels():
     )
 
 
+def test_parse_owners():
+    assert {
+        "owners": [
+            "Amy Williams",
+            "Daniel McFadden",
+        ]
+    } == parse_row(
+        # purposefully using different variations of comma separated
+        # labels
+        ["Amy Williams", "Daniel McFadden"],
+        ["owned by", "owned by"],
+    )
+
+
 def test_build_story_with_comments():
     ctx = create_test_ctx()
     d = {
