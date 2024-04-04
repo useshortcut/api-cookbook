@@ -4,10 +4,8 @@
 # See README.md for prerequisites, setup, and usage.
 import argparse
 import csv
-import logging
 import re
 import sys
-from datetime import datetime
 from collections import Counter
 
 from lib import *
@@ -180,7 +178,7 @@ def parse_row(row, headers):
 
 def build_entity(ctx, d):
     """Process the row to generate the payload needed to create the entity in Shortcut."""
-    # ensure import label
+    # ensure Shortcut entities have a Label that identifies this import
     d.setdefault("labels", []).append({"name": PIVOTAL_TO_SHORTCUT_LABEL})
 
     # reconcile entity types
@@ -204,7 +202,7 @@ def build_entity(ctx, d):
     elif "comments" in d:
         del d["comments"]
 
-    # releases become chores
+    # releases become Shortcut Stories of type "chore"
     if d["story_type"] == "release":
         d["story_type"] = "chore"
         d.setdefault("labels", []).append({"name": PIVOTAL_RELEASE_TYPE_LABEL})

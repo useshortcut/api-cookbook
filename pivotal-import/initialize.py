@@ -14,7 +14,7 @@ which are detailed here at the time of this writing:
 https://www.pivotaltracker.com/help/articles/story_states/
 """
 
-from collections.abc import Mapping
+import argparse
 import csv
 import difflib
 import logging
@@ -23,11 +23,17 @@ import sys
 
 from lib import *
 
+# CLI arguments
+parser = argparse.ArgumentParser(
+    description="""Run this script with no arguments to configure how story state and users will be mapped from Pivotal to Shortcut.""",
+)
+
 # Logging
 logger = logging.getLogger(__name__)
 
 
-# Mapping of Pivotal Tracker story states to Shortcut ones
+# Pivotal Tracker story states, including "planned" which is used
+# if automatic Pivotal iterations are disabled.
 pt_all_states = [
     "unscheduled",
     "unstarted",
@@ -277,6 +283,9 @@ def extract_pt_users_from_row(row, header):
 
 
 def extract_pt_users(pt_csv_file):
+    """
+    Given the Pivotal export CSV, return a unique set of all users found in all rows.
+    """
     pt_users = set()
     with open(pt_csv_file) as csvfile:
         reader = csv.reader(csvfile)
@@ -286,15 +295,17 @@ def extract_pt_users(pt_csv_file):
     return pt_users
 
 
-def _unspace(s):
-    return s.replace(" ", "")
-
-
 def _casefold_then_remove_spaces_and_specials(s):
     return re.sub(r"[\W_]", "", s.casefold())
 
 
 def find_sc_user_from_pt_user(pt_user, user_map):
+    """
+    Return the Shortcut user that maps to the given Pivotal user.
+    Compares full names (since that is was the Pivotal export contains).
+
+    Return None if a suitable Shortcut user could not be identified.
+    """
     simplified_user = _casefold_then_remove_spaces_and_specials(pt_user)
 
     user_info = user_map.get(simplified_user)
@@ -395,22 +406,22 @@ have accounts in your Shortcut workspace.
     sys.exit(1)
 
 
-def main():
+def main(argv):
+    # Support -h/--help
+    parser.parse_args(argv[1:])
     """
-    Script entry-point for importing a Pivotal Tracker CSV export into a Shortcut workspace.
+    Script entry-point for initializing an import of Pivotal data into Shortcut.
+
+    Once initialized, use pivotal_import.py to see a dry-run and perform the import.
     """
     cfg = load_config()
     populate_states_csv(cfg["states_csv_file"], cfg["workflow_id"])
     populate_users_csv(cfg["users_csv_file"], cfg["pt_csv_file"])
     print(
-        f"""[Success] Pivotal Tracker export and local configuration have been validated.
-          Identified %d epics, %d stories, %d iterations, and %d labels to import.
-
-[Next] Run 'python pivotal_import.py' to see a dry-run or to perform the actual import into Shortcut."""
-        % (0, 0, 0, 0)
+        "[Success] Pivotal Tracker export and local configuration have been validated."
     )
     return 0
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(main(sys.argv))
