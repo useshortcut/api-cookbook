@@ -5,13 +5,15 @@ This script imports a Pivotal Tracker CSV export file into a Shortcut workspace.
 In order to run this, you will require a Pivotal account and the ability to sign up for a Shortcut account, as well as a working internet connection.
 
 1. Sign up for a Shortcut account at [https://www.shortcut.com/signup](https://www.shortcut.com/signup).
+   - **NOTE:** Do not run this importer against an existing Shortcut workspace that already has data you wish to keep.
 1. [Create an API token](https://app.shortcut.com/settings/account/api-tokens) and [export it into your environment](../Authentication.md).
 1. Export your Pivotal project to CSV and save the file to `data/pivotal_export.csv`.
 1. Create/Invite all users you want to reference into your Shortcut workspace.
-1. Run `./setup` to install Python dependencies.
-1. Run [`initialize.py`](initialize.py) to initialize `data/users.csv` and `data/states.csv`.
-1. Ensure there is exactly one Shortcut user mapped for all referenced users in `data/users.csv`.
-1. Ensure there is exactly one Shortcut workflow state mapped for all referenced Pivotal states in `data/states.csv`.
+   - **NOTE:** If you're not on a Shortcut trial, please [reach out to our support team](https://help.shortcut.com/hc/en-us/requests/new) before running this import to make sure you're not billed for users that you want to be disabled after import.
+1. Run `make import` to perform a dry-run of the import.
+   - Follow instructions printed to the console to ensure the mapping of Pivotal and Shortcut data is complete and correct.
+   - You can review `data/states.csv` and `data/users.csv` to review these mappings.
+1. If the dry-run output looks correct, you can apply the import to your Shortcut workspace by running `make import-apply`
 
 # Operation
 
@@ -40,7 +42,7 @@ Please check [currently open issues](https://github.com/useshortcut/api-cookbook
 
 # Customization
 
-It's possible that this tool does not do exactly what you'd like it to - if that's the case, we have tried to make it straightforward to modify. Make reference to the [Shortcut API](https://developer.shortcut.com/api/rest/v3) and the other examples in this cookbook, and please let us know in [our Discord](https://discord.com/channels/887801174496006216/887831741019070534) what you're doing with it!
+It's possible that this tool does not do exactly what you'd like it to - if that's the case, we have tried to make it straightforward to modify. Make reference to the [Shortcut API](https://developer.shortcut.com/api/rest/v3) and the other examples in this cookbook, and please let us know in [our Discord](https://discord.gg/shortcut-community-887801174496006216) what you're doing with it!
 
 # Contributing
 
