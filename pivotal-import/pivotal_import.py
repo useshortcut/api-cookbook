@@ -4,10 +4,8 @@
 # See README.md for prerequisites, setup, and usage.
 import argparse
 import csv
-import logging
 import re
 import sys
-from datetime import datetime
 from collections import Counter
 
 from lib import *
