@@ -1,5 +1,5 @@
 name: 🐞 Bug Report
-description: File a new bug report
+description: File a new bug report for this project
 title: '[Bug]: <title>'
 labels: [bug, needs-triage]
 body:
@@ -9,16 +9,16 @@ body:
   - type: checkboxes
     attributes:
       label: 'Do I have the most recent api-cookbook code?'
-      description: 'Please ensure you have pulled the latest code from the main branch of https://github.com/useshortcut/app-cookbook'
+      description: 'Please ensure you have pulled the latest code from the `main` branch of https://github.com/useshortcut/app-cookbook'
       options:
-      - label: 'I am using the most recent available api-cookbook code.'
+      - label: 'I am using the latest code available on the `main` branch of the api-cookbook repo.'
         required: true
   - type: checkboxes
     attributes:
       label: 'Is there an existing issue for this?'
-      description: 'Please [search :mag: the issues](https://github.com/useshortcut/app-cookbook/issues) to check if this bug has already been reported.'
+      description: 'Please [search :mag: the issues](https://github.com/useshortcut/api-cookbook/issues) to check if this bug has already been reported.'
       options:
-      - label: 'I have searched the existing issues'
+      - label: 'I have searched the existing issues.'
         required: true
   - type: textarea
     attributes:
@@ -60,7 +60,7 @@ body:
     attributes:
       label: Further Information
       description: |
-        Links? References? Anything that will give us more context about the issue you are encountering!
+        Links or references? Anything that will give us more context about the issue you are encountering is greatly appreciated!
 
         _Tip: You can attach images or log files by clicking this area to highlight it and then dragging files in._
     validations:
@@ -68,4 +68,3 @@ body:
   - type: markdown
     attributes:
       value: ':stop_sign: _For Shortcut support questions, please visit our [help center](https://help.shortcut.com) instead._'
-
