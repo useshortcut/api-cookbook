@@ -170,8 +170,19 @@ def populate_config():
         logger.debug(
             "Skipping populating config.json, because the file already exists."
         )
-        with open("config.json", "r") as f:
+        return read_config_from_disk("config.json")
+
+
+def read_config_from_disk(cfg_file):
+    try:
+        with open(cfg_file, "r") as f:
             return json.load(f)
+    except json.decoder.JSONDecodeError as err:
+        printerr(
+            f"[Problem] Tried to parse {cfg_file} as JSON but encountered an error:"
+        )
+        printerr(f"{err}")
+        return None
 
 
 def validate_environment():

@@ -1,4 +1,29 @@
+import tempfile
 from lib import *
+
+
+def test_read_config_from_disk_ok():
+    with tempfile.NamedTemporaryFile() as fp:
+        fp.write(b'{ "workflow_id": 1234 }')
+        fp.seek(0)
+        assert read_config_from_disk(fp.name) == {"workflow_id": 1234}
+        fp.close()
+
+
+def test_read_config_from_disk_empty():
+    with tempfile.NamedTemporaryFile() as fp:
+        fp.write(b"")
+        fp.seek(0)
+        assert read_config_from_disk(fp.name) == None
+        fp.close()
+
+
+def test_read_config_from_disk_malformed():
+    with tempfile.NamedTemporaryFile() as fp:
+        fp.write(b"{ abc }")
+        fp.seek(0)
+        assert read_config_from_disk(fp.name) == None
+        fp.close()
 
 
 def test_parse_comment_good():
