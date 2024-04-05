@@ -90,13 +90,53 @@ def printerr(s):
 
 
 # File locations
-shortcut_workflows_csv = "data/shortcut_workflows.csv"
-shortcut_users_csv = "data/shortcut_users.csv"
 emails_to_invite = "data/emails_to_invite.csv"
+shortcut_custom_fields_csv = "data/shortcut_custom_fields.csv"
 shortcut_imported_entities_csv = "data/shortcut_imported_entities.csv"
+shortcut_users_csv = "data/shortcut_users.csv"
+shortcut_workflows_csv = "data/shortcut_workflows.csv"
 
 
-def print_workflow_tree(workflows):
+def print_custom_fields_tree(custom_fields):
+    """
+    Print and write to `shortcut_custom_fields_csv` the content of all Custom Fields
+    in the user's Shortcut workspace, including all Custom Field Values and their IDs.
+    """
+    output_lines = []
+    with open(shortcut_custom_fields_csv, "w") as f:
+        writer = csv.DictWriter(
+            f,
+            [
+                "custom_field_name",
+                "custom_field_id",
+                "custom_field_value_name",
+                "custom_field_value_id",
+            ],
+        )
+        writer.writeheader()
+        for custom_field in custom_fields:
+            if custom_field["enabled"]:
+                output_lines.append(
+                    'Custom Field {id} : "{name}"'.format_map(custom_field)
+                )
+                for custom_field_value in custom_field["values"]:
+                    writer.writerow(
+                        {
+                            "custom_field_name": custom_field["name"],
+                            "custom_field_id": custom_field["id"],
+                            "custom_field_value_name": custom_field_value["value"],
+                            "custom_field_value_id": custom_field_value["id"],
+                        }
+                    )
+                    output_lines.append(
+                        '    Custom Field Value {id} : "{value}"'.format_map(
+                            custom_field_value
+                        )
+                    )
+    printerr("\n".join(output_lines))
+
+
+def print_workflows_tree(workflows):
     """
     Print and write to `shortcut_workflows_csv` the content of all Workflows
     in the user's Shortcut workspace, including all Workflow States and their IDs.
@@ -132,6 +172,34 @@ def print_workflow_tree(workflows):
     printerr("\n".join(output_lines))
 
 
+def default_priority_custom_field_id():
+    """
+    Shortcut Workspaces have a built-in "Priority" Custom Field. However,
+    users are permitted to disable this in their workspace.
+
+    Return the ID for the Priority Custom Field if it is enabled, else
+    return None.
+    """
+    priority_custom_field_id = None
+    custom_fields = sc_get("/custom-fields")
+    for custom_field in custom_fields:
+        if custom_field["canonical_name"] == "priority" and custom_field["enabled"]:
+            priority_custom_field_id = custom_field["id"]
+
+    if priority_custom_field_id is None:
+        printerr(
+            f"""[Problem] The Priority custom field is disabled or not found in your Shortcut workspace. Please:
+ 1. Review the Shortcut Custom Fields printed below (also written to {shortcut_custom_fields_csv} for reference).
+ 2. Copy the UUID of your desired Custom Field (custom_field_id column in the CSV).
+ 3. Paste it as the "priority_custom_field_id" value in your config.json file.
+ 4. Rerun initialize.py."""
+        )
+        print_custom_fields_tree(custom_fields)
+        return None
+    else:
+        return priority_custom_field_id
+
+
 def default_workflow_id():
     """
     Determine the default Shortcut Workflow, or provide instructions to the user
@@ -147,13 +215,13 @@ def default_workflow_id():
     if workflow_id is None:
         printerr(
             f"""[Problem] Failed to find the default Story Workflow in your Shortcut workspace, please:
-  1. Review the Shortcut Workflows printed below (also written to {shortcut_workflows_csv} for reference)
-  2. Copy the numeric ID of your desired Workflow below
+  1. Review the Shortcut Workflows printed below (also written to {shortcut_workflows_csv} for reference).
+  2. Copy the numeric ID of your desired Workflow (workflow_id column in the CSV).
   3. Paste it as the "workflow_id" value in your config.json file.
   4. Rerun initialize.py.
 """
         )
-        print_workflow_tree(workflows)
+        print_workflows_tree(workflows)
         return None
     else:
         return workflow_id
@@ -169,14 +237,18 @@ def populate_config():
     try:
         with open("config.json", "x", encoding="utf-8") as f:
             workflow_id = default_workflow_id()
+            priority_custom_field_id = default_priority_custom_field_id()
             data = {
                 "pt_csv_file": "data/pivotal_export.csv",
+                "priorities_csv_file": "data/priorities.csv",
+                "priority_custom_field_id": priority_custom_field_id,
                 "states_csv_file": "data/states.csv",
                 "users_csv_file": "data/users.csv",
                 "workflow_id": workflow_id,
             }
             json.dump(data, f, indent=2)
-            if workflow_id is None:
+            # Errors are printed to the console in the default_* functions above
+            if workflow_id is None or priority_custom_field_id is None:
                 sys.exit(1)
             return data
     except FileExistsError:

@@ -45,6 +45,139 @@ pt_all_states = [
     "accepted",
 ]
 
+# Pivotal Tracker story priorities. The "None" priority is not mapped
+# because the importer interprets that as "do not set a Priority".
+pt_all_priorities = [
+    "p0 - critical",
+    "p1 - high",
+    "p2 - medium",
+    "p3 - low",
+]
+
+
+def populate_priorities_csv(priorities_csv_file, priority_custom_field_id):
+    """
+    Writes a CSV file mapping Pivotal Tracker's 5 story priorities to appropriate
+    Shortcut Custom Field Values.
+
+    Shortcut workspaces are configured with a Custom Field called "Priority" by default
+    that maps well to Pivotal's priority values. This is used if it is enabled in the
+    workspace.
+
+    If the default Priority Custom Field is disabled, then empty entries will be placed in the
+    priorities_csv_file; all of the Custom Fields in your workspace will be written to
+    data/shortcut_custom_fields.csv so that you can review them, and then you can manually
+    paste the Custom Field Value IDs into the priorities_csv_file to specify the mapping of
+    Pivotal priority to Shortcut Custom Field Value that you want.
+    """
+    try:
+        with open(priorities_csv_file, "x") as f:
+            pt_priority_mapping = pt_priority_mapping_for_custom_field(
+                priority_custom_field_id
+            )
+            unmapped_pt_priorities = []
+            writer = csv.DictWriter(
+                f,
+                [
+                    "pt_priority",
+                    "shortcut_custom_field_value_id",
+                    "shortcut_custom_field_value_name",
+                ],
+            )
+            writer.writeheader()
+            for pt_priority in pt_all_priorities:
+                mapping = pt_priority_mapping[pt_priority]
+                if mapping is None:
+                    unmapped_pt_priorities.append(pt_priority)
+                    writer.writerow(
+                        {
+                            "pt_priority": pt_priority,
+                            "shortcut_custom_field_value_id": "",
+                            "shortcut_custom_field_value_name": "",
+                        }
+                    )
+                else:
+                    writer.writerow(mapping)
+            if unmapped_pt_priorities:
+                exit_unmapped_pt_priorities(priorities_csv_file, unmapped_pt_priorities)
+    except FileExistsError:
+        unmapped_pt_priorities = []
+        with open(priorities_csv_file, "r", newline="") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                if not row["shortcut_custom_field_value_id"]:
+                    unmapped_pt_priorities.append(row["pt_priority"])
+        if unmapped_pt_priorities:
+            exit_unmapped_pt_priorities(priorities_csv_file, unmapped_pt_priorities)
+
+
+def exit_unmapped_pt_priorities(priorities_csv_file, unmapped_pt_priorities):
+    """
+    If there are Pivotal Tracker priorities for which a Shortcut Custom Field Value
+    mapping could not be determined, notify the user of this and provide
+    instructions for rectifying the problem.
+    """
+    msg = "\n  - ".join(f'"{s}"' for s in unmapped_pt_priorities)
+    printerr(
+        f"[Problem] These Pivotal Tracker priorities couldn't be automatically mapped to Shortcut Custom Field Values:\n  - {msg}\n"
+    )
+    printerr(
+        f"""To resolve this, please:
+1. Review the Shortcut Custom Fields printed below (also written to {shortcut_custom_fields_csv} for reference)
+2. Copy the UUIDs of Custom Field Values (custom_field_value_id column in the CSV) that you want to map to Pivotal priorities where there are blanks in your {priorities_csv_file} file.
+3. Save your {priorities_csv_file} file and rerun initalize.py to validate it.
+"""
+    )
+    custom_fields = sc_get("/custom-fields")
+    print_custom_fields_tree(custom_fields)
+    sys.exit(1)
+
+
+def pt_priority_mapping_for_custom_field(priority_custom_field_id):
+    """
+    Returns a dict mapping Pivotal Tracker story priorities to Shortcut Custom Field Values.
+    If no mapping can be determined automatically for a particular Pivotal Tracker
+    priority, then it is mapped to `None`.
+
+    Instead of relying on editable names like we must for Shortcut Workflow States,
+    Custom Field Values have a `position`, and for the built-in Priority Custom Field,
+    those positions are fixed.
+    """
+    custom_field = sc_get(f"/custom-fields/{priority_custom_field_id}")
+    pt_priority_mapping = {k: None for k in pt_all_priorities}
+    for custom_field_value in custom_field["values"]:
+        match (custom_field_value["position"]):
+            case 0:
+                pt_priority_mapping["p0 - critical"] = {
+                    "pt_priority": "p0 - critical",
+                    "shortcut_custom_field_value_id": custom_field_value["id"],
+                    # Default is "Highest"
+                    "shortcut_custom_field_value_name": custom_field_value["value"],
+                }
+            case 1:
+                pt_priority_mapping["p1 - high"] = {
+                    "pt_priority": "p1 - high",
+                    "shortcut_custom_field_value_id": custom_field_value["id"],
+                    # Default is "High"
+                    "shortcut_custom_field_value_name": custom_field_value["value"],
+                }
+            case 2:
+                pt_priority_mapping["p2 - medium"] = {
+                    "pt_priority": "p2 - medium",
+                    "shortcut_custom_field_value_id": custom_field_value["id"],
+                    # Default is "Medium"
+                    "shortcut_custom_field_value_name": custom_field_value["value"],
+                }
+            case 3:
+                pt_priority_mapping["p3 - low"] = {
+                    "pt_priority": "p3 - low",
+                    "shortcut_custom_field_value_id": custom_field_value["id"],
+                    # Default is "Low"
+                    "shortcut_custom_field_value_name": custom_field_value["value"],
+                }
+
+    return pt_priority_mapping
+
 
 def populate_states_csv(states_csv_file, workflow_id):
     """
@@ -96,19 +229,19 @@ def exit_unmapped_pt_states(states_csv_file, unmapped_pt_states):
     mapping could not be determined, notify the user of this and provide
     instructions for rectifying the problem.
     """
-    msg = "\n  - ".join(unmapped_pt_states)
+    msg = "\n  - ".join(f'"{s}"' for s in unmapped_pt_states)
     printerr(
         f"[Problem] These Pivotal Tracker states couldn't be automatically mapped to Shortcut workflow states:\n  - {msg}\n"
     )
     printerr(
         f"""To resolve this, please:
 1. Review the Shortcut Workflow States printed below (also written to {shortcut_workflows_csv} for reference)
-2. Copy the numeric IDs of Workflow States you want to map to Pivotal states where there are blanks in your {states_csv_file} file.
+2. Copy the numeric IDs of Workflow States (workflow_state_id column in the CSV) that you want to map to Pivotal states where there are blanks in your {states_csv_file} file.
 3. Save your {states_csv_file} file and rerun initalize.py to validate it.
 """
     )
     workflows = sc_get("/workflows")
-    print_workflow_tree(workflows)
+    print_workflows_tree(workflows)
     sys.exit(1)
 
 
@@ -418,6 +551,7 @@ def main(argv):
         logging.basicConfig(level=logging.DEBUG)
 
     cfg = load_config()
+    populate_priorities_csv(cfg["priorities_csv_file"], cfg["priority_custom_field_id"])
     populate_states_csv(cfg["states_csv_file"], cfg["workflow_id"])
     populate_users_csv(cfg["users_csv_file"], cfg["pt_csv_file"])
     print(
