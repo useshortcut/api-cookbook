@@ -29,7 +29,6 @@ PIVOTAL_TO_SHORTCUT_LABEL = "pivotal->shortcut"
 PIVOTAL_RELEASE_TYPE_LABEL = "pivotal-release"
 
 
-
 def sc_creator(items):
     """Create Shortcut entities utilizing bulk APIs whenever possible.
 
