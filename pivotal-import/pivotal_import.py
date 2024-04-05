@@ -29,7 +29,6 @@ PIVOTAL_TO_SHORTCUT_LABEL = "pivotal->shortcut"
 PIVOTAL_RELEASE_TYPE_LABEL = "pivotal-release"
 
 
-
 def sc_creator(items):
     """Create Shortcut entities utilizing bulk APIs whenever possible.
 
@@ -37,31 +36,36 @@ def sc_creator(items):
     and `entity`. `type` must be either story or epic. `entity` must
     be the payload that is sent to the Shortcut API.
 
-    Returns a list of created entity ids in order.
+    Returns back the list of items with two new keys:
+    - `imported_id`: the id of the entity that was created
+    - `imported_entity`: the full entity that was created
 
     """
-    stories = []
+    batch_stories = []
     ids = []
 
     def create_stories(stories):
-        res = sc_post("/stories/bulk", {"stories": stories})
-        ids.extend([s["id"] for s in res])
-        stories.clear()
+        entities = [s["entity"] for s in stories]
+        created_entities = sc_post("/stories/bulk", {"stories": entities})
+        for created, story in zip(created_entities, stories):
+            story["imported_entity"] = created
+        return stories
 
     for item in items:
         if item["type"] == "story":
-            stories.append(item["entity"])
+            batch_stories.append(item)
         else:
             res = sc_post("/epics", item["entity"])
-            ids.append(res["id"])
+            item["imported_entity"] = res
 
-        if len(stories) >= BATCH_SIZE:
-            create_stories(stories)
+        if len(batch_stories) >= BATCH_SIZE:
+            create_stories(batch_stories)
+            batch_stories.clear()
 
-    if stories:
-        create_stories(stories)
+    if batch_stories:
+        create_stories(batch_stories)
 
-    return ids
+    return items
 
 
 def url_to_external_links(url):
@@ -259,16 +263,33 @@ def load_users(csv_file):
 
 def print_stats(stats):
     print("Import stats")
+    plurals = {"story": "stories", "epic": "epics"}
     for k, v in stats.items():
-        print(f"  - {k.capitalize()}s : {v}")
+        plural = plurals.get(k, k + "s")
+        print(f"  - {plural.capitalize()} : {v}")
 
 
-def mock_emitter(items):
-    ret = []
-    for ix, item in enumerate(items):
-        print("Creating {} {}".format(ix, item["entity"]["name"]))
-        ret.append(ix)
-    return ret
+def get_mock_emitter():
+    _mock_global_id = 0
+
+    def _get_next_id():
+        nonlocal _mock_global_id
+        id = _mock_global_id
+        _mock_global_id += 1
+        return id
+
+    def mock_emitter(items):
+        for ix, item in enumerate(items):
+            entity_id = _get_next_id()
+            created_entity = item["entity"].copy()
+            created_entity["id"] = entity_id
+            created_entity["entity_type"] = item["type"]
+            created_entity["app_url"] = f"https://example.com/entity/{entity_id}"
+            item["imported_entity"] = created_entity
+            print("Creating {} {}".format(entity_id, item["entity"]["name"]))
+        return items
+
+    return mock_emitter
 
 
 class EntityCollector:
@@ -280,10 +301,12 @@ class EntityCollector:
     entities.
     """
 
-    def __init__(self, emitter=mock_emitter):
+    def __init__(self, emitter=None):
+        _mock_global_id = 0
         self.epics = []
         self.stories = []
-
+        if emitter is None:
+            emitter = get_mock_emitter()
         self.emitter = emitter
 
     def collect(self, item):
@@ -301,15 +324,15 @@ class EntityCollector:
 
     def commit(self):
         # create all the epics and find their associated epic ids
-        epic_ids = self.emitter(self.epics)
+        self.epics = self.emitter(self.epics)
 
-        logger.debug("Finished epics {}".format(epic_ids))
+        logger.info("Finished creating %d epics", len(self.epics))
         epic_label_map = {}
-        for epic_id, epic in zip(epic_ids, self.epics):
+        for epic in self.epics:
             for label in epic["entity"]["labels"]:
                 label_name = label["name"]
                 if label_name is not PIVOTAL_TO_SHORTCUT_LABEL:
-                    epic_label_map[label_name] = epic_id
+                    epic_label_map[label_name] = epic["imported_entity"]["id"]
 
         # update all the stories with the appropriate epic ids
         for story in self.stories:
@@ -320,7 +343,20 @@ class EntityCollector:
                     story["entity"]["epic_id"] = epic_id
 
         # create all the stories
-        self.emitter(self.stories)
+        self.stories = self.emitter(self.stories)
+        logger.info("Finished creating %d stories", len(self.stories))
+
+        # Aggregate all the created stories and epics and labels into a list of maps
+        created_entities = []
+        created_set = set()
+        for item in self.epics + self.stories:
+            # add item
+            entity = item["imported_entity"]
+            if entity["id"] not in created_set:
+                created_entities.append(entity)
+                created_set.add(entity["id"])
+
+        return created_entities
 
 
 def process_pt_csv_export(ctx, pt_csv_file, entity_collector):
@@ -338,6 +374,21 @@ def process_pt_csv_export(ctx, pt_csv_file, entity_collector):
     print_stats(stats)
 
 
+def write_created_entities_csv(created_entities):
+    with open(shortcut_imported_entities_csv, "w") as f:
+        writer = csv.DictWriter(f, ["id", "type", "name", "url"])
+        writer.writeheader()
+        for entity in created_entities:
+            writer.writerow(
+                {
+                    "id": entity["id"],
+                    "name": entity["name"],
+                    "type": entity["entity_type"],
+                    "url": entity["app_url"],
+                }
+            )
+
+
 def build_ctx(cfg):
     ctx = {
         "workflow_config": load_workflow_states(cfg["states_csv_file"]),
@@ -351,7 +402,7 @@ def main(argv):
     args = parser.parse_args(argv[1:])
     if args.debug:
         logging.basicConfig(level=logging.DEBUG)
-    emitter = mock_emitter
+    emitter = None
     if args.apply:
         emitter = sc_creator
 
@@ -361,7 +412,8 @@ def main(argv):
     ctx = build_ctx(cfg)
     process_pt_csv_export(ctx, cfg["pt_csv_file"], entity_collector)
 
-    entity_collector.commit()
+    created_entities = entity_collector.commit()
+    write_created_entities_csv(created_entities)
 
     return 0
 

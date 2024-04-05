@@ -80,6 +80,7 @@ def printerr(s):
 shortcut_workflows_csv = "data/shortcut_workflows.csv"
 shortcut_users_csv = "data/shortcut_users.csv"
 emails_to_invite = "data/emails_to_invite.csv"
+shortcut_imported_entities_csv = "data/shortcut_imported_entities.csv"
 
 
 def print_workflow_tree(workflows):

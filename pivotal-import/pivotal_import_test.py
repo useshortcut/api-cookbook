@@ -203,35 +203,38 @@ def test_build_epic():
 
 
 def test_entity_collector():
-    created = []
-
-    def mock_emitter(items):
-        created.extend([i["entity"] for i in items])
-        return range(len(items))
-
-    entity_collector = EntityCollector(mock_emitter)
+    entity_collector = EntityCollector()
 
     entity_collector.collect({"type": "story", "entity": {"name": "A Story 1"}})
     entity_collector.collect({"type": "story", "entity": {"name": "A Story 2"}})
     entity_collector.collect({"type": "story", "entity": {"name": "A Story 3"}})
 
-    entity_collector.commit()
+    created = entity_collector.commit()
 
     assert [
-        {"name": "A Story 1"},
-        {"name": "A Story 2"},
-        {"name": "A Story 3"},
+        {
+            "name": "A Story 1",
+            "id": 0,
+            "app_url": "https://example.com/entity/0",
+            "entity_type": "story",
+        },
+        {
+            "name": "A Story 2",
+            "id": 1,
+            "app_url": "https://example.com/entity/1",
+            "entity_type": "story",
+        },
+        {
+            "name": "A Story 3",
+            "id": 2,
+            "app_url": "https://example.com/entity/2",
+            "entity_type": "story",
+        },
     ] == created
 
 
 def test_entity_collector_with_epics():
-    created = []
-
-    def mock_emitter(items):
-        created.extend([i["entity"] for i in items])
-        return range(len(items))
-
-    entity_collector = EntityCollector(mock_emitter)
+    entity_collector = EntityCollector()
 
     # Given: a sequence of stories and epics
     entity_collector.collect({"type": "story", "entity": {"name": "A Story 1"}})
@@ -256,16 +259,45 @@ def test_entity_collector_with_epics():
     entity_collector.collect({"type": "story", "entity": {"name": "A Story 3"}})
 
     # When: the entities are commited/crread
-    entity_collector.commit()
+    created = entity_collector.commit()
 
     # Then: All epics are created before the stories
     #     and the story with the same label as the epic is created with the appropriate epic id
     assert [
         # epic id =  0
-        {"name": "An Epic", "labels": [{"name": "my-epic-label"}]},
+        {
+            "name": "An Epic",
+            "labels": [{"name": "my-epic-label"}],
+            "id": 0,
+            "app_url": "https://example.com/entity/0",
+            "entity_type": "epic",
+        },
         # epic id = 1
-        {"name": "Another Epic", "labels": [{"name": "my-epic-label-2"}]},
-        {"name": "A Story 1"},
-        {"name": "A Story 2", "epic_id": 1, "labels": [{"name": "my-epic-label-2"}]},
-        {"name": "A Story 3"},
+        {
+            "name": "Another Epic",
+            "labels": [{"name": "my-epic-label-2"}],
+            "id": 1,
+            "app_url": "https://example.com/entity/1",
+            "entity_type": "epic",
+        },
+        {
+            "name": "A Story 1",
+            "id": 2,
+            "app_url": "https://example.com/entity/2",
+            "entity_type": "story",
+        },
+        {
+            "name": "A Story 2",
+            "epic_id": 1,
+            "labels": [{"name": "my-epic-label-2"}],
+            "id": 3,
+            "app_url": "https://example.com/entity/3",
+            "entity_type": "story",
+        },
+        {
+            "name": "A Story 3",
+            "id": 4,
+            "app_url": "https://example.com/entity/4",
+            "entity_type": "story",
+        },
     ] == created
