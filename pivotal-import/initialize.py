@@ -41,6 +41,7 @@ pt_all_states = [
     "planned",
     "started",
     "finished",
+    "delivered",
     "rejected",
     "accepted",
 ]
@@ -255,45 +256,50 @@ def pt_state_mapping_for_workflow(workflow_id):
     pt_state_mapping = {k: None for k in pt_all_states}
     for wf_state in workflow["states"]:
         match (wf_state["type"], wf_state["name"]):
-            case ("unstarted", "Unscheduled"):
+            case ("backlog", "Backlog"):
                 pt_state_mapping["unscheduled"] = {
                     "pt_state": "unscheduled",
                     "shortcut_state_id": wf_state["id"],
-                    "shortcut_state_name": "Unscheduled",
+                    "shortcut_state_name": wf_state["name"],
                 }
-            case ("unstarted", "Ready for Development"):
+            case ("unstarted", "To Do"):
                 pt_state_mapping["unstarted"] = {
                     "pt_state": "unstarted",
                     "shortcut_state_id": wf_state["id"],
-                    "shortcut_state_name": "Ready for Development",
+                    "shortcut_state_name": wf_state["name"],
                 }
                 pt_state_mapping["planned"] = {
                     "pt_state": "planned",
                     "shortcut_state_id": wf_state["id"],
-                    "shortcut_state_name": "Ready for Development",
+                    "shortcut_state_name": wf_state["name"],
                 }
-            case ("started", "In Development"):
+            case ("started", "In Progress"):
                 pt_state_mapping["started"] = {
                     "pt_state": "started",
                     "shortcut_state_id": wf_state["id"],
-                    "shortcut_state_name": "In Development",
+                    "shortcut_state_name": wf_state["name"],
                 }
-            case ("started", "Ready for Review"):
+            case ("started", "In Review"):
                 pt_state_mapping["finished"] = {
                     "pt_state": "finished",
                     "shortcut_state_id": wf_state["id"],
-                    "shortcut_state_name": "Ready for Review",
+                    "shortcut_state_name": wf_state["name"],
                 }
-            case ("done", "Completed"):
+                pt_state_mapping["delivered"] = {
+                    "pt_state": "delivered",
+                    "shortcut_state_id": wf_state["id"],
+                    "shortcut_state_name": wf_state["name"],
+                }
+            case ("done", "Done"):
                 pt_state_mapping["rejected"] = {
                     "pt_state": "rejected",
                     "shortcut_state_id": wf_state["id"],
-                    "shortcut_state_name": "Completed",
+                    "shortcut_state_name": wf_state["name"],
                 }
                 pt_state_mapping["accepted"] = {
                     "pt_state": "accepted",
                     "shortcut_state_id": wf_state["id"],
-                    "shortcut_state_name": "Completed",
+                    "shortcut_state_name": wf_state["name"],
                 }
 
     return pt_state_mapping
