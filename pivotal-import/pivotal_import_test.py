@@ -80,7 +80,10 @@ def test_build_story_with_comments():
                 {"text": "Comment 2"},
                 {"text": "Comment 3"},
             ],
-            "labels": [{"name": PIVOTAL_TO_SHORTCUT_LABEL}],
+            "labels": [
+                {"name": PIVOTAL_TO_SHORTCUT_LABEL},
+                {"name": PIVOTAL_TO_SHORTCUT_RUN_LABEL},
+            ],
         },
         "parsed_row": d,
     } == build_entity(ctx, d)
@@ -105,7 +108,10 @@ def test_build_story_workflow_mapping():
             "entity": {
                 "story_type": "feature",
                 "workflow_state_id": ctx["workflow_config"]["unstarted"],
-                "labels": [{"name": PIVOTAL_TO_SHORTCUT_LABEL}],
+                "labels": [
+                    {"name": PIVOTAL_TO_SHORTCUT_LABEL},
+                    {"name": PIVOTAL_TO_SHORTCUT_RUN_LABEL},
+                ],
             },
             "parsed_row": rows[0],
         },
@@ -114,7 +120,10 @@ def test_build_story_workflow_mapping():
             "entity": {
                 "story_type": "bug",
                 "workflow_state_id": ctx["workflow_config"]["started"],
-                "labels": [{"name": PIVOTAL_TO_SHORTCUT_LABEL}],
+                "labels": [
+                    {"name": PIVOTAL_TO_SHORTCUT_LABEL},
+                    {"name": PIVOTAL_TO_SHORTCUT_RUN_LABEL},
+                ],
             },
             "parsed_row": rows[1],
         },
@@ -140,7 +149,10 @@ def test_build_story_user_mapping():
             "entity": {
                 "story_type": "feature",
                 "requested_by_id": ctx["user_config"]["Daniel McFadden"],
-                "labels": [{"name": PIVOTAL_TO_SHORTCUT_LABEL}],
+                "labels": [
+                    {"name": PIVOTAL_TO_SHORTCUT_LABEL},
+                    {"name": PIVOTAL_TO_SHORTCUT_RUN_LABEL},
+                ],
             },
             "parsed_row": rows[0],
         },
@@ -152,7 +164,10 @@ def test_build_story_user_mapping():
                     ctx["user_config"]["Amy Williams"],
                     ctx["user_config"]["Daniel McFadden"],
                 ],
-                "labels": [{"name": PIVOTAL_TO_SHORTCUT_LABEL}],
+                "labels": [
+                    {"name": PIVOTAL_TO_SHORTCUT_LABEL},
+                    {"name": PIVOTAL_TO_SHORTCUT_RUN_LABEL},
+                ],
             },
             "parsed_row": rows[1],
         },
@@ -173,6 +188,7 @@ def test_build_release():
             "story_type": "chore",
             "labels": [
                 {"name": PIVOTAL_TO_SHORTCUT_LABEL},
+                {"name": PIVOTAL_TO_SHORTCUT_RUN_LABEL},
                 {"name": PIVOTAL_RELEASE_TYPE_LABEL},
             ],
         },
@@ -196,7 +212,10 @@ def test_build_epic():
         "type": "epic",
         "entity": {
             "name": "An Epic Name",
-            "labels": [{"name": PIVOTAL_TO_SHORTCUT_LABEL}],
+            "labels": [
+                {"name": PIVOTAL_TO_SHORTCUT_LABEL},
+                {"name": PIVOTAL_TO_SHORTCUT_RUN_LABEL},
+            ],
         },
         "parsed_row": d,
     } == build_entity(ctx, d)
