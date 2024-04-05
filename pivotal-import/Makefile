@@ -1,7 +1,7 @@
 .PHONY : clean delete delete-apply import import-apply initialize lint setup setup-dev test
 
 clean:
-	rm -f data/states.csv data/users.csv data/shortcut_workflows.csv config.json
+	./clean
 
 delete:
 	pipenv run python delete_imported_entities.py
