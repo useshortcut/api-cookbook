@@ -503,7 +503,10 @@ so you can easily invite them to your workspace.
 """
     )
     with open(shortcut_users_csv, "w") as f:
-        writer = csv.DictWriter(f, ["shortcut_user_name", "shortcut_user_email"])
+        writer = csv.DictWriter(
+            f,
+            ["shortcut_user_name", "shortcut_user_email", "shortcut_user_mention_name"],
+        )
         writer.writeheader()
         for user_info in user_info_list:
             writer.writerow(
