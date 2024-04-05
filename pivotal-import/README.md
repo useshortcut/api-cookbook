@@ -1,6 +1,6 @@
 This script imports a Pivotal Tracker CSV export file into a Shortcut workspace.
 
-[Walk-through Video](https://us06web.zoom.us/clips/share/b-GrMOkI75f5MPehYt_uK1RS7SdNy-ADfJqsew5gCQ5w05sNfAFhS56SgE4xIq2RIM-K68_9QNyJNVIwBb2sDkl3.ouSPQZoDx0WOD8ic) _(recorded 2024-04-05 using api-cookbook commit [1c12c1cc03](https://github.com/useshortcut/api-cookbook/tree/1c12c1cc035f4321f6b09a0e264eec740ddf2e88))_
+[Walk-through Video](https://vimeo.com/931197039?share=copy) _(recorded 2024-04-05 using api-cookbook commit [1c12c1cc03](https://github.com/useshortcut/api-cookbook/tree/1c12c1cc035f4321f6b09a0e264eec740ddf2e88))_
 
 # Prerequisites and Setup
 
