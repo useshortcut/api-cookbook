@@ -173,32 +173,44 @@ def populate_config():
             return json.load(f)
 
 
+def validate_environment():
+    """
+    Validate environment settings that must be in place to populate and load
+    the default configuration for this importer.
+    """
+    problems = []
+    if sc_token is None:
+        problems.append(
+            " - You must define a SHORTCUT_API_TOKEN environment variable with your Shortcut API token."
+        )
+    if not os.path.isfile("data/pivotal_export.csv"):
+        problems.append(
+            " - Your Pivotal Tracker project export must be located at data/pivotal_export.csv"
+        )
+    if problems:
+        msg = "\n".join(problems)
+        printerr(f"Problems:\n{msg}")
+        sys.exit(1)
+
+
 def validate_config(cfg):
     """
     Validate all configuration and setup, printing a description of problems
     and exiting with 1 if any problems found.
     """
     problems = []
-    if sc_token is None:
-        problems.append(
-            "- You must define a SHORTCUT_API_TOKEN environment variable with your Shortcut API token."
-        )
-    if not os.path.isfile("data/pivotal_export.csv"):
-        problems.append(
-            "- Your Pivotal Tracker project export must be located at data/pivotal_export.csv"
-        )
     if not isinstance(cfg, Mapping):
         problems.append(
-            "- Your config.json file must be a JSON object, please check its formatting."
+            " - Your config.json file must be a JSON object, please check its formatting."
         )
     else:
         if "workflow_id" not in cfg or not cfg["workflow_id"]:
             problems.append(
-                '- Your config.json file needs a "workflow_id" entry whose value is the ID of the Shortcut Workflow this importer should use.'
+                ' - Your config.json file needs a "workflow_id" entry whose value is the ID of the Shortcut Workflow this importer should use.'
             )
         if "pt_csv_file" not in cfg or not cfg["pt_csv_file"]:
             problems.append(
-                '- Your config.json file needs a "pt_csv_file" entry whose value is the path to your Pivotal Tracker export CSV.'
+                ' - Your config.json file needs a "pt_csv_file" entry whose value is the path to your Pivotal Tracker export CSV.'
             )
     if problems:
         msg = "\n".join(problems)
@@ -207,6 +219,7 @@ def validate_config(cfg):
 
 
 def load_config():
+    validate_environment()
     cfg = populate_config()
     validate_config(cfg)
     return cfg
