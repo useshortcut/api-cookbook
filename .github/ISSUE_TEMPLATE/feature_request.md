@@ -7,4 +7,5 @@ assignees: ''
 
 ---
 
-Please describe the problem you're facing and any suggestions you have for an ideal solution.
+Please describe the problem you're facing with any of the code in this repository
+and any suggestions you have for an ideal solution.
