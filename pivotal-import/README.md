@@ -12,8 +12,10 @@ In order to run this, you will require a Pivotal account and the ability to sign
    - **NOTE:** If you're not on a Shortcut trial, please [reach out to our support team](https://help.shortcut.com/hc/en-us/requests/new) before running this import to make sure you're not billed for users that you want to be disabled after import.
 1. Run `make import` to perform a dry-run of the import.
    - Follow instructions printed to the console to ensure the mapping of Pivotal and Shortcut data is complete and correct.
-   - You can review `data/states.csv` and `data/users.csv` to review these mappings.
+   - Refer to `data/states.csv` and `data/users.csv` to review these mappings.
 1. If the dry-run output looks correct, you can apply the import to your Shortcut workspace by running `make import-apply`
+1. Refer to `data/shortcut_imported_entities.csv` to review all epics, stories, etc. imported successfully into Shortcut.
+   1. If you find that you need to adjust your configuration or your Pivotal data and try again, you can run `make delete` to review a dry-run and `make delete-apply` to actually delete the imported Shortcut epics and stories listed in that CSV file.
 
 # Operation
 
