@@ -204,13 +204,13 @@ def default_priority_custom_field_id():
 def default_workflow_id():
     """
     Determine the default Shortcut Workflow, or provide instructions to the user
-    to select a specific Workflow if the default "Engineering" Workflow is not
+    to select a specific Workflow if the default "Standard" Workflow is not
     found.
     """
     workflow_id = None
     workflows = sc_get("/workflows")
     for workflow in workflows:
-        if workflow["name"] == "Engineering":
+        if workflow["name"] == "Standard":
             workflow_id = workflow["id"]
 
     if workflow_id is None:
