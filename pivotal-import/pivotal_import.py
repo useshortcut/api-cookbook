@@ -261,14 +261,6 @@ def load_users(csv_file):
     }
 
 
-def print_stats(stats):
-    print("Import stats")
-    plurals = {"story": "stories", "epic": "epics"}
-    for k, v in stats.items():
-        plural = plurals.get(k, k + "s")
-        print(f"  - {plural.capitalize()} : {v}")
-
-
 def get_mock_emitter():
     _mock_global_id = 0
 
@@ -371,6 +363,7 @@ def process_pt_csv_export(ctx, pt_csv_file, entity_collector):
             logger.debug("Emitting Entity: %s", entity)
             stats.update(entity_collector.collect(entity))
 
+    print("Summary of data to be imported")
     print_stats(stats)
 
 

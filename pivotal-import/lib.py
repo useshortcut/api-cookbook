@@ -72,6 +72,19 @@ def sc_put(path, data={}):
     return resp.json()
 
 
+def sc_delete(path):
+    """
+    Make a DELETE api call.
+
+    Typically used to delete an entity.
+    """
+    url = api_url_base + path
+    logger.debug("DELETE url=%s headers=%s" % (url, headers))
+    resp = requests.delete(url, headers=headers)
+    resp.raise_for_status()
+    return resp
+
+
 def printerr(s):
     print(s, file=sys.stderr)
 
@@ -264,3 +277,10 @@ def parse_date(d: str):
 ### Utility functions
 def identity(x):
     return x
+
+
+def print_stats(stats):
+    plurals = {"story": "stories", "epic": "epics"}
+    for k, v in stats.items():
+        plural = plurals.get(k, k + "s")
+        print(f"  - {plural.capitalize()} : {v}")
