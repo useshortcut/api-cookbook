@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Shortcut Help Center
+    url: https://help.shortcut.com
+    about: Shortcut help & documentation
+  - name: Contact Shortcut Support
+    url: https://help.shortcut.com/hc/en-us/requests/new
+    about: Submit a support ticket for your Shortcut workspace
