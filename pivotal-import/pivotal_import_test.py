@@ -6,8 +6,10 @@ def create_test_ctx():
         "priority_config": {"p2 - medium": "priority_medium_123"},
         "priority_custom_field_id": "priority_123",
         "user_config": {
-            "Daniel McFadden": "daniel_member_id",
             "Amy Williams": "amy_member_id",
+            "Daniel McFadden": "daniel_member_id",
+            "Emmanuelle Charpentier": "emmanuelle_member_id",
+            "Giorgio Parisi": "giorgio_member_id",
         },
         "workflow_config": {"unstarted": 400001, "started": 400002, "done": 400003},
     }
@@ -55,10 +57,25 @@ def test_parse_owners():
             "Daniel McFadden",
         ]
     } == parse_row(
-        # purposefully using different variations of comma separated
-        # labels
         ["Amy Williams", "Daniel McFadden"],
         ["owned by", "owned by"],
+    )
+
+
+def test_parse_reviewers():
+    assert {
+        "reviewers": [
+            "Amy Williams",
+            "Giorgio Parisi",
+            "Emmanuelle Charpentier",
+        ]
+    } == parse_row(
+        [
+            "Amy Williams",
+            "Giorgio Parisi",
+            "Emmanuelle Charpentier",
+        ],
+        ["reviewer", "reviewer", "reviewer"],
     )
 
 
@@ -193,6 +210,10 @@ def test_build_story_user_mapping():
             "story_type": "bug",
             "owners": ["Amy Williams", "Daniel McFadden"],
         },
+        {
+            "story_type": "chore",
+            "reviewers": ["Giorgio Parisi", "Emmanuelle Charpentier"],
+        },
     ]
 
     assert [
@@ -222,6 +243,21 @@ def test_build_story_user_mapping():
                 ],
             },
             "parsed_row": rows[1],
+        },
+        {
+            "type": "story",
+            "entity": {
+                "story_type": "chore",
+                "follower_ids": [
+                    ctx["user_config"]["Giorgio Parisi"],
+                    ctx["user_config"]["Emmanuelle Charpentier"],
+                ],
+                "labels": [
+                    {"name": PIVOTAL_TO_SHORTCUT_LABEL},
+                    {"name": PIVOTAL_TO_SHORTCUT_RUN_LABEL},
+                ],
+            },
+            "parsed_row": rows[2],
         },
     ] == [build_entity(ctx, d) for d in rows]
 

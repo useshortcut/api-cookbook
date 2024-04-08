@@ -109,12 +109,13 @@ col_map = {
 }
 
 nested_col_map = {
-    "blocker": "blocker",
     "blocker status": "blocker_state",
-    "task": "task_titles",
-    "task status": "task_states",
+    "blocker": "blocker",
     "comment": ("comments", parse_comment),
     "owned by": "owners",
+    "reviewer": "reviewers",
+    "task status": "task_states",
+    "task": "task_titles",
 }
 
 # These are the keys that are currently correctly populated in the
@@ -129,6 +130,7 @@ select_keys = {
         "estimate",
         "external_id",
         "external_links",
+        "follower_ids",
         "labels",
         "name",
         "owner_ids",
@@ -241,10 +243,18 @@ def build_entity(ctx, d):
         owners = d.get("owners")
         if owners:
             d["owner_ids"] = [
-                # filter out woners that aren't found
+                # filter out owners that aren't found
                 user_to_sc_id[owner]
                 for owner in owners
                 if owner in user_to_sc_id
+            ]
+
+        reviewers = d.get("reviewers")
+        if reviewers:
+            d["follower_ids"] = [
+                user_to_sc_id[reviewer]
+                for reviewer in reviewers
+                if reviewer in user_to_sc_id
             ]
 
         # Custom Fields
