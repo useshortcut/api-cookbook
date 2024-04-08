@@ -84,13 +84,21 @@ def parse_labels(labels: str):
     return [{"name": label} for label in re.split(r"\s*,\s*", labels)]
 
 
+def parse_priority(priority):
+    lowered = priority.lower()
+    if lowered == "none":
+        return None
+    else:
+        return lowered
+
+
 col_map = {
     "id": "external_id",
     "title": "name",
     "description": "description",
     "type": "story_type",
     "estimate": ("estimate", int),
-    "priority": "priority",
+    "priority": ("priority", parse_priority),
     "current state": "pt_state",
     "labels": ("labels", parse_labels),
     "url": ("external_links", url_to_external_links),
@@ -114,26 +122,27 @@ nested_col_map = {
 # list is effectively an allow list of top level attributes.
 select_keys = {
     "story": [
-        "name",
-        "description",
-        "external_links",
-        "estimate",
-        "workflow_state_id",
-        "story_type",
-        "created_at",
         "comments",
-        "tasks",
-        "labels",
+        "created_at",
+        "custom_fields",
+        "description",
+        "estimate",
         "external_id",
+        "external_links",
+        "labels",
+        "name",
         "owner_ids",
         "requested_by_id",
+        "story_type",
+        "tasks",
+        "workflow_state_id",
     ],
     "epic": [
-        "name",
-        "description",
-        "labels",
         "created_at",
+        "description",
         "external_id",
+        "labels",
+        "name",
     ],
 }
 
@@ -238,6 +247,21 @@ def build_entity(ctx, d):
                 if owner in user_to_sc_id
             ]
 
+        # Custom Fields
+        custom_fields = []
+        # process priority as Priority custom field
+        pt_priority = d.get("priority")
+        if pt_priority:
+            custom_fields.append(
+                {
+                    "field_id": ctx["priority_custom_field_id"],
+                    "value_id": ctx["priority_config"][pt_priority],
+                }
+            )
+
+        if custom_fields:
+            d["custom_fields"] = custom_fields
+
     elif type == "epic":
         pass
 
@@ -259,9 +283,9 @@ def load_mapping_csv(csv_file, from_key, to_key, to_transform=identity):
     return d
 
 
-def load_workflow_states(csv_file):
-    logger.debug(f"Loading workflow states from {csv_file}")
-    return load_mapping_csv(csv_file, "pt_state", "shortcut_state_id", int)
+def load_priorities(csv_file):
+    logger.debug(f"Loading priorities from {csv_file}")
+    return load_mapping_csv(csv_file, "pt_priority", "shortcut_custom_field_value_id")
 
 
 def load_users(csv_file):
@@ -273,6 +297,11 @@ def load_users(csv_file):
         for pt_user, sc_email in user_to_email.items()
         if sc_email
     }
+
+
+def load_workflow_states(csv_file):
+    logger.debug(f"Loading workflow states from {csv_file}")
+    return load_mapping_csv(csv_file, "pt_state", "shortcut_state_id", int)
 
 
 def get_mock_emitter():
@@ -411,8 +440,10 @@ def write_created_entities_csv(created_entities):
 
 def build_ctx(cfg):
     ctx = {
-        "workflow_config": load_workflow_states(cfg["states_csv_file"]),
+        "priority_config": load_priorities(cfg["priorities_csv_file"]),
+        "priority_custom_field_id": cfg["priority_custom_field_id"],
         "user_config": load_users(cfg["users_csv_file"]),
+        "workflow_config": load_workflow_states(cfg["states_csv_file"]),
     }
     logger.debug("Built context %s", ctx)
     return ctx
