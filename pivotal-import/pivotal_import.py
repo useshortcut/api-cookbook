@@ -113,6 +113,8 @@ nested_col_map = {
     "comment": ("comments", parse_comment),
     "owned by": "owners",
     "reviewer": "reviewers",
+    "review type": "review_types",
+    "review status": "review_states",
     "task status": "task_states",
     "task": "task_titles",
 }
@@ -146,6 +148,13 @@ select_keys = {
         "name",
     ],
 }
+
+review_as_comment_text_prefix = """\\[Pivotal Importer\\] Reviewers have been added as followers on this Shortcut Story.
+
+The following table describes the state of their reviews when they were imported into Shortcut from Pivotal Tracker:
+
+| Reviewer | Review Type | Review Status |
+|---|---|---|"""
 
 
 def parse_row(row, headers):
@@ -203,10 +212,8 @@ def build_entity(ctx, d):
             if author_id:
                 new_comment["author_id"] = author_id
         comments.append(new_comment)
-    if comments:
-        d["comments"] = comments
-    elif "comments" in d:
-        del d["comments"]
+    # other things we process are reified as comments,
+    # so we'll add comments to the d later in processing
 
     # releases become Shortcut Stories of type "chore"
     if d["story_type"] == "release":
@@ -256,6 +263,19 @@ def build_entity(ctx, d):
                 if reviewer in user_to_sc_id
             ]
 
+        # format table of all reviewers, types, and statuses as a comment on the imported story
+        if reviewers:
+            comment_text = review_as_comment_text_prefix
+            for reviewer, review_type, review_status in zip(
+                d.get("reviewers", []),
+                d.get("review_types", []),
+                d.get("review_states", []),
+            ):
+                comment_text += f"\n|{reviewer}|{review_type}|{review_status}|"
+            comments.append(
+                {"author_id": d.get("requested_by_id", None), "text": comment_text}
+            )
+
         # Custom Fields
         custom_fields = []
         # process priority as Priority custom field
@@ -270,6 +290,14 @@ def build_entity(ctx, d):
 
         if custom_fields:
             d["custom_fields"] = custom_fields
+
+        # as a last step, ensure comments (both those that were comments
+        # in Pivotal, and those we add during import to fill feature gaps)
+        # are all added to the d dict
+        if comments:
+            d["comments"] = comments
+        elif "comments" in d:
+            del d["comments"]
 
     elif type == "epic":
         pass

@@ -113,6 +113,92 @@ def test_build_story_with_comments():
     } == build_entity(ctx, d)
 
 
+def test_build_story_with_reviews():
+    ctx = create_test_ctx()
+    rows = [
+        # just reviews, no Pivotal comments
+        {
+            "story_type": "feature",
+            "reviewers": ["Emmanuelle Charpentier", "Giorgio Parisi"],
+            "review_types": ["code", "security"],
+            "review_states": ["unstarted", "in_review"],
+        },
+        # both Pivotal comments and reviews, which we add as Shortcut comments
+        {
+            "story_type": "bug",
+            "requester": "Daniel McFadden",
+            "reviewers": ["Emmanuelle Charpentier", "Giorgio Parisi", "Amy Williams"],
+            "review_types": ["code", "security", "custom qa"],
+            "review_states": ["unstarted", "in_review", "passed"],
+            "comments": [
+                {"text": "Comment 1"},
+                {"text": "Comment 2"},
+                {"text": "Comment 3"},
+            ],
+        },
+    ]
+
+    assert (
+        [
+            {
+                "type": "story",
+                "entity": {
+                    "story_type": "feature",
+                    "comments": [
+                        {
+                            "author_id": None,
+                            "text": review_as_comment_text_prefix
+                            + """
+|Emmanuelle Charpentier|code|unstarted|
+|Giorgio Parisi|security|in_review|""",
+                        },
+                    ],
+                    "follower_ids": [
+                        "emmanuelle_member_id",
+                        "giorgio_member_id",
+                    ],
+                    "labels": [
+                        {"name": PIVOTAL_TO_SHORTCUT_LABEL},
+                        {"name": PIVOTAL_TO_SHORTCUT_RUN_LABEL},
+                    ],
+                },
+                "parsed_row": rows[0],
+            },
+            {
+                "type": "story",
+                "entity": {
+                    "story_type": "bug",
+                    "requested_by_id": "daniel_member_id",
+                    "comments": [
+                        {"text": "Comment 1"},
+                        {"text": "Comment 2"},
+                        {"text": "Comment 3"},
+                        {
+                            "author_id": "daniel_member_id",
+                            "text": review_as_comment_text_prefix
+                            + """
+|Emmanuelle Charpentier|code|unstarted|
+|Giorgio Parisi|security|in_review|
+|Amy Williams|custom qa|passed|""",
+                        },
+                    ],
+                    "follower_ids": [
+                        "emmanuelle_member_id",
+                        "giorgio_member_id",
+                        "amy_member_id",
+                    ],
+                    "labels": [
+                        {"name": PIVOTAL_TO_SHORTCUT_LABEL},
+                        {"name": PIVOTAL_TO_SHORTCUT_RUN_LABEL},
+                    ],
+                },
+                "parsed_row": rows[1],
+            },
+        ]
+        == [build_entity(ctx, d) for d in rows]
+    )
+
+
 def test_build_story_priority_mapping():
     ctx = create_test_ctx()
     rows = [
@@ -210,10 +296,6 @@ def test_build_story_user_mapping():
             "story_type": "bug",
             "owners": ["Amy Williams", "Daniel McFadden"],
         },
-        {
-            "story_type": "chore",
-            "reviewers": ["Giorgio Parisi", "Emmanuelle Charpentier"],
-        },
     ]
 
     assert [
@@ -243,21 +325,6 @@ def test_build_story_user_mapping():
                 ],
             },
             "parsed_row": rows[1],
-        },
-        {
-            "type": "story",
-            "entity": {
-                "story_type": "chore",
-                "follower_ids": [
-                    ctx["user_config"]["Giorgio Parisi"],
-                    ctx["user_config"]["Emmanuelle Charpentier"],
-                ],
-                "labels": [
-                    {"name": PIVOTAL_TO_SHORTCUT_LABEL},
-                    {"name": PIVOTAL_TO_SHORTCUT_RUN_LABEL},
-                ],
-            },
-            "parsed_row": rows[2],
         },
     ] == [build_entity(ctx, d) for d in rows]
 
