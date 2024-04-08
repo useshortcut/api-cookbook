@@ -324,7 +324,7 @@ def get_mock_emitter():
         return id
 
     def mock_emitter(items):
-        for ix, item in enumerate(items):
+        for item in items:
             entity_id = _get_next_id()
             created_entity = item["entity"].copy()
             created_entity["id"] = entity_id
