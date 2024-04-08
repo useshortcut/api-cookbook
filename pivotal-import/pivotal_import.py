@@ -6,6 +6,7 @@ import argparse
 import csv
 import re
 import sys
+from datetime import datetime
 from collections import Counter
 
 from lib import *
@@ -20,10 +21,12 @@ parser.add_argument("--debug", action="store_true", help="Turns on debugging log
 
 
 """The batch size when running in batch mode"""
-BATCH_SIZE = 20
+BATCH_SIZE = 100
 
-"""The label associated with all stories and epics that are created with this import script."""
+"""The labels associated with all stories and epics that are created with this import script."""
 PIVOTAL_TO_SHORTCUT_LABEL = "pivotal->shortcut"
+_current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M")
+PIVOTAL_TO_SHORTCUT_RUN_LABEL = f"pivotal->shortcut {_current_datetime}"
 
 """The label associated with all chore stories created from release types in Pivotal."""
 PIVOTAL_RELEASE_TYPE_LABEL = "pivotal-release"
@@ -54,9 +57,14 @@ def sc_creator(items):
     for item in items:
         if item["type"] == "story":
             batch_stories.append(item)
-        else:
+        elif item["type"] == "epic":
             res = sc_post("/epics", item["entity"])
             item["imported_entity"] = res
+        elif item["type"] == "label":
+            res = sc_post("/labels", item["entity"])
+            item["imported_entity"] = res
+        else:
+            raise RuntimeError("Unknown entity type {}".format(item["type"]))
 
         if len(batch_stories) >= BATCH_SIZE:
             create_stories(batch_stories)
@@ -158,10 +166,16 @@ def parse_row(row, headers):
     return d
 
 
+def build_run_label_entity():
+    return {"type": "label", "entity": {"name": PIVOTAL_TO_SHORTCUT_RUN_LABEL}}
+
+
 def build_entity(ctx, d):
     """Process the row to generate the payload needed to create the entity in Shortcut."""
     # ensure Shortcut entities have a Label that identifies this import
-    d.setdefault("labels", []).append({"name": PIVOTAL_TO_SHORTCUT_LABEL})
+    d.setdefault("labels", []).extend(
+        [{"name": PIVOTAL_TO_SHORTCUT_LABEL}, {"name": PIVOTAL_TO_SHORTCUT_RUN_LABEL}]
+    )
 
     # reconcile entity types
     type = "story"
@@ -297,6 +311,7 @@ class EntityCollector:
         _mock_global_id = 0
         self.epics = []
         self.stories = []
+        self.labels = []
         if emitter is None:
             emitter = get_mock_emitter()
         self.emitter = emitter
@@ -304,8 +319,12 @@ class EntityCollector:
     def collect(self, item):
         if item["type"] == "story":
             self.stories.append(item)
-        else:
+        elif item["type"] == "epic":
             self.epics.append(item)
+        elif item["type"] == "label":
+            self.labels.append(item)
+        else:
+            raise RuntimeError("Unknown entity type {}".format(item["type"]))
 
         return {item["type"]: 1}
 
@@ -315,10 +334,17 @@ class EntityCollector:
         pass
 
     def commit(self):
+        # create all the default labels
+        self.labels = self.emitter(self.labels)
+        for label in self.labels:
+            if PIVOTAL_TO_SHORTCUT_RUN_LABEL == label["entity"]["name"]:
+                label_url = label["imported_entity"]["app_url"]
+                print(f"Import Started\n\nVisit {label_url} to monitor import progress")
+
         # create all the epics and find their associated epic ids
         self.epics = self.emitter(self.epics)
 
-        logger.info("Finished creating %d epics", len(self.epics))
+        print("Finished creating {} epics".format(len(self.epics)))
         epic_label_map = {}
         for epic in self.epics:
             for label in epic["entity"]["labels"]:
@@ -336,7 +362,7 @@ class EntityCollector:
 
         # create all the stories
         self.stories = self.emitter(self.stories)
-        logger.info("Finished creating %d stories", len(self.stories))
+        print("Finished creating {} stories".format(len(self.stories)))
 
         # Aggregate all the created stories and epics and labels into a list of maps
         created_entities = []
@@ -353,6 +379,7 @@ class EntityCollector:
 
 def process_pt_csv_export(ctx, pt_csv_file, entity_collector):
     stats = Counter()
+    stats.update(entity_collector.collect(build_run_label_entity()))
 
     with open(pt_csv_file) as csvfile:
         reader = csv.reader(csvfile)
