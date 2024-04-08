@@ -61,7 +61,7 @@ def sc_creator(items):
             res = sc_post("/epics", item["entity"])
             item["imported_entity"] = res
         elif item["type"] == "label":
-            res = sc_post("/label", item["entity"])
+            res = sc_post("/labels", item["entity"])
             item["imported_entity"] = res
         else:
             raise RuntimeError("Unknown entity type {}".format(item["type"]))
