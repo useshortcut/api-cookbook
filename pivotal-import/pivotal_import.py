@@ -45,7 +45,6 @@ def sc_creator(items):
 
     """
     batch_stories = []
-    ids = []
 
     def create_stories(stories):
         entities = [s["entity"] for s in stories]
