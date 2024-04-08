@@ -3,11 +3,13 @@ from pivotal_import import *
 
 def create_test_ctx():
     return {
-        "workflow_config": {"unstarted": 400001, "started": 400002, "done": 400003},
+        "priority_config": {"p2 - medium": "priority_medium_123"},
+        "priority_custom_field_id": "priority_123",
         "user_config": {
             "Daniel McFadden": "daniel_member_id",
             "Amy Williams": "amy_member_id",
         },
+        "workflow_config": {"unstarted": 400001, "started": 400002, "done": 400003},
     }
 
 
@@ -60,6 +62,11 @@ def test_parse_owners():
     )
 
 
+def test_parse_priority():
+    assert "p3 - low" == parse_priority("p3 - Low")
+    assert parse_priority("none") is None
+
+
 def test_build_story_with_comments():
     ctx = create_test_ctx()
     d = {
@@ -87,6 +94,51 @@ def test_build_story_with_comments():
         },
         "parsed_row": d,
     } == build_entity(ctx, d)
+
+
+def test_build_story_priority_mapping():
+    ctx = create_test_ctx()
+    rows = [
+        {
+            "story_type": "feature",
+            "priority": "p2 - medium",
+        },
+        {
+            "story_type": "bug",
+            "priority": None,
+        },
+    ]
+
+    assert [
+        {
+            "type": "story",
+            "entity": {
+                "story_type": "feature",
+                "custom_fields": [
+                    {
+                        "field_id": "priority_123",
+                        "value_id": "priority_medium_123",
+                    }
+                ],
+                "labels": [
+                    {"name": PIVOTAL_TO_SHORTCUT_LABEL},
+                    {"name": PIVOTAL_TO_SHORTCUT_RUN_LABEL},
+                ],
+            },
+            "parsed_row": rows[0],
+        },
+        {
+            "type": "story",
+            "entity": {
+                "story_type": "bug",
+                "labels": [
+                    {"name": PIVOTAL_TO_SHORTCUT_LABEL},
+                    {"name": PIVOTAL_TO_SHORTCUT_RUN_LABEL},
+                ],
+            },
+            "parsed_row": rows[1],
+        },
+    ] == [build_entity(ctx, d) for d in rows]
 
 
 def test_build_story_workflow_mapping():
