@@ -157,6 +157,10 @@ The following table describes the state of their reviews when they were imported
 |---|---|---|"""
 
 
+def escape_md_table_syntax(s):
+    return s.replace("|", "\\|")
+
+
 def parse_row(row, headers):
     d = dict()
     for ix, val in enumerate(row):
@@ -271,6 +275,9 @@ def build_entity(ctx, d):
                 d.get("review_types", []),
                 d.get("review_states", []),
             ):
+                reviewer = escape_md_table_syntax(reviewer)
+                review_type = escape_md_table_syntax(review_type)
+                review_status = escape_md_table_syntax(review_status)
                 comment_text += f"\n|{reviewer}|{review_type}|{review_status}|"
             comments.append(
                 {"author_id": d.get("requested_by_id", None), "text": comment_text}

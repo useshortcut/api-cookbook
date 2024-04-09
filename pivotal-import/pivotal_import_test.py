@@ -10,6 +10,7 @@ def create_test_ctx():
             "Daniel McFadden": "daniel_member_id",
             "Emmanuelle Charpentier": "emmanuelle_member_id",
             "Giorgio Parisi": "giorgio_member_id",
+            "Piper | Barnes": "piper_member_id",
         },
         "workflow_config": {"unstarted": 400001, "started": 400002, "done": 400003},
     }
@@ -68,14 +69,16 @@ def test_parse_reviewers():
             "Amy Williams",
             "Giorgio Parisi",
             "Emmanuelle Charpentier",
+            "Piper | Barnes",
         ]
     } == parse_row(
         [
             "Amy Williams",
             "Giorgio Parisi",
             "Emmanuelle Charpentier",
+            "Piper | Barnes",
         ],
-        ["reviewer", "reviewer", "reviewer"],
+        ["reviewer", "reviewer", "reviewer", "reviewer"],
     )
 
 
@@ -127,7 +130,7 @@ def test_build_story_with_reviews():
         {
             "story_type": "bug",
             "requester": "Daniel McFadden",
-            "reviewers": ["Emmanuelle Charpentier", "Giorgio Parisi", "Amy Williams"],
+            "reviewers": ["Emmanuelle Charpentier", "Giorgio Parisi", "Piper | Barnes"],
             "review_types": ["code", "security", "custom qa"],
             "review_states": ["unstarted", "in_review", "passed"],
             "comments": [
@@ -179,13 +182,13 @@ def test_build_story_with_reviews():
                             + """
 |Emmanuelle Charpentier|code|unstarted|
 |Giorgio Parisi|security|in_review|
-|Amy Williams|custom qa|passed|""",
+|Piper \\| Barnes|custom qa|passed|""",
                         },
                     ],
                     "follower_ids": [
                         "emmanuelle_member_id",
                         "giorgio_member_id",
-                        "amy_member_id",
+                        "piper_member_id",
                     ],
                     "labels": [
                         {"name": PIVOTAL_TO_SHORTCUT_LABEL},
