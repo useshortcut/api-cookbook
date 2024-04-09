@@ -5,6 +5,7 @@ name = "pypi"
 
 [packages]
 requests = "~=2.31.0"
+pyrate-limiter = "~=3.6.0"
 
 [dev-packages]
 black = "*"
