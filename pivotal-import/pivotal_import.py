@@ -31,6 +31,9 @@ PIVOTAL_TO_SHORTCUT_RUN_LABEL = f"pivotal->shortcut {_current_datetime}"
 """The label associated with all chore stories created from release types in Pivotal."""
 PIVOTAL_RELEASE_TYPE_LABEL = "pivotal-release"
 
+"""The label indicating a story had reviews in Pivotal."""
+PIVOTAL_HAD_REVIEW_LABEL = "pivotal-had-review"
+
 
 def sc_creator(items):
     """Create Shortcut entities utilizing bulk APIs whenever possible.
@@ -266,6 +269,7 @@ def build_entity(ctx, d):
                 for reviewer in reviewers
                 if reviewer in user_to_sc_id
             ]
+            d.setdefault("labels", []).append({"name": PIVOTAL_HAD_REVIEW_LABEL})
 
         # format table of all reviewers, types, and statuses as a comment on the imported story
         if reviewers:

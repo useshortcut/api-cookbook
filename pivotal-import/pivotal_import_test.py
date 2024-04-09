@@ -163,6 +163,7 @@ def test_build_story_with_reviews():
                     "labels": [
                         {"name": PIVOTAL_TO_SHORTCUT_LABEL},
                         {"name": PIVOTAL_TO_SHORTCUT_RUN_LABEL},
+                        {"name": PIVOTAL_HAD_REVIEW_LABEL},
                     ],
                 },
                 "parsed_row": rows[0],
@@ -193,6 +194,7 @@ def test_build_story_with_reviews():
                     "labels": [
                         {"name": PIVOTAL_TO_SHORTCUT_LABEL},
                         {"name": PIVOTAL_TO_SHORTCUT_RUN_LABEL},
+                        {"name": PIVOTAL_HAD_REVIEW_LABEL},
                     ],
                 },
                 "parsed_row": rows[1],
