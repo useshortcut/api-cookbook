@@ -509,6 +509,7 @@ def main(argv):
 
     cfg = load_config()
     ctx = build_ctx(cfg)
+    print_rate_limiting_explanation()
     process_pt_csv_export(ctx, cfg["pt_csv_file"], entity_collector)
 
     created_entities = entity_collector.commit()

@@ -27,8 +27,9 @@ def delete_entity(entity_type, entity_id):
     if prefix:
         try:
             sc_delete(f"{prefix}{entity_id}")
-        except requests.HTTPError:
+        except requests.HTTPError as err:
             printerr(f"Unable to delete {entity_type} {entity_id}")
+            printerr(f"Error: {err}")
             return None
 
     return True
@@ -38,6 +39,8 @@ def main(argv):
     args = parser.parse_args(argv[1:])
     if args.debug:
         logging.basicConfig(level=logging.DEBUG)
+
+    print_rate_limiting_explanation()
 
     counter = Counter()
     with open(shortcut_imported_entities_csv) as csvfile:
@@ -49,6 +52,11 @@ def main(argv):
             if args.apply:
                 if delete_entity(entity_type, entity_id):
                     counter[entity_type] += 1
+                    # Enhancement: This can be replaced with a link to a relevant label,
+                    # which is done during import because there is a trivially simple
+                    # place in the import code flow to print the Shortcut-provided
+                    # app_url for the import-specific label.
+                    print("Deleted {} {}".format(entity_type, entity_id))
             else:
                 counter[entity_type] += 1
 

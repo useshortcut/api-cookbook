@@ -14,10 +14,42 @@ import json
 import os
 import logging
 
+from pyrate_limiter import Duration, InMemoryBucket, Limiter, Rate
 import requests
 
 # Logging
 logger = logging.getLogger(__name__)
+
+# Rate limiting. See https://developer.shortcut.com/api/rest/v3#Rate-Limiting
+# The Shortcut API limit is 200 per minute; the 200th request within 60 seconds
+# will receive an HTTP 429 response.
+#
+# The rate limiting config below sets an in-memory limit that is just below
+# Shortcut's rate limit to reduce the possibility of being throttled, and sets
+# the amount of time it will wait once it reaches that limit to just
+# over a minute to account for possible computer clock differences.
+max_requests_per_minute = 200
+rate = Rate(max_requests_per_minute - 5, Duration.MINUTE)
+bucket = InMemoryBucket([rate])
+max_limiter_delay_seconds = 70
+limiter = Limiter(
+    bucket, raise_when_fail=True, max_delay=Duration.SECOND * max_limiter_delay_seconds
+)
+
+
+def rate_mapping(*args, **kwargs):
+    return "shortcut-api-request", 1
+
+
+rate_decorator = limiter.as_decorator()
+
+
+def print_rate_limiting_explanation():
+    printerr(
+        f"""[Note] This importer adheres to the Shortcut API rate limit of {max_requests_per_minute} requests per minute.
+       It may pause for up to {max_limiter_delay_seconds} seconds during processing to avoid request throttling."""
+    )
+
 
 # API Helpers
 sc_token = os.getenv("SHORTCUT_API_TOKEN")
@@ -30,6 +62,7 @@ headers = {
 }
 
 
+@rate_decorator(rate_mapping)
 def sc_get(path, params={}):
     """
     Make a GET api call.
@@ -43,6 +76,7 @@ def sc_get(path, params={}):
     return resp.json()
 
 
+@rate_decorator(rate_mapping)
 def sc_post(path, data={}):
     """Make a POST api call.
 
@@ -59,6 +93,7 @@ def sc_post(path, data={}):
     return resp.json()
 
 
+@rate_decorator(rate_mapping)
 def sc_put(path, data={}):
     """
     Make a PUT api call.
@@ -73,6 +108,7 @@ def sc_put(path, data={}):
     return resp.json()
 
 
+@rate_decorator(rate_mapping)
 def sc_delete(path):
     """
     Make a DELETE api call.
