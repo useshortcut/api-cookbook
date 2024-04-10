@@ -16,8 +16,9 @@ In order to run this, you will require a Pivotal account and the ability to sign
    - Follow instructions printed to the console to ensure the mapping of Pivotal and Shortcut data is complete and correct.
    - Refer to `data/priorities.csv`, `data/states.csv`, and `data/users.csv` to review these mappings.
 1. If the dry-run output looks correct, you can apply the import to your Shortcut workspace by running `make import-apply`
-1. Refer to `data/shortcut_imported_entities.csv` to review all epics, stories, etc. imported successfully into Shortcut.
-   1. If you find that you need to adjust your configuration or your Pivotal data and try again, you can run `make delete` to review a dry-run and `make delete-apply` to actually delete the imported Shortcut epics and stories listed in that CSV file.
+   - The console should print a link to an import-specific Shortcut label page that you can review to find all imported Stories and Epics.
+   - If you run the importer multiple times, you can review all imported Stories and Epics by visiting Settings > Labels and then searching for the `pivotal->shortcut` label and clicking on it.
+1. If you find that you need to adjust your configuration or your Pivotal data and try again, you can run `make delete` to review a dry-run and `make delete-apply` to actually delete the imported Shortcut epics and stories listed in `data/shortcut_imported_entities.csv`. You can also archive or delete content in the Shortcut application if needed.
 
 # Operation
 
@@ -31,7 +32,10 @@ If `pivotal_import.py` completes without errors, you can run the script with the
 
 The following are known limitations:
 
-- **No story reviewers:** Pivotal story reviewers are not imported.
+- **Limited story reviews:** Shortcut does not have a feature equivalent to Pivotal story reviews, so they are imported as follows:
+  - Pivotal story reviewers are imported as Shortcut story followers on the stories they were assigned for review. Shortcut story followers receive updates in their Shortcut Activity Feed for all story updates.
+  - Imported stories that had Pivotal reviews have an additional comment with a table that lists all of the story reviews from Pivotal (reviewer, review type, and review status).
+  - Imported stories that had Pivotal reviews have a label in Shortcut of `pivotal-had-review`.
 - **No story blockers:** Pivotal story blockers (the relationships between stories) are not imported.
 - **No iterations:** Pivotal iterations are not imported.
 - **Epics are imported as unstarted:** Imported epics are set to an unstarted "Todo" state.

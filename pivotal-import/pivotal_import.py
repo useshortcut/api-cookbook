@@ -31,6 +31,9 @@ PIVOTAL_TO_SHORTCUT_RUN_LABEL = f"pivotal->shortcut {_current_datetime}"
 """The label associated with all chore stories created from release types in Pivotal."""
 PIVOTAL_RELEASE_TYPE_LABEL = "pivotal-release"
 
+"""The label indicating a story had reviews in Pivotal."""
+PIVOTAL_HAD_REVIEW_LABEL = "pivotal-had-review"
+
 
 def sc_creator(items):
     """Create Shortcut entities utilizing bulk APIs whenever possible.
@@ -45,7 +48,6 @@ def sc_creator(items):
 
     """
     batch_stories = []
-    ids = []
 
     def create_stories(stories):
         entities = [s["entity"] for s in stories]
@@ -114,6 +116,8 @@ nested_col_map = {
     "comment": ("comments", parse_comment),
     "owned by": "owners",
     "reviewer": "reviewers",
+    "review type": "review_types",
+    "review status": "review_states",
     "task status": "task_states",
     "task": "task_titles",
 }
@@ -147,6 +151,17 @@ select_keys = {
         "name",
     ],
 }
+
+review_as_comment_text_prefix = """\\[Pivotal Importer\\] Reviewers have been added as followers on this Shortcut Story.
+
+The following table describes the state of their reviews when they were imported into Shortcut from Pivotal Tracker:
+
+| Reviewer | Review Type | Review Status |
+|---|---|---|"""
+
+
+def escape_md_table_syntax(s):
+    return s.replace("|", "\\|")
 
 
 def parse_row(row, headers):
@@ -204,10 +219,8 @@ def build_entity(ctx, d):
             if author_id:
                 new_comment["author_id"] = author_id
         comments.append(new_comment)
-    if comments:
-        d["comments"] = comments
-    elif "comments" in d:
-        del d["comments"]
+    # other things we process are reified as comments,
+    # so we'll add comments to the d later in processing
 
     # releases become Shortcut Stories of type "chore"
     if d["story_type"] == "release":
@@ -256,6 +269,23 @@ def build_entity(ctx, d):
                 for reviewer in reviewers
                 if reviewer in user_to_sc_id
             ]
+            d.setdefault("labels", []).append({"name": PIVOTAL_HAD_REVIEW_LABEL})
+
+        # format table of all reviewers, types, and statuses as a comment on the imported story
+        if reviewers:
+            comment_text = review_as_comment_text_prefix
+            for reviewer, review_type, review_status in zip(
+                d.get("reviewers", []),
+                d.get("review_types", []),
+                d.get("review_states", []),
+            ):
+                reviewer = escape_md_table_syntax(reviewer)
+                review_type = escape_md_table_syntax(review_type)
+                review_status = escape_md_table_syntax(review_status)
+                comment_text += f"\n|{reviewer}|{review_type}|{review_status}|"
+            comments.append(
+                {"author_id": d.get("requested_by_id", None), "text": comment_text}
+            )
 
         # Custom Fields
         custom_fields = []
@@ -271,6 +301,14 @@ def build_entity(ctx, d):
 
         if custom_fields:
             d["custom_fields"] = custom_fields
+
+        # as a last step, ensure comments (both those that were comments
+        # in Pivotal, and those we add during import to fill feature gaps)
+        # are all added to the d dict
+        if comments:
+            d["comments"] = comments
+        elif "comments" in d:
+            del d["comments"]
 
     elif type == "epic":
         pass
@@ -324,7 +362,7 @@ def get_mock_emitter():
         return id
 
     def mock_emitter(items):
-        for ix, item in enumerate(items):
+        for item in items:
             entity_id = _get_next_id()
             created_entity = item["entity"].copy()
             created_entity["id"] = entity_id
