@@ -129,6 +129,7 @@ def printerr(s):
 # File locations
 emails_to_invite = "data/emails_to_invite.csv"
 shortcut_custom_fields_csv = "data/shortcut_custom_fields.csv"
+shortcut_groups_csv = "data/shortcut_groups.csv"
 shortcut_imported_entities_csv = "data/shortcut_imported_entities.csv"
 shortcut_users_csv = "data/shortcut_users.csv"
 shortcut_workflows_csv = "data/shortcut_workflows.csv"
@@ -173,6 +174,27 @@ def print_custom_fields_tree(custom_fields):
     printerr("\n".join(output_lines))
 
 
+def print_groups_tree(groups):
+    """
+    Print and write to `shortcut_groups_csv` the content of all Teams/Groups
+    in the user's Shortcut workspace.
+    """
+    output_lines = []
+    with open(shortcut_groups_csv, "w") as f:
+        writer = csv.DictWriter(
+            f,
+            [
+                "group_name",
+                "group_id",
+            ],
+        )
+        writer.writeheader()
+        for group in groups:
+            writer.writerow({"group_name": group["name"], "group_id": group["id"]})
+            output_lines.append('Group/Team {id} : "{name}"'.format_map(group))
+    printerr("\n".join(output_lines))
+
+
 def print_workflows_tree(workflows):
     """
     Print and write to `shortcut_workflows_csv` the content of all Workflows
@@ -207,6 +229,34 @@ def print_workflows_tree(workflows):
                     )
                 )
     printerr("\n".join(output_lines))
+
+
+def default_group_id():
+    """
+    Determine the default Shortcut Team (Group in the parlance of Shortcut's REST API),
+    or provide instructions to the user to select a specific Team if the default Team
+    isn't found.
+    """
+    group_id = None
+    groups = sc_get("/groups")
+    for group in groups:
+        if group["name"] == "Team 1":
+            group_id = group["id"]
+
+    if group_id is None:
+        printerr(
+            f"""[Warning] Failed to find a Team (called "Group" in the Shortcut API) to automatically assign imported stories and epics to.
+          If you would like to assign a Team/Group for the stories and epics you import, please:
+  1. Review the Shortcut Teams/Groups printed below (also written to {shortcut_workflows_csv} for reference).
+  2. Copy the numeric ID of your desired Team/Group (group_id column in the CSV).
+  3. Paste it as the "group_id" value in your config.json file.
+  4. Rerun initialize.py.
+"""
+        )
+        print_groups_tree(groups)
+        return None
+    else:
+        return group_id
 
 
 def default_priority_custom_field_id():
@@ -273,9 +323,11 @@ def populate_config():
     """
     try:
         with open("config.json", "x", encoding="utf-8") as f:
-            workflow_id = default_workflow_id()
+            group_id = default_group_id()
             priority_custom_field_id = default_priority_custom_field_id()
+            workflow_id = default_workflow_id()
             data = {
+                "group_id": group_id,
                 "pt_csv_file": "data/pivotal_export.csv",
                 "priorities_csv_file": "data/priorities.csv",
                 "priority_custom_field_id": priority_custom_field_id,
