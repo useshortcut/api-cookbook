@@ -127,6 +127,10 @@ def printerr(s):
 
 
 # File locations
+data_pivotal_export_csv = "data/pivotal_export.csv"
+data_priorities_csv = "data/priorities.csv"
+data_states_csv = "data/states.csv"
+data_users_csv = "data/users.csv"
 emails_to_invite = "data/emails_to_invite.csv"
 shortcut_custom_fields_csv = "data/shortcut_custom_fields.csv"
 shortcut_groups_csv = "data/shortcut_groups.csv"
@@ -340,11 +344,11 @@ def populate_config():
             workflow_id = default_workflow_id()
             data = {
                 "group_id": group_id,
-                "pt_csv_file": "data/pivotal_export.csv",
-                "priorities_csv_file": "data/priorities.csv",
+                "pt_csv_file": data_pivotal_export_csv,
+                "priorities_csv_file": data_priorities_csv,
                 "priority_custom_field_id": priority_custom_field_id,
-                "states_csv_file": "data/states.csv",
-                "users_csv_file": "data/users.csv",
+                "states_csv_file": data_states_csv,
+                "users_csv_file": data_users_csv,
                 "workflow_id": workflow_id,
             }
             json.dump(data, f, indent=2)
@@ -402,25 +406,45 @@ def validate_config(cfg):
             " - Your config.json file must be a JSON object, please check its formatting."
         )
     else:
-        if "workflow_id" not in cfg or not cfg["workflow_id"]:
+        if "group_id" not in cfg:
             problems.append(
-                ' - Your config.json file needs a "workflow_id" entry whose value is the ID of the Shortcut Workflow this importer should use.'
+                f' - Your config.json file needs a "group_id" entry, which may be set to `null`, or may be set to one of the Teams/Groups listed in {shortcut_groups_csv}'
+            )
+        if "priorities_csv_file" not in cfg or not cfg["priorities_csv_file"]:
+            problems.append(
+                f' - Your config.json is missing an expected field "priorities_csv_file" whose default value is {data_priorities_csv}. Add it manually or run `make clean import` to regenerate a valid config.json'
+            )
+        if "priority_custom_field_id" not in cfg or not cfg["priority_custom_field_id"]:
+            problems.append(
+                f' - Your config.json file needs a "priority_custom_field_id" entry whose value is the ID of the built-in Shortcut Custom Field called "Priority" which you can find in {shortcut_custom_fields_csv}'
             )
         if "pt_csv_file" not in cfg or not cfg["pt_csv_file"]:
             problems.append(
-                ' - Your config.json file needs a "pt_csv_file" entry whose value is the path to your Pivotal Tracker export CSV.'
+                f' - Your config.json file needs a "pt_csv_file" entry whose default value is {data_pivotal_export_csv}. Add it manually or run `make clean import` to regenerate a valid config.json'
+            )
+        if "states_csv_file" not in cfg or not cfg["states_csv_file"]:
+            problems.append(
+                f' - Your config.json is missing an expected field "states_csv_file" whose default value is {data_states_csv}. Add it manually or run `make clean import` to regenerate a valid config.json'
+            )
+        if "users_csv_file" not in cfg or not cfg["users_csv_file"]:
+            problems.append(
+                f' - Your config.json is missing an expected field "users_csv_file" whose default value is {data_users_csv}. Add it manually or run `make clean import` to regenerate a valid config.json'
+            )
+        if "workflow_id" not in cfg or not cfg["workflow_id"]:
+            problems.append(
+                f' - Your config.json file needs a "workflow_id" entry whose value is the ID of the Shortcut Workflow this importer should use, refer to {shortcut_workflows_csv} to pick one.'
             )
     if problems:
         msg = "\n".join(problems)
         printerr(f"Problems:\n{msg}")
         sys.exit(1)
+    else:
+        return cfg
 
 
 def load_config():
     validate_environment()
-    cfg = populate_config()
-    validate_config(cfg)
-    return cfg
+    return validate_config(populate_config())
 
 
 def get_user_info(member):
