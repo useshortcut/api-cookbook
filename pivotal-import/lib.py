@@ -171,6 +171,8 @@ def print_custom_fields_tree(custom_fields):
                             custom_field_value
                         )
                     )
+    printerr("Shortcut Custom Fields")
+    printerr("======================")
     printerr("\n".join(output_lines))
 
 
@@ -192,6 +194,8 @@ def print_groups_tree(groups):
         for group in groups:
             writer.writerow({"group_name": group["name"], "group_id": group["id"]})
             output_lines.append('Group/Team {id} : "{name}"'.format_map(group))
+    printerr("Shortcut Teams/Groups")
+    printerr("=====================")
     printerr("\n".join(output_lines))
 
 
@@ -228,6 +232,8 @@ def print_workflows_tree(workflows):
                         workflow_state
                     )
                 )
+    printerr("Shortcut Workflows")
+    printerr("==================")
     printerr("\n".join(output_lines))
 
 
@@ -245,15 +251,17 @@ def default_group_id():
 
     if group_id is None:
         printerr(
-            f"""[Warning] Failed to find a Team (called "Group" in the Shortcut API) to automatically assign imported stories and epics to.
+            f"""
+[Warning] Failed to find a Team (called "Group" in the Shortcut API) to automatically assign imported stories and epics to.
           If you would like to assign a Team/Group for the stories and epics you import, please:
-  1. Review the Shortcut Teams/Groups printed below (also written to {shortcut_workflows_csv} for reference).
+  1. Review the Shortcut Teams/Groups printed below (also written to {shortcut_groups_csv} for reference).
   2. Copy the numeric ID of your desired Team/Group (group_id column in the CSV).
   3. Paste it as the "group_id" value in your config.json file.
   4. Rerun initialize.py.
 """
         )
         print_groups_tree(groups)
+        printerr("\n")
         return None
     else:
         return group_id
@@ -275,13 +283,15 @@ def default_priority_custom_field_id():
 
     if priority_custom_field_id is None:
         printerr(
-            f"""[Problem] The Priority custom field is disabled or not found in your Shortcut workspace. Please:
+            f"""
+[Problem] The Priority custom field is disabled or not found in your Shortcut workspace. Please:
  1. Review the Shortcut Custom Fields printed below (also written to {shortcut_custom_fields_csv} for reference).
  2. Copy the UUID of your desired Custom Field (custom_field_id column in the CSV).
  3. Paste it as the "priority_custom_field_id" value in your config.json file.
  4. Rerun initialize.py."""
         )
         print_custom_fields_tree(custom_fields)
+        printerr("\n")
         return None
     else:
         return priority_custom_field_id
@@ -301,7 +311,8 @@ def default_workflow_id():
 
     if workflow_id is None:
         printerr(
-            f"""[Problem] Failed to find the default Story Workflow in your Shortcut workspace, please:
+            f"""
+[Problem] Failed to find the default Story Workflow in your Shortcut workspace, please:
   1. Review the Shortcut Workflows printed below (also written to {shortcut_workflows_csv} for reference).
   2. Copy the numeric ID of your desired Workflow (workflow_id column in the CSV).
   3. Paste it as the "workflow_id" value in your config.json file.
@@ -309,6 +320,7 @@ def default_workflow_id():
 """
         )
         print_workflows_tree(workflows)
+        printerr("\n")
         return None
     else:
         return workflow_id
