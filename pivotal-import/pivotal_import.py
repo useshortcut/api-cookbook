@@ -95,19 +95,19 @@ def parse_priority(priority):
 
 
 col_map = {
-    "id": "external_id",
-    "title": "name",
-    "description": "description",
-    "type": "story_type",
-    "estimate": ("estimate", int),
-    "priority": ("priority", parse_priority),
-    "current state": "pt_state",
-    "labels": ("labels", parse_labels),
-    "url": ("external_links", url_to_external_links),
-    "created at": ("created_at", parse_date),
     "accepted at": ("accepted_at", parse_date),
+    "created at": ("created_at", parse_date),
+    "current state": "pt_state",
     "deadline": ("deadline", parse_date),
+    "description": "description",
+    "estimate": ("estimate", int),
+    "id": "external_id",
+    "labels": ("labels", parse_labels),
+    "priority": ("priority", parse_priority),
     "requested by": "requester",
+    "title": "name",
+    "type": "story_type",
+    "url": ("external_links", url_to_external_links),
 }
 
 nested_col_map = {
@@ -130,6 +130,7 @@ select_keys = {
         "comments",
         "created_at",
         "custom_fields",
+        "deadline",
         "description",
         "estimate",
         "external_id",
