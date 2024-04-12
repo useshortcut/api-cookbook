@@ -483,14 +483,15 @@ def process_pt_csv_export(ctx, pt_csv_file, entity_collector):
 
 def write_created_entities_csv(created_entities):
     with open(shortcut_imported_entities_csv, "w") as f:
-        writer = csv.DictWriter(f, ["id", "type", "name", "url"])
+        writer = csv.DictWriter(f, ["id", "type", "name", "epic_id", "url"])
         writer.writeheader()
         for entity in created_entities:
             writer.writerow(
                 {
                     "id": entity["id"],
-                    "name": entity["name"],
                     "type": entity["entity_type"],
+                    "name": entity["name"],
+                    "epic_id": entity["epic_id"] if "epic_id" in entity else None,
                     "url": entity["app_url"],
                 }
             )
