@@ -135,6 +135,7 @@ select_keys = {
         "external_id",
         "external_links",
         "follower_ids",
+        "group_id",
         "labels",
         "name",
         "owner_ids",
@@ -147,6 +148,7 @@ select_keys = {
         "created_at",
         "description",
         "external_id",
+        "group_ids",
         "labels",
         "name",
     ],
@@ -203,6 +205,10 @@ def build_entity(ctx, d):
         [{"name": PIVOTAL_TO_SHORTCUT_LABEL}, {"name": PIVOTAL_TO_SHORTCUT_RUN_LABEL}]
     )
 
+    # The Shortcut Team/Group ID to assign to stories/epics,
+    # may be None which the REST API interprets correctly.
+    group_id = ctx["group_id"]
+
     # reconcile entity types
     type = "story"
     if d["story_type"] == "epic":
@@ -228,6 +234,8 @@ def build_entity(ctx, d):
         d.setdefault("labels", []).append({"name": PIVOTAL_RELEASE_TYPE_LABEL})
 
     if type == "story":
+        # assign to team/group
+        d["group_id"] = group_id
         # process workflow state
         pt_state = d.get("pt_state")
         if pt_state:
@@ -311,7 +319,7 @@ def build_entity(ctx, d):
             del d["comments"]
 
     elif type == "epic":
-        pass
+        d["group_ids"] = [group_id] if group_id is not None else []
 
     entity = {k: d[k] for k in select_keys[type] if k in d}
     return {"type": type, "entity": entity, "parsed_row": d}
@@ -488,6 +496,7 @@ def write_created_entities_csv(created_entities):
 
 def build_ctx(cfg):
     ctx = {
+        "group_id": cfg["group_id"],
         "priority_config": load_priorities(cfg["priorities_csv_file"]),
         "priority_custom_field_id": cfg["priority_custom_field_id"],
         "user_config": load_users(cfg["users_csv_file"]),

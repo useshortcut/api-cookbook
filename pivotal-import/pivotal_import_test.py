@@ -3,6 +3,7 @@ from pivotal_import import *
 
 def create_test_ctx():
     return {
+        "group_id": "group_123",
         "priority_config": {"p2 - medium": "priority_medium_123"},
         "priority_custom_field_id": "priority_123",
         "user_config": {
@@ -102,6 +103,7 @@ def test_build_story_with_comments():
         "type": "story",
         "entity": {
             "story_type": "feature",
+            "group_id": "group_123",
             "comments": [
                 {"text": "Comment 1"},
                 {"text": "Comment 2"},
@@ -147,6 +149,7 @@ def test_build_story_with_reviews():
                 "type": "story",
                 "entity": {
                     "story_type": "feature",
+                    "group_id": "group_123",
                     "comments": [
                         {
                             "author_id": None,
@@ -173,6 +176,7 @@ def test_build_story_with_reviews():
                 "entity": {
                     "story_type": "bug",
                     "requested_by_id": "daniel_member_id",
+                    "group_id": "group_123",
                     "comments": [
                         {"text": "Comment 1"},
                         {"text": "Comment 2"},
@@ -222,6 +226,7 @@ def test_build_story_priority_mapping():
             "type": "story",
             "entity": {
                 "story_type": "feature",
+                "group_id": "group_123",
                 "custom_fields": [
                     {
                         "field_id": "priority_123",
@@ -239,6 +244,7 @@ def test_build_story_priority_mapping():
             "type": "story",
             "entity": {
                 "story_type": "bug",
+                "group_id": "group_123",
                 "labels": [
                     {"name": PIVOTAL_TO_SHORTCUT_LABEL},
                     {"name": PIVOTAL_TO_SHORTCUT_RUN_LABEL},
@@ -267,6 +273,7 @@ def test_build_story_workflow_mapping():
             "type": "story",
             "entity": {
                 "story_type": "feature",
+                "group_id": "group_123",
                 "workflow_state_id": ctx["workflow_config"]["unstarted"],
                 "labels": [
                     {"name": PIVOTAL_TO_SHORTCUT_LABEL},
@@ -279,6 +286,7 @@ def test_build_story_workflow_mapping():
             "type": "story",
             "entity": {
                 "story_type": "bug",
+                "group_id": "group_123",
                 "workflow_state_id": ctx["workflow_config"]["started"],
                 "labels": [
                     {"name": PIVOTAL_TO_SHORTCUT_LABEL},
@@ -308,6 +316,7 @@ def test_build_story_user_mapping():
             "type": "story",
             "entity": {
                 "story_type": "feature",
+                "group_id": "group_123",
                 "requested_by_id": ctx["user_config"]["Daniel McFadden"],
                 "labels": [
                     {"name": PIVOTAL_TO_SHORTCUT_LABEL},
@@ -320,10 +329,56 @@ def test_build_story_user_mapping():
             "type": "story",
             "entity": {
                 "story_type": "bug",
+                "group_id": "group_123",
                 "owner_ids": [
                     ctx["user_config"]["Amy Williams"],
                     ctx["user_config"]["Daniel McFadden"],
                 ],
+                "labels": [
+                    {"name": PIVOTAL_TO_SHORTCUT_LABEL},
+                    {"name": PIVOTAL_TO_SHORTCUT_RUN_LABEL},
+                ],
+            },
+            "parsed_row": rows[1],
+        },
+    ] == [build_entity(ctx, d) for d in rows]
+
+
+def test_build_no_group():
+    ctx = create_test_ctx()
+    ctx["group_id"] = None  # field is allowed to be null/None
+    rows = [
+        {
+            "story_type": "feature",
+            "requester": "Daniel McFadden",
+        },
+        {
+            "story_type": "epic",
+            "name": "An Epic Name",
+            # TODO Imported epics don't currently honor the requester as they should. Will fix in subsequent commit.
+            "requester": "Amy Williams",
+        },
+    ]
+
+    assert [
+        {
+            "type": "story",
+            "entity": {
+                "story_type": "feature",
+                "group_id": None,
+                "requested_by_id": ctx["user_config"]["Daniel McFadden"],
+                "labels": [
+                    {"name": PIVOTAL_TO_SHORTCUT_LABEL},
+                    {"name": PIVOTAL_TO_SHORTCUT_RUN_LABEL},
+                ],
+            },
+            "parsed_row": rows[0],
+        },
+        {
+            "type": "epic",
+            "entity": {
+                "name": "An Epic Name",
+                "group_ids": [],
                 "labels": [
                     {"name": PIVOTAL_TO_SHORTCUT_LABEL},
                     {"name": PIVOTAL_TO_SHORTCUT_RUN_LABEL},
@@ -346,6 +401,7 @@ def test_build_release():
         "entity": {
             "name": "A Release",
             "story_type": "chore",
+            "group_id": "group_123",
             "labels": [
                 {"name": PIVOTAL_TO_SHORTCUT_LABEL},
                 {"name": PIVOTAL_TO_SHORTCUT_RUN_LABEL},
@@ -372,6 +428,7 @@ def test_build_epic():
         "type": "epic",
         "entity": {
             "name": "An Epic Name",
+            "group_ids": ["group_123"],
             "labels": [
                 {"name": PIVOTAL_TO_SHORTCUT_LABEL},
                 {"name": PIVOTAL_TO_SHORTCUT_RUN_LABEL},
