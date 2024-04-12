@@ -15,6 +15,7 @@ In order to run this, you will require a Pivotal account and the ability to sign
 1. Run `make import` to perform a dry-run of the import.
    - Follow instructions printed to the console to ensure the mapping of Pivotal and Shortcut data is complete and correct.
    - Refer to `data/priorities.csv`, `data/states.csv`, and `data/users.csv` to review these mappings.
+   - Ensure a `group_id` is set in your `config.json` file if you want to assign the epics and stories you import to a Shortcut Team/Group.
 1. If the dry-run output looks correct, you can apply the import to your Shortcut workspace by running `make import-apply`
    - The console should print a link to an import-specific Shortcut label page that you can review to find all imported Stories and Epics.
    - If you run the importer multiple times, you can review all imported Stories and Epics by visiting Settings > Labels and then searching for the `pivotal->shortcut` label and clicking on it.
