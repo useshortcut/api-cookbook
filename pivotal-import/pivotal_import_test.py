@@ -436,6 +436,44 @@ def test_build_epic():
     } == build_entity(ctx, d)
 
 
+def test_assign_stories_to_epics():
+    assert assign_stories_to_epics(
+        [
+            {
+                "type": "story",
+                "entity": {
+                    "name": "A Story 1",
+                    # This label is used to determine epic membership of the story; see the epic's labels
+                    "labels": [{"name": "an epic name"}],
+                },
+            },
+            # This story is not assigned to an epic, and so should not have an epic_id.
+            {"type": "story", "entity": {"name": "A Story 2"}},
+        ],
+        [
+            {
+                "type": "epic",
+                # This label is used to determine epic membership of the story; see the story's labels
+                "entity": {"id": 1234, "labels": [{"name": "an epic name"}]},
+                "imported_entity": {"id": 1234},
+            }
+        ],
+    ) == [
+        {
+            "type": "story",
+            "entity": {
+                "name": "A Story 1",
+                "epic_id": 1234,
+                "labels": [{"name": "an epic name"}],
+            },
+        },
+        # Note the absence of the epic_id, fixing a bug where we unintentionally assigned
+        # an epic to every story; bug introduced in commit
+        # efbb2ddb691c7c91b0f2e3c817cfead663adc5db on 2024-04-08
+        {"type": "story", "entity": {"name": "A Story 2"}},
+    ]
+
+
 def test_entity_collector():
     entity_collector = EntityCollector()
 

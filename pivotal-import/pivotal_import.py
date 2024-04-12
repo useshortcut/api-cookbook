@@ -385,6 +385,37 @@ def get_mock_emitter():
     return mock_emitter
 
 
+def collect_epic_label_mapping(epics):
+    """
+    Return a dict mapping label names to Shortcut Epic ID.
+    """
+    epic_label_map = {}
+    for epic in epics:
+        for label in epic["entity"]["labels"]:
+            label_name = label["name"]
+            if (
+                label_name is not PIVOTAL_TO_SHORTCUT_LABEL
+                and label_name is not PIVOTAL_TO_SHORTCUT_RUN_LABEL
+            ):
+                epic_label_map[label_name] = epic["imported_entity"]["id"]
+    return epic_label_map
+
+
+def assign_stories_to_epics(stories, epics):
+    """
+    Mutate the `stories` to set an epic_id if that story is assigned to that epic.
+    """
+    epic_label_map = collect_epic_label_mapping(epics)
+    for story in stories:
+        for label in story["entity"].get("labels", []):
+            label_name = label["name"]
+            epic_id = epic_label_map.get(label_name)
+            logger.debug(f"story epic id {epic_id}")
+            if epic_id is not None:
+                story["entity"]["epic_id"] = epic_id
+    return stories
+
+
 class EntityCollector:
     """Collect and process entities for import into Shortcut.
 
@@ -432,20 +463,8 @@ class EntityCollector:
         self.epics = self.emitter(self.epics)
 
         print("Finished creating {} epics".format(len(self.epics)))
-        epic_label_map = {}
-        for epic in self.epics:
-            for label in epic["entity"]["labels"]:
-                label_name = label["name"]
-                if label_name is not PIVOTAL_TO_SHORTCUT_LABEL:
-                    epic_label_map[label_name] = epic["imported_entity"]["id"]
 
-        # update all the stories with the appropriate epic ids
-        for story in self.stories:
-            for label in story["entity"].get("labels", []):
-                label_name = label["name"]
-                epic_id = epic_label_map.get(label_name)
-                if epic_id is not None:
-                    story["entity"]["epic_id"] = epic_id
+        assign_stories_to_epics(self.stories, self.epics)
 
         # create all the stories
         self.stories = self.emitter(self.stories)
