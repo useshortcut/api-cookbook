@@ -130,6 +130,7 @@ select_keys = {
         "comments",
         "created_at",
         "custom_fields",
+        "deadline",
         "description",
         "estimate",
         "external_id",

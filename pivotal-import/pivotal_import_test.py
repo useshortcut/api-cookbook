@@ -392,6 +392,7 @@ def test_build_release():
     d = {
         "story_type": "release",
         "name": "A Release",
+        "deadline": "2014-10-15T00:00:00",
     }
 
     assert {
@@ -405,6 +406,7 @@ def test_build_release():
                 {"name": PIVOTAL_TO_SHORTCUT_RUN_LABEL},
                 {"name": PIVOTAL_RELEASE_TYPE_LABEL},
             ],
+            "deadline": "2014-10-15T00:00:00",
         },
         "parsed_row": d,
     } == build_entity(ctx, d)
