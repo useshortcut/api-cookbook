@@ -135,6 +135,7 @@ select_keys = {
         "external_id",
         "external_links",
         "follower_ids",
+        "group_id",
         "labels",
         "name",
         "owner_ids",
@@ -147,6 +148,7 @@ select_keys = {
         "created_at",
         "description",
         "external_id",
+        "group_ids",
         "labels",
         "name",
     ],
@@ -203,6 +205,10 @@ def build_entity(ctx, d):
         [{"name": PIVOTAL_TO_SHORTCUT_LABEL}, {"name": PIVOTAL_TO_SHORTCUT_RUN_LABEL}]
     )
 
+    # The Shortcut Team/Group ID to assign to stories/epics,
+    # may be None which the REST API interprets correctly.
+    group_id = ctx["group_id"]
+
     # reconcile entity types
     type = "story"
     if d["story_type"] == "epic":
@@ -228,6 +234,8 @@ def build_entity(ctx, d):
         d.setdefault("labels", []).append({"name": PIVOTAL_RELEASE_TYPE_LABEL})
 
     if type == "story":
+        # assign to team/group
+        d["group_id"] = group_id
         # process workflow state
         pt_state = d.get("pt_state")
         if pt_state:
@@ -311,7 +319,9 @@ def build_entity(ctx, d):
             del d["comments"]
 
     elif type == "epic":
-        pass
+        # While Pivotal's model does not have a requester or owners for
+        # Epics, we can still apply the provided Team/Group assignment.
+        d["group_ids"] = [group_id] if group_id is not None else []
 
     entity = {k: d[k] for k in select_keys[type] if k in d}
     return {"type": type, "entity": entity, "parsed_row": d}
@@ -375,6 +385,37 @@ def get_mock_emitter():
     return mock_emitter
 
 
+def collect_epic_label_mapping(epics):
+    """
+    Return a dict mapping label names to Shortcut Epic ID.
+    """
+    epic_label_map = {}
+    for epic in epics:
+        for label in epic["entity"]["labels"]:
+            label_name = label["name"]
+            if (
+                label_name is not PIVOTAL_TO_SHORTCUT_LABEL
+                and label_name is not PIVOTAL_TO_SHORTCUT_RUN_LABEL
+            ):
+                epic_label_map[label_name] = epic["imported_entity"]["id"]
+    return epic_label_map
+
+
+def assign_stories_to_epics(stories, epics):
+    """
+    Mutate the `stories` to set an epic_id if that story is assigned to that epic.
+    """
+    epic_label_map = collect_epic_label_mapping(epics)
+    for story in stories:
+        for label in story["entity"].get("labels", []):
+            label_name = label["name"]
+            epic_id = epic_label_map.get(label_name)
+            logger.debug(f"story epic id {epic_id}")
+            if epic_id is not None:
+                story["entity"]["epic_id"] = epic_id
+    return stories
+
+
 class EntityCollector:
     """Collect and process entities for import into Shortcut.
 
@@ -422,20 +463,8 @@ class EntityCollector:
         self.epics = self.emitter(self.epics)
 
         print("Finished creating {} epics".format(len(self.epics)))
-        epic_label_map = {}
-        for epic in self.epics:
-            for label in epic["entity"]["labels"]:
-                label_name = label["name"]
-                if label_name is not PIVOTAL_TO_SHORTCUT_LABEL:
-                    epic_label_map[label_name] = epic["imported_entity"]["id"]
 
-        # update all the stories with the appropriate epic ids
-        for story in self.stories:
-            for label in story["entity"].get("labels", []):
-                label_name = label["name"]
-                epic_id = epic_label_map.get(label_name)
-                if epic_id is not None:
-                    story["entity"]["epic_id"] = epic_id
+        assign_stories_to_epics(self.stories, self.epics)
 
         # create all the stories
         self.stories = self.emitter(self.stories)
@@ -473,14 +502,15 @@ def process_pt_csv_export(ctx, pt_csv_file, entity_collector):
 
 def write_created_entities_csv(created_entities):
     with open(shortcut_imported_entities_csv, "w") as f:
-        writer = csv.DictWriter(f, ["id", "type", "name", "url"])
+        writer = csv.DictWriter(f, ["id", "type", "name", "epic_id", "url"])
         writer.writeheader()
         for entity in created_entities:
             writer.writerow(
                 {
                     "id": entity["id"],
-                    "name": entity["name"],
                     "type": entity["entity_type"],
+                    "name": entity["name"],
+                    "epic_id": entity["epic_id"] if "epic_id" in entity else None,
                     "url": entity["app_url"],
                 }
             )
@@ -488,6 +518,7 @@ def write_created_entities_csv(created_entities):
 
 def build_ctx(cfg):
     ctx = {
+        "group_id": cfg["group_id"],
         "priority_config": load_priorities(cfg["priorities_csv_file"]),
         "priority_custom_field_id": cfg["priority_custom_field_id"],
         "user_config": load_users(cfg["users_csv_file"]),
