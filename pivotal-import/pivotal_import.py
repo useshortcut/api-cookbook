@@ -319,6 +319,8 @@ def build_entity(ctx, d):
             del d["comments"]
 
     elif type == "epic":
+        # While Pivotal's model does not have a requester or owners for
+        # Epics, we can still apply the provided Team/Group assignment.
         d["group_ids"] = [group_id] if group_id is not None else []
 
     entity = {k: d[k] for k in select_keys[type] if k in d}

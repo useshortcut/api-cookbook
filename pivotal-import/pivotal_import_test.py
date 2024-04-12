@@ -355,8 +355,6 @@ def test_build_no_group():
         {
             "story_type": "epic",
             "name": "An Epic Name",
-            # TODO Imported epics don't currently honor the requester as they should. Will fix in subsequent commit.
-            "requester": "Amy Williams",
         },
     ]
 
