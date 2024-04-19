@@ -89,6 +89,7 @@ def sc_post(path, data={}):
     url = api_url_base + path
     logger.debug("POST url=%s params=%s headers=%s" % (url, data, headers))
     resp = requests.post(url, headers=headers, json=data)
+    logger.debug(f"POST response: {resp.status_code} {resp.text}")
     resp.raise_for_status()
     return resp.json()
 
