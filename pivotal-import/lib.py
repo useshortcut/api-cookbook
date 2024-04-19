@@ -198,7 +198,7 @@ def print_groups_tree(groups):
         writer.writeheader()
         for group in groups:
             writer.writerow({"group_name": group["name"], "group_id": group["id"]})
-            output_lines.append('Group/Team {id} : "{name}"'.format_map(group))
+            output_lines.append('Team/Group {id} : "{name}"'.format_map(group))
     printerr("Shortcut Teams/Groups")
     printerr("=====================")
     printerr("\n".join(output_lines))
