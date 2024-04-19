@@ -114,6 +114,8 @@ def test_build_story_with_comments():
                 {"name": PIVOTAL_TO_SHORTCUT_RUN_LABEL},
             ],
         },
+        "iteration": None,
+        "pt_iteration_id": None,
         "parsed_row": d,
     } == build_entity(ctx, d)
 
@@ -169,6 +171,8 @@ def test_build_story_with_reviews():
                         {"name": PIVOTAL_HAD_REVIEW_LABEL},
                     ],
                 },
+                "iteration": None,
+                "pt_iteration_id": None,
                 "parsed_row": rows[0],
             },
             {
@@ -201,6 +205,8 @@ def test_build_story_with_reviews():
                         {"name": PIVOTAL_HAD_REVIEW_LABEL},
                     ],
                 },
+                "iteration": None,
+                "pt_iteration_id": None,
                 "parsed_row": rows[1],
             },
         ]
@@ -238,6 +244,8 @@ def test_build_story_priority_mapping():
                     {"name": PIVOTAL_TO_SHORTCUT_RUN_LABEL},
                 ],
             },
+            "iteration": None,
+            "pt_iteration_id": None,
             "parsed_row": rows[0],
         },
         {
@@ -250,6 +258,8 @@ def test_build_story_priority_mapping():
                     {"name": PIVOTAL_TO_SHORTCUT_RUN_LABEL},
                 ],
             },
+            "iteration": None,
+            "pt_iteration_id": None,
             "parsed_row": rows[1],
         },
     ] == [build_entity(ctx, d) for d in rows]
@@ -280,6 +290,8 @@ def test_build_story_workflow_mapping():
                     {"name": PIVOTAL_TO_SHORTCUT_RUN_LABEL},
                 ],
             },
+            "iteration": None,
+            "pt_iteration_id": None,
             "parsed_row": rows[0],
         },
         {
@@ -293,6 +305,8 @@ def test_build_story_workflow_mapping():
                     {"name": PIVOTAL_TO_SHORTCUT_RUN_LABEL},
                 ],
             },
+            "iteration": None,
+            "pt_iteration_id": None,
             "parsed_row": rows[1],
         },
     ] == [build_entity(ctx, d) for d in rows]
@@ -323,6 +337,8 @@ def test_build_story_user_mapping():
                     {"name": PIVOTAL_TO_SHORTCUT_RUN_LABEL},
                 ],
             },
+            "iteration": None,
+            "pt_iteration_id": None,
             "parsed_row": rows[0],
         },
         {
@@ -339,6 +355,8 @@ def test_build_story_user_mapping():
                     {"name": PIVOTAL_TO_SHORTCUT_RUN_LABEL},
                 ],
             },
+            "iteration": None,
+            "pt_iteration_id": None,
             "parsed_row": rows[1],
         },
     ] == [build_entity(ctx, d) for d in rows]
@@ -370,6 +388,8 @@ def test_build_no_group():
                     {"name": PIVOTAL_TO_SHORTCUT_RUN_LABEL},
                 ],
             },
+            "iteration": None,
+            "pt_iteration_id": None,
             "parsed_row": rows[0],
         },
         {
@@ -382,6 +402,8 @@ def test_build_no_group():
                     {"name": PIVOTAL_TO_SHORTCUT_RUN_LABEL},
                 ],
             },
+            "iteration": None,
+            "pt_iteration_id": None,
             "parsed_row": rows[1],
         },
     ] == [build_entity(ctx, d) for d in rows]
@@ -408,6 +430,8 @@ def test_build_release():
             ],
             "deadline": "2014-10-15T00:00:00",
         },
+        "iteration": None,
+        "pt_iteration_id": None,
         "parsed_row": d,
     } == build_entity(ctx, d)
 
@@ -434,6 +458,8 @@ def test_build_epic():
                 {"name": PIVOTAL_TO_SHORTCUT_RUN_LABEL},
             ],
         },
+        "iteration": None,
+        "pt_iteration_id": None,
         "parsed_row": d,
     } == build_entity(ctx, d)
 
@@ -449,7 +475,7 @@ def test_assign_stories_to_epics():
                     "labels": [{"name": "an epic name"}],
                 },
             },
-            # This story is not assigned to an epic, and so should not have an epic_id.
+            # This story is not assigned to an epic, and so should not have an epic_id
             {"type": "story", "entity": {"name": "A Story 2"}},
         ],
         [
@@ -476,12 +502,83 @@ def test_assign_stories_to_epics():
     ]
 
 
+def test_assign_stories_to_iterations():
+    assert assign_stories_to_iterations(
+        [
+            {
+                "type": "story",
+                "entity": {
+                    "name": "A Story 1",
+                },
+                "iteration": "123|2024-01-01|2025-01-01",
+                "pt_iteration_id": "123",
+            },
+            # This story is not assigned to an iteration, and so should not have an iteration_id
+            {
+                "type": "story",
+                "entity": {"name": "A Story 2"},
+                "iteration": None,
+                "pt_iteration_id": None,
+            },
+        ],
+        [
+            {
+                "type": "iteration",
+                "pt_iteration_id": "123",
+                "entity": {
+                    "name": "PT 123",
+                    "start_date": "2024-01-01",
+                    "end_date": "2025-01-01",
+                },
+                "imported_entity": {"id": 1234},
+            }
+        ],
+    ) == [
+        {
+            "type": "story",
+            "entity": {
+                "name": "A Story 1",
+                "iteration_id": 1234,
+            },
+            "iteration": "123|2024-01-01|2025-01-01",
+            "pt_iteration_id": "123",
+        },
+        {
+            "type": "story",
+            "entity": {"name": "A Story 2"},
+            "iteration": None,
+            "pt_iteration_id": None,
+        },
+    ]
+
+
 def test_entity_collector():
     entity_collector = EntityCollector()
 
-    entity_collector.collect({"type": "story", "entity": {"name": "A Story 1"}})
-    entity_collector.collect({"type": "story", "entity": {"name": "A Story 2"}})
-    entity_collector.collect({"type": "story", "entity": {"name": "A Story 3"}})
+    entity_collector.collect(
+        {
+            "type": "story",
+            "entity": {"name": "A Story 1"},
+            "iteration": None,
+            "pt_iteration_id": None,
+        }
+    )
+    entity_collector.collect(
+        {
+            "type": "story",
+            "entity": {"name": "A Story 2"},
+            "iteration": None,
+            "pt_iteration_id": None,
+        }
+    )
+    entity_collector.collect(
+        {
+            "type": "story",
+            "entity": {"name": "A Story 3"},
+            "iteration": None,
+            "pt_iteration_id": None,
+        }
+    )
 
     created = entity_collector.commit()
 
@@ -511,26 +608,46 @@ def test_entity_collector_with_epics():
     entity_collector = EntityCollector()
 
     # Given: a sequence of stories and epics
-    entity_collector.collect({"type": "story", "entity": {"name": "A Story 1"}})
+    entity_collector.collect(
+        {
+            "type": "story",
+            "entity": {"name": "A Story 1"},
+            "iteration": None,
+            "pt_iteration_id": None,
+        }
+    )
     entity_collector.collect(
         {
             "type": "story",
             "entity": {"name": "A Story 2", "labels": [{"name": "my-epic-label-2"}]},
+            "iteration": None,
+            "pt_iteration_id": None,
         }
     )
     entity_collector.collect(
         {
             "type": "epic",
             "entity": {"name": "An Epic", "labels": [{"name": "my-epic-label"}]},
+            "iteration": None,
+            "pt_iteration_id": None,
         }
     )
     entity_collector.collect(
         {
             "type": "epic",
             "entity": {"name": "Another Epic", "labels": [{"name": "my-epic-label-2"}]},
+            "iteration": None,
+            "pt_iteration_id": None,
         }
     )
-    entity_collector.collect({"type": "story", "entity": {"name": "A Story 3"}})
+    entity_collector.collect(
+        {
+            "type": "story",
+            "entity": {"name": "A Story 3"},
+            "iteration": None,
+            "pt_iteration_id": None,
+        }
+    )
 
     # When: the entities are commited/crread
     created = entity_collector.commit()

@@ -108,4 +108,8 @@ def test_parse_comment_without_suffix():
 
 
 def test_parse_date():
-    assert parse_date("Oct 15, 2014") == "2014-10-15T00:00:00"
+    assert parse_date("Oct 15, 2024") == "2024-10-15"
+
+
+def test_parse_date_time():
+    assert parse_date_time("Oct 15, 2014") == "2014-10-15T00:00:00"

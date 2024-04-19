@@ -485,13 +485,19 @@ def parse_comment(s):
             author = author.strip()
         created_at = match.group(3)
         if created_at is not None:
-            created_at = parse_date(created_at.strip())
+            created_at = parse_date_time(created_at.strip())
         return {"text": txt, "author": author, "created_at": created_at}
     else:
         return {"text": s}
 
 
 def parse_date(d: str):
+    """Parse the string as a date, then return as a string in ISO 8601 format."""
+    dt = datetime.strptime(d, "%b %d, %Y").date()
+    return dt.strftime("%Y-%m-%d")
+
+
+def parse_date_time(d: str):
     """Parse the string as a datetime, then return as a string in ISO 8601 format."""
     return datetime.strptime(d, "%b %d, %Y").isoformat()
 
@@ -502,7 +508,7 @@ def identity(x):
 
 
 def print_stats(stats):
-    plurals = {"story": "stories", "epic": "epics"}
+    plurals = {"story": "stories", "epic": "epics", "iteration": "iterations"}
     for k, v in stats.items():
         plural = plurals.get(k, k + "s")
         print(f"  - {plural.capitalize()} : {v}")
