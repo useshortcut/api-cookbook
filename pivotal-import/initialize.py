@@ -129,8 +129,6 @@ def exit_unmapped_pt_priorities(priorities_csv_file, unmapped_pt_priorities):
 3. Save your {priorities_csv_file} file and rerun initalize.py to validate it.
 """
     )
-    custom_fields = sc_get("/custom-fields")
-    print_custom_fields_tree(custom_fields)
     sys.exit(1)
 
 
@@ -241,8 +239,6 @@ def exit_unmapped_pt_states(states_csv_file, unmapped_pt_states):
 3. Save your {states_csv_file} file and rerun initalize.py to validate it.
 """
     )
-    workflows = sc_get("/workflows")
-    print_workflows_tree(workflows)
     sys.exit(1)
 
 
@@ -559,7 +555,22 @@ def main(argv):
     if args.debug:
         logging.basicConfig(level=logging.DEBUG)
 
+    # Configuration consists of the environment variable SHORTCUT_API_TOKEN and all values
+    # found in the local config.json file (which is written by this script if absent).
     cfg = load_config()
+
+    # Ensure local data/shortcut_*.csv files are populated with user's workspace data,
+    # so they can review what's available for mapping in the steps that follow.
+    custom_fields = sc_get("/custom-fields")
+    print_custom_fields_tree(custom_fields)
+    groups = sc_get("/groups")
+    print_groups_tree(groups)
+    workflows = sc_get("/workflows")
+    print_workflows_tree(workflows)
+
+    # Populate local data/priorities.csv, data/states.csv, and data/users.csv files,
+    # automatically where possible, and print problems to the console where mappings
+    # are not 100% complete.
     populate_priorities_csv(cfg["priorities_csv_file"], cfg["priority_custom_field_id"])
     populate_states_csv(cfg["states_csv_file"], cfg["workflow_id"])
     populate_users_csv(cfg["users_csv_file"], cfg["pt_csv_file"])

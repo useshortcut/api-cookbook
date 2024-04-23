@@ -238,8 +238,6 @@ def default_group_id():
   4. Rerun initialize.py.
 """
         )
-        print_groups_tree(groups)
-        printerr("\n")
         return None
     else:
         return group_id
@@ -266,10 +264,9 @@ def default_priority_custom_field_id():
  1. Review the Shortcut Custom Fields printed below (also written to {shortcut_custom_fields_csv} for reference).
  2. Copy the UUID of your desired Custom Field (custom_field_id column in the CSV).
  3. Paste it as the "priority_custom_field_id" value in your config.json file.
- 4. Rerun initialize.py."""
+ 4. Rerun initialize.py.
+"""
         )
-        print_custom_fields_tree(custom_fields)
-        printerr("\n")
         return None
     else:
         return priority_custom_field_id
@@ -297,8 +294,6 @@ def default_workflow_id():
   4. Rerun initialize.py.
 """
         )
-        print_workflows_tree(workflows)
-        printerr("\n")
         return None
     else:
         return workflow_id
