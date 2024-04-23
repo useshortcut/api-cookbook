@@ -124,7 +124,7 @@ def exit_unmapped_pt_priorities(priorities_csv_file, unmapped_pt_priorities):
     )
     printerr(
         f"""To resolve this, please:
-1. Review the Shortcut Custom Fields printed below (also written to {shortcut_custom_fields_csv} for reference)
+1. Review the Shortcut Custom Fields written to {shortcut_custom_fields_csv}
 2. Copy the UUIDs of Custom Field Values (custom_field_value_id column in the CSV) that you want to map to Pivotal priorities where there are blanks in your {priorities_csv_file} file.
 3. Save your {priorities_csv_file} file and rerun initalize.py to validate it.
 """
@@ -236,7 +236,7 @@ def exit_unmapped_pt_states(states_csv_file, unmapped_pt_states):
     )
     printerr(
         f"""To resolve this, please:
-1. Review the Shortcut Workflow States printed below (also written to {shortcut_workflows_csv} for reference)
+1. Review the Shortcut Workflow States written to {shortcut_workflows_csv}
 2. Copy the numeric IDs of Workflow States (workflow_state_id column in the CSV) that you want to map to Pivotal states where there are blanks in your {states_csv_file} file.
 3. Save your {states_csv_file} file and rerun initalize.py to validate it.
 """
@@ -490,7 +490,7 @@ def exit_unmapped_pt_users(users_csv_file, unmapped_pt_users, user_info_list):
     )
     printerr(
         f"""To resolve this, please:
-1. Review the Shortcut users in your workspace, written to {shortcut_users_csv} for your convenience.
+1. Review the Shortcut users in your workspace, written to {shortcut_users_csv}
 2. For users you've already invited to Shortcut, copy their email address from {shortcut_users_csv}
    and fill in the appropriate blank entries in {users_csv_file} for them.
 3. For users you haven't already invited to Shortcut, you can enter their email addresses manually into
@@ -531,7 +531,7 @@ def exit_uninvited_pt_users(uninvited_pt_users):
     printerr(
         f"""To resolve this, invite these people to your Shortcut workspace.
 
-1. Copy the list of emails printed above (also written to {emails_to_invite} for reference).
+1. Copy the list of emails written to {emails_to_invite}
 2. Navigate to https://app.shortcut.com/settings/users/invite
 3. Click "Invite Emails".
 4. Paste the list of emails into the text area.
