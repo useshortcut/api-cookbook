@@ -89,6 +89,7 @@ def sc_post(path, data={}):
     url = api_url_base + path
     logger.debug("POST url=%s params=%s headers=%s" % (url, data, headers))
     resp = requests.post(url, headers=headers, json=data)
+    logger.debug(f"POST response: {resp.status_code} {resp.text}")
     resp.raise_for_status()
     return resp.json()
 
@@ -197,7 +198,7 @@ def print_groups_tree(groups):
         writer.writeheader()
         for group in groups:
             writer.writerow({"group_name": group["name"], "group_id": group["id"]})
-            output_lines.append('Group/Team {id} : "{name}"'.format_map(group))
+            output_lines.append('Team/Group {id} : "{name}"'.format_map(group))
     printerr("Shortcut Teams/Groups")
     printerr("=====================")
     printerr("\n".join(output_lines))
@@ -484,13 +485,19 @@ def parse_comment(s):
             author = author.strip()
         created_at = match.group(3)
         if created_at is not None:
-            created_at = parse_date(created_at.strip())
+            created_at = parse_date_time(created_at.strip())
         return {"text": txt, "author": author, "created_at": created_at}
     else:
         return {"text": s}
 
 
 def parse_date(d: str):
+    """Parse the string as a date, then return as a string in ISO 8601 format."""
+    dt = datetime.strptime(d, "%b %d, %Y").date()
+    return dt.strftime("%Y-%m-%d")
+
+
+def parse_date_time(d: str):
     """Parse the string as a datetime, then return as a string in ISO 8601 format."""
     return datetime.strptime(d, "%b %d, %Y").isoformat()
 
@@ -501,7 +508,7 @@ def identity(x):
 
 
 def print_stats(stats):
-    plurals = {"story": "stories", "epic": "epics"}
+    plurals = {"story": "stories", "epic": "epics", "iteration": "iterations"}
     for k, v in stats.items():
         plural = plurals.get(k, k + "s")
         print(f"  - {plural.capitalize()} : {v}")

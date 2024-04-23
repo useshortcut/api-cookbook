@@ -39,13 +39,16 @@ def sc_creator(items):
     """Create Shortcut entities utilizing bulk APIs whenever possible.
 
     Accepts a list of dicts that must have at least two keys `type`
-    and `entity`. `type` must be either story or epic. `entity` must
-    be the payload that is sent to the Shortcut API.
+    and `entity`. `type` must be one of:
+    - epic
+    - iteration
+    - story
 
-    Returns back the list of items with two new keys:
+    `entity` must be the payload that is sent to the Shortcut API.
+
+    Mutates and returns the list of items with two new keys:
     - `imported_id`: the id of the entity that was created
     - `imported_entity`: the full entity that was created
-
     """
     batch_stories = []
 
@@ -61,6 +64,9 @@ def sc_creator(items):
             batch_stories.append(item)
         elif item["type"] == "epic":
             res = sc_post("/epics", item["entity"])
+            item["imported_entity"] = res
+        elif item["type"] == "iteration":
+            res = sc_post("/iterations", item["entity"])
             item["imported_entity"] = res
         elif item["type"] == "label":
             res = sc_post("/labels", item["entity"])
@@ -95,13 +101,16 @@ def parse_priority(priority):
 
 
 col_map = {
-    "accepted at": ("accepted_at", parse_date),
-    "created at": ("created_at", parse_date),
+    "accepted at": ("accepted_at", parse_date_time),
+    "created at": ("created_at", parse_date_time),
     "current state": "pt_state",
-    "deadline": ("deadline", parse_date),
+    "deadline": ("deadline", parse_date_time),
     "description": "description",
     "estimate": ("estimate", int),
     "id": "external_id",
+    "iteration": "pt_iteration_id",
+    "iteration end": ("pt_iteration_end_date", parse_date),
+    "iteration start": ("pt_iteration_start_date", parse_date),
     "labels": ("labels", parse_labels),
     "priority": ("priority", parse_priority),
     "requested by": "requester",
@@ -137,6 +146,7 @@ select_keys = {
         "external_links",
         "follower_ids",
         "group_id",
+        "iteration_id",
         "labels",
         "name",
         "owner_ids",
@@ -234,6 +244,8 @@ def build_entity(ctx, d):
         d["story_type"] = "chore"
         d.setdefault("labels", []).append({"name": PIVOTAL_RELEASE_TYPE_LABEL})
 
+    iteration = None
+    pt_iteration_id = d["pt_iteration_id"] if "pt_iteration_id" in d else None
     if type == "story":
         # assign to team/group
         d["group_id"] = group_id
@@ -311,6 +323,16 @@ def build_entity(ctx, d):
         if custom_fields:
             d["custom_fields"] = custom_fields
 
+        if pt_iteration_id:
+            # Python dicts are not hashable and thus can't be
+            # put into a set. To avoid extra-extra bookeeping,
+            # capturing this as a trivially-parsable string
+            # which can be accrued in a set in the entity
+            # collector.
+            start_date = d["pt_iteration_start_date"]
+            end_date = d["pt_iteration_end_date"]
+            iteration = "|".join([pt_iteration_id, start_date, end_date])
+
         # as a last step, ensure comments (both those that were comments
         # in Pivotal, and those we add during import to fill feature gaps)
         # are all added to the d dict
@@ -325,7 +347,13 @@ def build_entity(ctx, d):
         d["group_ids"] = [group_id] if group_id is not None else []
 
     entity = {k: d[k] for k in select_keys[type] if k in d}
-    return {"type": type, "entity": entity, "parsed_row": d}
+    return {
+        "type": type,
+        "entity": entity,
+        "iteration": iteration,
+        "pt_iteration_id": pt_iteration_id,
+        "parsed_row": d,
+    }
 
 
 def load_mapping_csv(csv_file, from_key, to_key, to_transform=identity):
@@ -380,7 +408,11 @@ def get_mock_emitter():
             created_entity["entity_type"] = item["type"]
             created_entity["app_url"] = f"https://example.com/entity/{entity_id}"
             item["imported_entity"] = created_entity
-            print("Creating {} {}".format(entity_id, item["entity"]["name"]))
+            print(
+                'Creating {} {} "{}"'.format(
+                    item["type"], entity_id, item["entity"]["name"]
+                )
+            )
         return items
 
     return mock_emitter
@@ -417,6 +449,31 @@ def assign_stories_to_epics(stories, epics):
     return stories
 
 
+def collect_pt_iteration_mapping(iterations):
+    """
+    Return a dict mapping Pivotal iteration IDs to their corresponding Shortcut Iteration IDs.
+    """
+    d = {}
+    for iteration in iterations:
+        pt_iteration_id = iteration["pt_iteration_id"]
+        sc_iteration_id = iteration["imported_entity"]["id"]
+        d[str(pt_iteration_id)] = sc_iteration_id
+    return d
+
+
+def assign_stories_to_iterations(stories, iterations):
+    """
+    Mutate the `stories` to set an iteration_id if that story is assigned to that iteration.
+    """
+    pt_iteration_mapping = collect_pt_iteration_mapping(iterations)
+    for story in stories:
+        pt_iteration_id = story["pt_iteration_id"]
+        if pt_iteration_id:
+            sc_iteration_id = pt_iteration_mapping[str(pt_iteration_id)]
+            story["entity"]["iteration_id"] = sc_iteration_id
+    return stories
+
+
 class EntityCollector:
     """Collect and process entities for import into Shortcut.
 
@@ -428,8 +485,13 @@ class EntityCollector:
 
     def __init__(self, emitter=None):
         _mock_global_id = 0
-        self.epics = []
         self.stories = []
+        self.epics = []
+        # set of strings in {id}|{start}|{end} format
+        # because dicts aren't hashable in Python
+        self.iteration_strings = set()
+        # to be populated at commit()
+        self.iterations = []
         self.labels = []
         if emitter is None:
             emitter = get_mock_emitter()
@@ -438,6 +500,8 @@ class EntityCollector:
     def collect(self, item):
         if item["type"] == "story":
             self.stories.append(item)
+            if item["iteration"]:
+                self.iteration_strings.add(item["iteration"])
         elif item["type"] == "epic":
             self.epics.append(item)
         elif item["type"] == "label":
@@ -460,22 +524,39 @@ class EntityCollector:
                 label_url = label["imported_entity"]["app_url"]
                 print(f"Import Started\n\nVisit {label_url} to monitor import progress")
 
-        # create all the epics and find their associated epic ids
+        # create all the epics and find their associated Shortcut epic ids
         self.epics = self.emitter(self.epics)
-
         print("Finished creating {} epics".format(len(self.epics)))
-
         assign_stories_to_epics(self.stories, self.epics)
+
+        # create all iterations and find their associated Shortcut iteration ids
+        iteration_entities = []
+        for iteration_string in self.iteration_strings:
+            id, start_date, end_date = iteration_string.split("|")
+            name = f"PT {id}"
+            iteration_entities.append(
+                {
+                    "type": "iteration",
+                    "pt_iteration_id": id,
+                    "entity": {
+                        "name": name,
+                        "start_date": start_date,
+                        "end_date": end_date,
+                    },
+                }
+            )
+        self.iterations = self.emitter(iteration_entities)
+        print("Finished creating {} iterations".format(len(self.iterations)))
+        assign_stories_to_iterations(self.stories, self.iterations)
 
         # create all the stories
         self.stories = self.emitter(self.stories)
         print("Finished creating {} stories".format(len(self.stories)))
 
-        # Aggregate all the created stories and epics and labels into a list of maps
+        # Aggregate all the created stories, epics, iterations, and labels into a list of maps
         created_entities = []
         created_set = set()
-        for item in self.epics + self.stories:
-            # add item
+        for item in self.epics + self.iterations + self.stories:
             entity = item["imported_entity"]
             if entity["id"] not in created_set:
                 created_entities.append(entity)
@@ -503,7 +584,9 @@ def process_pt_csv_export(ctx, pt_csv_file, entity_collector):
 
 def write_created_entities_csv(created_entities):
     with open(shortcut_imported_entities_csv, "w") as f:
-        writer = csv.DictWriter(f, ["id", "type", "name", "epic_id", "url"])
+        writer = csv.DictWriter(
+            f, ["id", "type", "name", "epic_id", "iteration_id", "url"]
+        )
         writer.writeheader()
         for entity in created_entities:
             writer.writerow(
@@ -512,6 +595,9 @@ def write_created_entities_csv(created_entities):
                     "type": entity["entity_type"],
                     "name": entity["name"],
                     "epic_id": entity["epic_id"] if "epic_id" in entity else None,
+                    "iteration_id": (
+                        entity["iteration_id"] if "iteration_id" in entity else None
+                    ),
                     "url": entity["app_url"],
                 }
             )

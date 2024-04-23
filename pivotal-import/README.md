@@ -38,7 +38,6 @@ The following are known limitations:
   - Imported stories that had Pivotal reviews have an additional comment with a table that lists all of the story reviews from Pivotal (reviewer, review type, and review status).
   - Imported stories that had Pivotal reviews have a label in Shortcut of `pivotal-had-review`.
 - **No story blockers:** Pivotal story blockers (the relationships between stories) are not imported.
-- **No iterations:** Pivotal iterations are not imported.
 - **Epics are imported as unstarted:** Imported epics are set to an unstarted "Todo" state.
 - **No redirects:** The URLs in the descriptions and comments of your Pivotal stories/epics are not rewritten to point to imported Shortcut stories/epics; they remain unchanged.
 - **No attachments:** The attachments (including Google Drive attachments) are not imported into Shortcut.
