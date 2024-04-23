@@ -142,10 +142,9 @@ shortcut_workflows_csv = "data/shortcut_workflows.csv"
 
 def print_custom_fields_tree(custom_fields):
     """
-    Print and write to `shortcut_custom_fields_csv` the content of all Custom Fields
+    Write to `shortcut_custom_fields_csv` the content of all Custom Fields
     in the user's Shortcut workspace, including all Custom Field Values and their IDs.
     """
-    output_lines = []
     with open(shortcut_custom_fields_csv, "w") as f:
         writer = csv.DictWriter(
             f,
@@ -159,9 +158,6 @@ def print_custom_fields_tree(custom_fields):
         writer.writeheader()
         for custom_field in custom_fields:
             if custom_field["enabled"]:
-                output_lines.append(
-                    'Custom Field {id} : "{name}"'.format_map(custom_field)
-                )
                 for custom_field_value in custom_field["values"]:
                     writer.writerow(
                         {
@@ -171,22 +167,13 @@ def print_custom_fields_tree(custom_fields):
                             "custom_field_value_id": custom_field_value["id"],
                         }
                     )
-                    output_lines.append(
-                        '    Custom Field Value {id} : "{value}"'.format_map(
-                            custom_field_value
-                        )
-                    )
-    printerr("Shortcut Custom Fields")
-    printerr("======================")
-    printerr("\n".join(output_lines))
 
 
 def print_groups_tree(groups):
     """
-    Print and write to `shortcut_groups_csv` the content of all Teams/Groups
+    Write to `shortcut_groups_csv` the content of all Teams/Groups
     in the user's Shortcut workspace.
     """
-    output_lines = []
     with open(shortcut_groups_csv, "w") as f:
         writer = csv.DictWriter(
             f,
@@ -198,18 +185,13 @@ def print_groups_tree(groups):
         writer.writeheader()
         for group in groups:
             writer.writerow({"group_name": group["name"], "group_id": group["id"]})
-            output_lines.append('Team/Group {id} : "{name}"'.format_map(group))
-    printerr("Shortcut Teams/Groups")
-    printerr("=====================")
-    printerr("\n".join(output_lines))
 
 
 def print_workflows_tree(workflows):
     """
-    Print and write to `shortcut_workflows_csv` the content of all Workflows
+    Write to `shortcut_workflows_csv` the content of all Workflows
     in the user's Shortcut workspace, including all Workflow States and their IDs.
     """
-    output_lines = []
     with open(shortcut_workflows_csv, "w") as f:
         writer = csv.DictWriter(
             f,
@@ -222,7 +204,6 @@ def print_workflows_tree(workflows):
         )
         writer.writeheader()
         for workflow in workflows:
-            output_lines.append('Workflow {id} : "{name}"'.format_map(workflow))
             for workflow_state in workflow["states"]:
                 writer.writerow(
                     {
@@ -232,14 +213,6 @@ def print_workflows_tree(workflows):
                         "workflow_state_id": workflow_state["id"],
                     }
                 )
-                output_lines.append(
-                    '    Workflow State {id} : [{type}] "{name}"'.format_map(
-                        workflow_state
-                    )
-                )
-    printerr("Shortcut Workflows")
-    printerr("==================")
-    printerr("\n".join(output_lines))
 
 
 def default_group_id():
