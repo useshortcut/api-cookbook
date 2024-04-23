@@ -562,11 +562,11 @@ def main(argv):
     # Ensure local data/shortcut_*.csv files are populated with user's workspace data,
     # so they can review what's available for mapping in the steps that follow.
     custom_fields = sc_get("/custom-fields")
-    print_custom_fields_tree(custom_fields)
+    write_custom_fields_tree(custom_fields)
     groups = sc_get("/groups")
-    print_groups_tree(groups)
+    write_groups_tree(groups)
     workflows = sc_get("/workflows")
-    print_workflows_tree(workflows)
+    write_workflows_tree(workflows)
 
     # Populate local data/priorities.csv, data/states.csv, and data/users.csv files,
     # automatically where possible, and print problems to the console where mappings

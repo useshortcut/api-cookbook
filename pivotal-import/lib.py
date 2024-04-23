@@ -140,7 +140,7 @@ shortcut_users_csv = "data/shortcut_users.csv"
 shortcut_workflows_csv = "data/shortcut_workflows.csv"
 
 
-def print_custom_fields_tree(custom_fields):
+def write_custom_fields_tree(custom_fields):
     """
     Write to `shortcut_custom_fields_csv` the content of all Custom Fields
     in the user's Shortcut workspace, including all Custom Field Values and their IDs.
@@ -169,7 +169,7 @@ def print_custom_fields_tree(custom_fields):
                     )
 
 
-def print_groups_tree(groups):
+def write_groups_tree(groups):
     """
     Write to `shortcut_groups_csv` the content of all Teams/Groups
     in the user's Shortcut workspace.
@@ -187,7 +187,7 @@ def print_groups_tree(groups):
             writer.writerow({"group_name": group["name"], "group_id": group["id"]})
 
 
-def print_workflows_tree(workflows):
+def write_workflows_tree(workflows):
     """
     Write to `shortcut_workflows_csv` the content of all Workflows
     in the user's Shortcut workspace, including all Workflow States and their IDs.
