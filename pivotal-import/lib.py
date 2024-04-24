@@ -140,12 +140,11 @@ shortcut_users_csv = "data/shortcut_users.csv"
 shortcut_workflows_csv = "data/shortcut_workflows.csv"
 
 
-def print_custom_fields_tree(custom_fields):
+def write_custom_fields_tree(custom_fields):
     """
-    Print and write to `shortcut_custom_fields_csv` the content of all Custom Fields
+    Write to `shortcut_custom_fields_csv` the content of all Custom Fields
     in the user's Shortcut workspace, including all Custom Field Values and their IDs.
     """
-    output_lines = []
     with open(shortcut_custom_fields_csv, "w") as f:
         writer = csv.DictWriter(
             f,
@@ -159,9 +158,6 @@ def print_custom_fields_tree(custom_fields):
         writer.writeheader()
         for custom_field in custom_fields:
             if custom_field["enabled"]:
-                output_lines.append(
-                    'Custom Field {id} : "{name}"'.format_map(custom_field)
-                )
                 for custom_field_value in custom_field["values"]:
                     writer.writerow(
                         {
@@ -171,22 +167,13 @@ def print_custom_fields_tree(custom_fields):
                             "custom_field_value_id": custom_field_value["id"],
                         }
                     )
-                    output_lines.append(
-                        '    Custom Field Value {id} : "{value}"'.format_map(
-                            custom_field_value
-                        )
-                    )
-    printerr("Shortcut Custom Fields")
-    printerr("======================")
-    printerr("\n".join(output_lines))
 
 
-def print_groups_tree(groups):
+def write_groups_tree(groups):
     """
-    Print and write to `shortcut_groups_csv` the content of all Teams/Groups
+    Write to `shortcut_groups_csv` the content of all Teams/Groups
     in the user's Shortcut workspace.
     """
-    output_lines = []
     with open(shortcut_groups_csv, "w") as f:
         writer = csv.DictWriter(
             f,
@@ -198,18 +185,13 @@ def print_groups_tree(groups):
         writer.writeheader()
         for group in groups:
             writer.writerow({"group_name": group["name"], "group_id": group["id"]})
-            output_lines.append('Team/Group {id} : "{name}"'.format_map(group))
-    printerr("Shortcut Teams/Groups")
-    printerr("=====================")
-    printerr("\n".join(output_lines))
 
 
-def print_workflows_tree(workflows):
+def write_workflows_tree(workflows):
     """
-    Print and write to `shortcut_workflows_csv` the content of all Workflows
+    Write to `shortcut_workflows_csv` the content of all Workflows
     in the user's Shortcut workspace, including all Workflow States and their IDs.
     """
-    output_lines = []
     with open(shortcut_workflows_csv, "w") as f:
         writer = csv.DictWriter(
             f,
@@ -222,7 +204,6 @@ def print_workflows_tree(workflows):
         )
         writer.writeheader()
         for workflow in workflows:
-            output_lines.append('Workflow {id} : "{name}"'.format_map(workflow))
             for workflow_state in workflow["states"]:
                 writer.writerow(
                     {
@@ -232,14 +213,6 @@ def print_workflows_tree(workflows):
                         "workflow_state_id": workflow_state["id"],
                     }
                 )
-                output_lines.append(
-                    '    Workflow State {id} : [{type}] "{name}"'.format_map(
-                        workflow_state
-                    )
-                )
-    printerr("Shortcut Workflows")
-    printerr("==================")
-    printerr("\n".join(output_lines))
 
 
 def default_group_id():
@@ -265,8 +238,6 @@ def default_group_id():
   4. Rerun initialize.py.
 """
         )
-        print_groups_tree(groups)
-        printerr("\n")
         return None
     else:
         return group_id
@@ -293,10 +264,9 @@ def default_priority_custom_field_id():
  1. Review the Shortcut Custom Fields printed below (also written to {shortcut_custom_fields_csv} for reference).
  2. Copy the UUID of your desired Custom Field (custom_field_id column in the CSV).
  3. Paste it as the "priority_custom_field_id" value in your config.json file.
- 4. Rerun initialize.py."""
+ 4. Rerun initialize.py.
+"""
         )
-        print_custom_fields_tree(custom_fields)
-        printerr("\n")
         return None
     else:
         return priority_custom_field_id
@@ -324,8 +294,6 @@ def default_workflow_id():
   4. Rerun initialize.py.
 """
         )
-        print_workflows_tree(workflows)
-        printerr("\n")
         return None
     else:
         return workflow_id

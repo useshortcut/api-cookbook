@@ -124,13 +124,11 @@ def exit_unmapped_pt_priorities(priorities_csv_file, unmapped_pt_priorities):
     )
     printerr(
         f"""To resolve this, please:
-1. Review the Shortcut Custom Fields printed below (also written to {shortcut_custom_fields_csv} for reference)
+1. Review the Shortcut Custom Fields written to {shortcut_custom_fields_csv}
 2. Copy the UUIDs of Custom Field Values (custom_field_value_id column in the CSV) that you want to map to Pivotal priorities where there are blanks in your {priorities_csv_file} file.
 3. Save your {priorities_csv_file} file and rerun initalize.py to validate it.
 """
     )
-    custom_fields = sc_get("/custom-fields")
-    print_custom_fields_tree(custom_fields)
     sys.exit(1)
 
 
@@ -236,13 +234,11 @@ def exit_unmapped_pt_states(states_csv_file, unmapped_pt_states):
     )
     printerr(
         f"""To resolve this, please:
-1. Review the Shortcut Workflow States printed below (also written to {shortcut_workflows_csv} for reference)
+1. Review the Shortcut Workflow States written to {shortcut_workflows_csv}
 2. Copy the numeric IDs of Workflow States (workflow_state_id column in the CSV) that you want to map to Pivotal states where there are blanks in your {states_csv_file} file.
 3. Save your {states_csv_file} file and rerun initalize.py to validate it.
 """
     )
-    workflows = sc_get("/workflows")
-    print_workflows_tree(workflows)
     sys.exit(1)
 
 
@@ -490,7 +486,7 @@ def exit_unmapped_pt_users(users_csv_file, unmapped_pt_users, user_info_list):
     )
     printerr(
         f"""To resolve this, please:
-1. Review the Shortcut users in your workspace, written to {shortcut_users_csv} for your convenience.
+1. Review the Shortcut users in your workspace, written to {shortcut_users_csv}
 2. For users you've already invited to Shortcut, copy their email address from {shortcut_users_csv}
    and fill in the appropriate blank entries in {users_csv_file} for them.
 3. For users you haven't already invited to Shortcut, you can enter their email addresses manually into
@@ -531,7 +527,7 @@ def exit_uninvited_pt_users(uninvited_pt_users):
     printerr(
         f"""To resolve this, invite these people to your Shortcut workspace.
 
-1. Copy the list of emails printed above (also written to {emails_to_invite} for reference).
+1. Copy the list of emails written to {emails_to_invite}
 2. Navigate to https://app.shortcut.com/settings/users/invite
 3. Click "Invite Emails".
 4. Paste the list of emails into the text area.
@@ -559,7 +555,22 @@ def main(argv):
     if args.debug:
         logging.basicConfig(level=logging.DEBUG)
 
+    # Configuration consists of the environment variable SHORTCUT_API_TOKEN and all values
+    # found in the local config.json file (which is written by this script if absent).
     cfg = load_config()
+
+    # Ensure local data/shortcut_*.csv files are populated with user's workspace data,
+    # so they can review what's available for mapping in the steps that follow.
+    custom_fields = sc_get("/custom-fields")
+    write_custom_fields_tree(custom_fields)
+    groups = sc_get("/groups")
+    write_groups_tree(groups)
+    workflows = sc_get("/workflows")
+    write_workflows_tree(workflows)
+
+    # Populate local data/priorities.csv, data/states.csv, and data/users.csv files,
+    # automatically where possible, and print problems to the console where mappings
+    # are not 100% complete.
     populate_priorities_csv(cfg["priorities_csv_file"], cfg["priority_custom_field_id"])
     populate_states_csv(cfg["states_csv_file"], cfg["workflow_id"])
     populate_users_csv(cfg["users_csv_file"], cfg["pt_csv_file"])
