@@ -555,9 +555,8 @@ def main(argv):
     if args.debug:
         logging.basicConfig(level=logging.DEBUG)
 
-    # Configuration consists of the environment variable SHORTCUT_API_TOKEN and all values
-    # found in the local config.json file (which is written by this script if absent).
-    cfg = load_config()
+    # We need to make API requests before fully validating local config.
+    validate_environment()
 
     # Ensure local data/shortcut_*.csv files are populated with user's workspace data,
     # so they can review what's available for mapping in the steps that follow.
@@ -567,6 +566,10 @@ def main(argv):
     write_groups_tree(groups)
     workflows = sc_get("/workflows")
     write_workflows_tree(workflows)
+
+    # Configuration consists of the environment variable SHORTCUT_API_TOKEN and all values
+    # found in the local config.json file (which is written by this script if absent).
+    cfg = load_config()
 
     # Populate local data/priorities.csv, data/states.csv, and data/users.csv files,
     # automatically where possible, and print problems to the console where mappings

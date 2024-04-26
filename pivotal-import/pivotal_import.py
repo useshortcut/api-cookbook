@@ -625,6 +625,8 @@ def main(argv):
 
     entity_collector = EntityCollector(emitter)
 
+    # We need to make API requests before fully validating local config.
+    validate_environment()
     cfg = load_config()
     ctx = build_ctx(cfg)
     print_rate_limiting_explanation()
