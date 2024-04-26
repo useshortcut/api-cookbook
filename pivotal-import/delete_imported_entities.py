@@ -44,6 +44,9 @@ def main(argv):
 
     print_rate_limiting_explanation()
 
+    # We need to make API requests before fully validating local config.
+    validate_environment()
+
     counter = Counter()
     with open(shortcut_imported_entities_csv) as csvfile:
         reader = csv.DictReader(csvfile)
