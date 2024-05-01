@@ -23,6 +23,8 @@ def delete_entity(entity_type, entity_id):
         prefix = "/stories/"
     elif entity_type == "epic":
         prefix = "/epics/"
+    elif entity_type == "file":
+        prefix = "/files/"
     elif entity_type == "iteration":
         prefix = "/iterations/"
 

@@ -558,7 +558,7 @@ def test_entity_collector():
     entity_collector.collect(
         {
             "type": "story",
-            "entity": {"name": "A Story 1"},
+            "entity": {"name": "A Story 1", "external_id": "1234"},
             "iteration": None,
             "pt_iteration_id": None,
         }
@@ -566,7 +566,7 @@ def test_entity_collector():
     entity_collector.collect(
         {
             "type": "story",
-            "entity": {"name": "A Story 2"},
+            "entity": {"name": "A Story 2", "external_id": "4567"},
             "iteration": None,
             "pt_iteration_id": None,
         }
@@ -574,7 +574,7 @@ def test_entity_collector():
     entity_collector.collect(
         {
             "type": "story",
-            "entity": {"name": "A Story 3"},
+            "entity": {"name": "A Story 3", "external_id": "6789"},
             "iteration": None,
             "pt_iteration_id": None,
         }
@@ -588,18 +588,21 @@ def test_entity_collector():
             "id": 0,
             "app_url": "https://example.com/entity/0",
             "entity_type": "story",
+            "external_id": "1234",
         },
         {
             "name": "A Story 2",
             "id": 1,
             "app_url": "https://example.com/entity/1",
             "entity_type": "story",
+            "external_id": "4567",
         },
         {
             "name": "A Story 3",
             "id": 2,
             "app_url": "https://example.com/entity/2",
             "entity_type": "story",
+            "external_id": "6789",
         },
     ] == created
 
@@ -611,7 +614,7 @@ def test_entity_collector_with_epics():
     entity_collector.collect(
         {
             "type": "story",
-            "entity": {"name": "A Story 1"},
+            "entity": {"name": "A Story 1", "external_id": "1234"},
             "iteration": None,
             "pt_iteration_id": None,
         }
@@ -619,7 +622,11 @@ def test_entity_collector_with_epics():
     entity_collector.collect(
         {
             "type": "story",
-            "entity": {"name": "A Story 2", "labels": [{"name": "my-epic-label-2"}]},
+            "entity": {
+                "name": "A Story 2",
+                "labels": [{"name": "my-epic-label-2"}],
+                "external_id": "2345",
+            },
             "iteration": None,
             "pt_iteration_id": None,
         }
@@ -643,7 +650,7 @@ def test_entity_collector_with_epics():
     entity_collector.collect(
         {
             "type": "story",
-            "entity": {"name": "A Story 3"},
+            "entity": {"name": "A Story 3", "external_id": "3456"},
             "iteration": None,
             "pt_iteration_id": None,
         }
@@ -676,6 +683,7 @@ def test_entity_collector_with_epics():
             "id": 2,
             "app_url": "https://example.com/entity/2",
             "entity_type": "story",
+            "external_id": "1234",
         },
         {
             "name": "A Story 2",
@@ -684,11 +692,13 @@ def test_entity_collector_with_epics():
             "id": 3,
             "app_url": "https://example.com/entity/3",
             "entity_type": "story",
+            "external_id": "2345",
         },
         {
             "name": "A Story 3",
             "id": 4,
             "app_url": "https://example.com/entity/4",
             "entity_type": "story",
+            "external_id": "3456",
         },
     ] == created
