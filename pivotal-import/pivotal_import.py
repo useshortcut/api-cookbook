@@ -522,7 +522,9 @@ class EntityCollector:
         for label in self.labels:
             if PIVOTAL_TO_SHORTCUT_RUN_LABEL == label["entity"]["name"]:
                 label_url = label["imported_entity"]["app_url"]
-                print(f"Import Started\n\nVisit {label_url} to monitor import progress")
+                print(
+                    f"Import Started\n\n==> Click here to monitor import progress: {label_url}"
+                )
 
         # create all the epics and find their associated Shortcut epic ids
         self.epics = self.emitter(self.epics)
