@@ -487,6 +487,7 @@ class EntityCollector:
         _mock_global_id = 0
         self.stories = []
         self.epics = []
+        self.files = []
         # set of strings in {id}|{start}|{end} format
         # because dicts aren't hashable in Python
         self.iteration_strings = set()
@@ -551,6 +552,25 @@ class EntityCollector:
         print("Finished creating {} iterations".format(len(self.iterations)))
         assign_stories_to_iterations(self.stories, self.iterations)
 
+        # upload files attached to stories so they can be associated during Story creation
+        for story in self.stories:
+            pt_id = story["entity"]["external_id"]
+            pt_files_dir = f"data/{pt_id}"
+            if os.path.isdir(pt_files_dir):
+                file_entities = sc_upload_files(
+                    [
+                        os.path.join(dirpath, f)
+                        for (dirpath, _, filenames) in os.walk(pt_files_dir)
+                        for f in filenames
+                    ]
+                )
+                self.files += [
+                    {"imported_entity": file_entity} for file_entity in file_entities
+                ]
+                story["entity"]["file_ids"] = [
+                    file_entity["id"] for file_entity in file_entities
+                ]
+
         # create all the stories
         self.stories = self.emitter(self.stories)
         print("Finished creating {} stories".format(len(self.stories)))
@@ -558,7 +578,7 @@ class EntityCollector:
         # Aggregate all the created stories, epics, iterations, and labels into a list of maps
         created_entities = []
         created_set = set()
-        for item in self.epics + self.iterations + self.stories:
+        for item in self.epics + self.iterations + self.files + self.stories:
             entity = item["imported_entity"]
             if entity["id"] not in created_set:
                 created_entities.append(entity)
@@ -600,7 +620,7 @@ def write_created_entities_csv(created_entities):
                     "iteration_id": (
                         entity["iteration_id"] if "iteration_id" in entity else None
                     ),
-                    "url": entity["app_url"],
+                    "url": entity["app_url"] if "app_url" in entity else entity["url"],
                 }
             )
 

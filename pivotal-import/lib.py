@@ -112,12 +112,11 @@ def sc_put(path, data={}):
 
 
 @rate_decorator(rate_mapping)
-def sc_upload_files(story_id, files):
+def sc_upload_files(files):
     """Upload and associate `files` with the story with given `story_id`"""
     url = f"{api_url_base}/files"
     logger.debug("POST url=%s files=%s headers=%s" % (url, files, headers))
-    responses = []
-    file_ids = []
+    file_entities = []
     for file in files:
         try:
             with open(file, "rb") as f:
@@ -136,12 +135,10 @@ def sc_upload_files(story_id, files):
                 logger.debug(f"POST response: {resp.status_code} {resp.text}")
                 resp.raise_for_status()
                 resp_json = resp.json()
-                file_ids.append(resp_json[0]["id"])
-                responses.append(resp_json)
+                file_entities.append(resp_json[0])
         except:
             printerr(f"[Warning] Failed to upload file {file}")
-    sc_put(f"/stories/{story_id}", {"file_ids": file_ids})
-    return responses
+    return file_entities
 
 
 @rate_decorator(rate_mapping)
@@ -526,7 +523,12 @@ def identity(x):
 
 
 def print_stats(stats):
-    plurals = {"story": "stories", "epic": "epics", "iteration": "iterations"}
+    plurals = {
+        "story": "stories",
+        "epic": "epics",
+        "file": "files",
+        "iteration": "iterations",
+    }
     for k, v in stats.items():
         plural = plurals.get(k, k + "s")
         print(f"  - {plural.capitalize()} : {v}")
