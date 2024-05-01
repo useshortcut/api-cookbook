@@ -1,4 +1,3 @@
-from copy import deepcopy
 import tempfile
 
 import pytest
@@ -44,13 +43,6 @@ def assoc(dict, key, value):
     """Return a copy of `dict` with `key` assigned to `value`"""
     d = deepcopy(dict)
     d[key] = value
-
-
-def dissoc(dict, key_to_remove):
-    """Return a copy of `dict` with `key_to_remove` absent."""
-    d = deepcopy(dict)
-    del d[key_to_remove]
-    return d
 
 
 def test_validate_config_ok():
@@ -113,3 +105,17 @@ def test_parse_date():
 
 def test_parse_date_time():
     assert parse_date_time("Oct 15, 2014") == "2014-10-15T00:00:00"
+
+
+def test_dissoc():
+    d = {"a": "alpha", "b": "beta", "c": "gamma"}
+    assert {"a": "alpha", "b": "beta"} == dissoc(d, "c")
+    assert d == dissoc(d, "")
+    assert {} == dissoc({}, "a")
+
+
+def test_guess_mime_type():
+    assert "application/json" == guess_mime_type("example.json")
+    assert "image/png" == guess_mime_type("example.png")
+    assert "text/plain" == guess_mime_type("example.txt")
+    assert "application/octet-stream" == guess_mime_type("example.unknown_extension")

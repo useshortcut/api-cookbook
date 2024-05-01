@@ -6,7 +6,9 @@ environment variable.
 """
 
 from collections.abc import Mapping
+from copy import deepcopy
 from datetime import datetime
+import mimetypes
 import re
 import sys
 import csv
@@ -107,6 +109,39 @@ def sc_put(path, data={}):
     resp = requests.put(url, headers=headers, json=data)
     resp.raise_for_status()
     return resp.json()
+
+
+@rate_decorator(rate_mapping)
+def sc_upload_files(story_id, files):
+    """Upload and associate `files` with the story with given `story_id`"""
+    url = f"{api_url_base}/files"
+    logger.debug("POST url=%s files=%s headers=%s" % (url, files, headers))
+    responses = []
+    file_ids = []
+    for file in files:
+        try:
+            with open(file, "rb") as f:
+                logger.debug(f"File: {f.name} {guess_mime_type(f.name)}")
+                resp = requests.post(
+                    url,
+                    headers=dissoc(headers, "Content-Type")
+                    | {"Accept": "application/json"},
+                    files=[
+                        (
+                            "file0",
+                            (os.path.basename(f.name), f, guess_mime_type(f.name)),
+                        )
+                    ],
+                )
+                logger.debug(f"POST response: {resp.status_code} {resp.text}")
+                resp.raise_for_status()
+                resp_json = resp.json()
+                file_ids.append(resp_json[0]["id"])
+                responses.append(resp_json)
+        except:
+            printerr(f"[Warning] Failed to upload file {file}")
+    sc_put(f"/stories/{story_id}", {"file_ids": file_ids})
+    return responses
 
 
 @rate_decorator(rate_mapping)
@@ -471,6 +506,21 @@ def parse_date_time(d: str):
 
 
 ### Utility functions
+
+
+def dissoc(dict, key_to_remove):
+    """Return a copy of `dict` with `key_to_remove` absent."""
+    d = deepcopy(dict)
+    if key_to_remove in d:
+        del d[key_to_remove]
+    return d
+
+
+def guess_mime_type(file_name):
+    (mime_type, _) = mimetypes.guess_type(file_name)
+    return mime_type if mime_type is not None else "application/octet-stream"
+
+
 def identity(x):
     return x
 
