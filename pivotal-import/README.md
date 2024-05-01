@@ -17,7 +17,10 @@ In order to run this, you will require a Pivotal account and the ability to sign
 1. Sign up for a Shortcut account at [https://www.shortcut.com/signup](https://www.shortcut.com/signup).
    - **NOTE:** Do not run this importer against an existing Shortcut workspace that already has data you wish to keep.
 1. [Create a new Shortcut API token](https://app.shortcut.com/settings/account/api-tokens) and [export it into your environment](../Authentication.md).
-1. Export your Pivotal project to CSV and save the file to `data/pivotal_export.csv`.
+1. Export your Pivotal project to CSV.
+   - Unarchive the ZIP file provided by Pivotal.
+   - Copy the primary CSV file to `data/pivotal_export.csv`
+   - (Optional) To import your Pivotal story file attachments, ensure you included them when requesting your Pivotal export, and then copy the directories in your Pivotal export that are named after your Pivotal story IDs (which contain their file attachments) into the `data/` folder of this project. This will result in a directory structure like `data/10000/*`, `data/10001/*`, etc.
 1. Create/Invite all users you want to reference into your Shortcut workspace.
    - **NOTE:** If you're not on a Shortcut trial, please [reach out to our support team](https://help.shortcut.com/hc/en-us/requests/new) before running this import to make sure you're not billed for users that you want to be disabled after import.
 1. Run `make import` to perform a dry-run of the import.
@@ -44,14 +47,14 @@ You can run `make clean` if you want to start over, but be aware this will delet
 
 The following are known limitations:
 
-- **Limited story reviews:** Shortcut does not have a feature equivalent to Pivotal story reviews, so they are imported as follows:
+- **Story reviews:** Shortcut does not have a feature equivalent to Pivotal story reviews, so they are imported as follows:
   - Pivotal story reviewers are imported as Shortcut story followers on the stories they were assigned for review. Shortcut story followers receive updates in their Shortcut Activity Feed for all story updates.
   - Imported stories that had Pivotal reviews have an additional comment with a table that lists all of the story reviews from Pivotal (reviewer, review type, and review status).
   - Imported stories that had Pivotal reviews have a label in Shortcut of `pivotal-had-review`.
+- **File attachments:** Files included in the Pivotal export (and correctly placed in the `data/` folder prior to import) are uploaded and associated with respective imported Shortcut stories. Other kinds of attachments (e.g., Google Drive) are not supported.
 - **No story blockers:** Pivotal story blockers (the relationships between stories) are not imported.
 - **Epics are imported as unstarted:** Imported epics are set to an unstarted "Todo" state.
 - **No redirects:** The URLs in the descriptions and comments of your Pivotal stories/epics are not rewritten to point to imported Shortcut stories/epics; they remain unchanged.
-- **No attachments:** The attachments (including Google Drive attachments) are not imported into Shortcut.
 - **No history:** Project history is not imported into Shortcut.
 
 Our intention is to attend to items higher on the list sooner than those lower.
