@@ -1,4 +1,5 @@
 # Welcome to the Shortcut REST API Cookbook
+
 The Shortcut REST API is a powerful tool that can make your work easier and enhance the ways that you use your Shortcut data.
 We created this material to get you started using the Shortcut REST API to solve common requests, even if you don't regularly use APIs.
 
@@ -13,17 +14,42 @@ Found a typo or other small issue? Please feel free to submit a PR!
 Questions and suggestions are welcome as Issues, or send us an email support@shortcut.com. We'd love to hear from you!
 
 ## Requirements
+
 All of the cookbook scripts are written in Python 3 and use the [Requests Library](http://docs.python-requests.org/en/master/).
-If you're comfortable checking your Python installation, installing Requests, using a virtual environment, and setting environment variables, please jump to [the main table of contents](https://github.com/useshortcut/api-cookbook/blob/master/Cookbook-Contents.md)
+If you're comfortable checking your Python installation, installing Requests, using a virtual environment, and setting environment variables, please jump to [the recipes](#cookbook-recipes).
 
 If you'd like a walk-through of getting set up to run these example scripts, please check out the setup instructions:
-- [Mac](https://github.com/useshortcut/api-cookbook/blob/master/set-up-instructions.md)
-- [PC](https://github.com/useshortcut/api-cookbook/blob/master/windows-set-up-instructions.md)
+- [Mac](https://github.com/useshortcut/api-cookbook/blob/main/set-up-instructions.md)
+- [PC](https://github.com/useshortcut/api-cookbook/blob/main/windows-set-up-instructions.md)
 
-## Quick reference to common questions
+## Cookbook Recipes
 
-[How do I authenticate?](https://github.com/useshortcut/api-cookbook/blob/master/Authentication.md)
+### [Send some Stories to Slack](https://github.com/useshortcut/api-cookbook/tree/main/stories-to-slack)
 
-[How do I get the next page of results?](https://github.com/useshortcut/api-cookbook/blob/master/Pagination.md)
+The support team at Shortcut uses a version of this script to help us get back to customers about bug fixes and shipped features.
 
-[Overview of contents](https://github.com/useshortcut/api-cookbook/blob/master/Cookbook-Contents.md)
+[This script](https://github.com/useshortcut/api-cookbook/tree/main/stories-to-slack) searches for work completed between the last business day and today, checks for support tickets on each Story, and preps data to send to Slack. The name of the Story, a link to the Story, and a count of the number of tickets on the Story are sent to a specific Slack channel.
+
+We use this to help the support team quickly find Stories where they need to follow up, but with modifications you could use it for things like daily squad updates, personal reminders, and more.
+
+### [There's incomplete work in my sprint. I need to update all the labels for the next sprint.](https://github.com/useshortcut/api-cookbook/tree/main/change-label)
+
+Many teams use Labels to represent sprints. When there's unfinished work that needs to be rolled into the next sprint, [this script](https://github.com/useshortcut/api-cookbook/tree/main/change-label) can help automate that process. As a bonus, you can also use this script to create labels with custom colors.
+
+### I need to report on cycle time
+
+Cycle time information for Epics and Objectives can be useful reporting tools. These scripts get the cycle time and lead time for an individual Epic or Objective. You can find cycle time information on stories using the charts provided within Shortcut itself.
+
+[How to I get the lead and cycle time for an Objective?](https://github.com/useshortcut/api-cookbook/tree/main/kanban-metrics/objective_metrics.py)
+
+[How do I get the lead and cycle time for an Epic?](https://github.com/useshortcut/api-cookbook/tree/main/kanban-metrics/epic_metrics.py)
+
+## FAQ
+
+[How do I get set up to use these scripts on my Mac?](https://github.com/useshortcut/api-cookbook/blob/main/set-up-instructions.md)
+
+[How do I get set up to use these scripts on my PC?](https://github.com/useshortcut/api-cookbook/blob/main/windows-set-up-instructions.md)
+
+[How do I authenticate?](https://github.com/useshortcut/api-cookbook/blob/main/Authentication.md)
+
+[How do I get the next page of results?](https://github.com/useshortcut/api-cookbook/blob/main/Pagination.md)
