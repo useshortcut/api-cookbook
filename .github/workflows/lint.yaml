@@ -34,7 +34,7 @@ jobs:
 
       - name: Install Python dependencies
         working-directory: ./pivotal-import
-        run: pipenv install --dev
+        run: make setup-dev
 
       - name: Lint Python with Black linter
         working-directory: ./pivotal-import
