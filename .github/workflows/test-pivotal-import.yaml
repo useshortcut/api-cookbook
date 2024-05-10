@@ -34,7 +34,7 @@ jobs:
 
       - name: Install Python dependencies
         working-directory: ./pivotal-import
-        run: pipenv install --dev
+        run: make setup-dev
 
       - name: Test pivotal-import
         working-directory: ./pivotal-import
