@@ -36,6 +36,6 @@ jobs:
         working-directory: ./pivotal-import
         run: make setup-dev
 
-      - name: Lint Python with Black linter
+      - name: Lint pivotal-import with Black linter
         working-directory: ./pivotal-import
         run: make lint

@@ -27,3 +27,31 @@ pipenv run python epic_comments.py --all-epics
 ```
 
 Each epic's comments will be written to a file with the epic ID and a current timestamp.
+
+## Development
+
+Set up your development environment:
+
+``` shell
+make setup-dev
+```
+
+Run `pipenv shell` to enter a shell with all Python dependencies loaded.
+
+Run tests:
+
+``` shell
+make test
+```
+
+Run the linter:
+
+``` shell
+make lint
+```
+
+If a test failure isn't clear, you can run pytest in verbose mode:
+
+``` shell
+pipenv run pytest -vv epic_comments_test.py
+```

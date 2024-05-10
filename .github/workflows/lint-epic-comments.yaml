@@ -1,0 +1,41 @@
+###
+### Workflow that lints code in pull requests
+###
+
+name: Lint
+
+# Note: No name so it uses the name associated with the pull request merge to main
+
+on:
+  pull_request:
+    paths:
+    - 'epic-comments/**'
+
+jobs:
+  lint-epic-comments:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - name: Get Python Version
+        run: echo "PYTHON_VERSION=$(cat .python-version | grep ^[^#])" >> $GITHUB_ENV
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: "pipenv"
+
+      - name: Install pipenv
+        run: pip install --user pipenv
+
+      - name: Install Python dependencies
+        working-directory: ./epic-comments
+        run: make setup-dev
+
+      - name: Lint epic-comments with Black linter
+        working-directory: ./epic-comments
+        run: make lint
