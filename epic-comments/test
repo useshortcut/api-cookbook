@@ -1,0 +1,3 @@
+#!/bin/sh
+
+pipenv run pytest --cov=. --cov-branch --cov-fail-under=30

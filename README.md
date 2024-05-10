@@ -44,6 +44,10 @@ Cycle time information for Epics and Objectives can be useful reporting tools. T
 
 [How do I get the lead and cycle time for an Epic?](https://github.com/useshortcut/api-cookbook/tree/main/kanban-metrics/epic_metrics.py)
 
+### Export Epic Comments to CSV
+
+Export the comments for either a single epic or all epics in your Shortcut Workspace using the [epic-comments recipe](./epic-comments).
+
 ## FAQ
 
 [How do I get set up to use these scripts on my Mac?](https://github.com/useshortcut/api-cookbook/blob/main/set-up-instructions.md)

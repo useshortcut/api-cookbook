@@ -1,0 +1,29 @@
+#!/bin/sh
+
+if ! command -v pipenv &> /dev/null
+then
+    echo "[Problem] pipenv could not be found on your PATH"
+    echo ""
+    echo "Please ensure Python 3 and pipenv are installed."
+    echo " - For Python: https://wiki.python.org/moin/BeginnersGuide/Download"
+    echo " - For pipenv: https://pipenv.pypa.io/en/latest/installation.html"
+    exit 1
+fi
+
+pipenv install
+
+echo ""
+echo "[Success] Python dependencies installed."
+echo ""
+echo "You can now either run the initialization script directly:"
+echo ""
+echo "    pipenv run python initialize.py"
+echo ""
+echo "Or you can enter a shell with all dependencies loaded,"
+echo "so you don't have to prepend commands with 'pipenv run':"
+echo ""
+echo "    pipenv shell"
+echo "    python initialize.py"
+echo ""
+echo "Once you're finished, you can run 'exit' to exit the"
+echo "pipenv shell and return to your normal shell."
