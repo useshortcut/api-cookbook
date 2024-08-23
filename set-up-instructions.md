@@ -65,20 +65,24 @@ If you're going to use the API often, we recommend setting your API token as a s
 
 On Mac:
 
-We're assuming you're using bash since it's the default user shell. If you're using a different shell (like zsh or tcsh), and aren't sure how to set a variable for your setup, check the documentation for the shell you're using.
+We're assuming you're using zsh since it's the default user shell. If you're using a different shell (like bash or tcsh), and aren't sure how to set a variable for your setup, check the documentation for the shell you're using.
 
 If you have other system variables set, like AWS credentials, and aren't sure where those credentials are, you may want to check with a technical lead on your team so you can set your Shortcut API variable in the same file.
 
 You'll use Terminal to set your Shortcut API token as an environment variable in ~/.bash_profile :
 
 1. Type `cd ~` and press Return to go to your home directory
-2. Type `nano .bash_profile` and press Return to open .bash_profile in the nano text editor (Feel free to use your preferred text editor instead)
+2. Type `nano .zshenv` and press Return to open .zshenv in the nano text editor (Feel free to use your preferred text editor instead)
 3. Add the line `export SHORTCUT_API_TOKEN='YOUR_TOKEN_VALUE'` to the file in nano, where YOUR_TOKEN_VALUE is your actual API token from Shortcut. Keep the single quotes around the token.
 4. Press ⌃O (control key and the letter 'o') then return to save the changes - this is like the ⌘S (Command-S )to save in most programs.
 5. Press ⌃X (control key and letter 'x') to exit.
 6. Close your Terminal window - this is necessary for the change to be applied!
 7. Open new Terminal window and test your environment variable by typing:
 `echo $SHORTCUT_API_TOKEN`
+
+The response for `echo $SHORTCUT_API_TOKEN` should contain your token. If you see a blank line there are two common reasons:
+1. If you haven't closed and reopened your shell the change won't have been picked up. Close your shell window and reopen before trying again.
+2. If you are running MacOS Mojave (10.14) or earlier your default shell will be bash and you will need to use `nano .bash_profile` instead of `nano .zshenv`. 
 
 If you are just testing things out, or don't need to regularly access the Shortcut API, you can set a temporary environment variable.
 
