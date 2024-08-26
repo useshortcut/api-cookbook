@@ -3,7 +3,7 @@ import sys
 import requests
 
 # This gets your token from the local environment variable.
-shortcut_api_token = '?token=' + os.getenv('shortcut_api_token')
+shortcut_api_token = '?token=' + os.getenv('SHORTCUT_API_TOKEN')
 
 api_url_base = 'https://api.app.shortcut.com/api/beta'
 objective_endpoint = '/objectives'
