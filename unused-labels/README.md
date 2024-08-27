@@ -26,6 +26,14 @@ Optionally include labels that have associated stories and/or epics, all of whic
 pipenv run python unused_labels.py --include-completed
 ```
 
+Once you're satisfied that the CSV contains labels you want to archive, pass the `--archive` argument with the name of the CSV:
+
+```shell
+pipenv run python unused_labels.py --archive-labels labels-to-archive.csv
+```
+
+The CSV must have a header with at least an `id` column which is treated as the ID of labels to archive.
+
 Pass `--help` for full usage information.
 
 ## Development
