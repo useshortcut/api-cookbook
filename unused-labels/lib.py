@@ -72,6 +72,21 @@ def sc_get(path, params={}):
     return resp.json()
 
 
+@rate_decorator(rate_mapping)
+def sc_put(path, data={}):
+    """
+    Make a PUT api call.
+
+    Typically used to update an entity.
+    Serializes params as JSON in the request body.
+    """
+    url = api_url_base + path
+    logger.debug("PUT url=%s params=%s headers=%s" % (url, data, headers))
+    resp = requests.put(url, headers=headers, json=data)
+    resp.raise_for_status()
+    return resp.json()
+
+
 def printerr(s):
     print(s, file=sys.stderr)
 

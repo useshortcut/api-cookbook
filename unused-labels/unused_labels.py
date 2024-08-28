@@ -1,26 +1,33 @@
 import argparse
 import csv
 import logging
+import os
 import sys
 
-from lib import print_rate_limiting_explanation, sc_get, validate_environment
+from lib import print_rate_limiting_explanation, sc_get, sc_put, validate_environment
 
 parser = argparse.ArgumentParser(
     description="Write CSV of unused labels in your Shortcut workspace",
 )
 parser.add_argument(
-    "--output-file",
-    dest="output_file",
-    default="labels-to-archive.csv",
-    help="Name of file to write results to.",
+    "--archive-labels",
+    dest="input_file",
+    help="WARNING: If provided, this CSV file is read and all labels listed in it are archived in your Shortcut workspace.",
 )
 parser.add_argument(
     "--include-completed",
     dest="include_completed",
     action="store_true",
     default=False,
-    help="Consider a label unused if all of its stories & epics are completed.",
+    help="Include labels that have all their stories & epics completed.",
 )
+parser.add_argument(
+    "--output-file",
+    dest="output_file",
+    default="labels-to-archive.csv",
+    help="Name of file to write CSV results to.",
+)
+
 parser.add_argument("--debug", action="store_true", help="Turns on debugging logs")
 
 
@@ -46,10 +53,11 @@ def calculate_archivable_labels(include_completed):
         "Fetching all labels with all associated stories & epics from your Shortcut workspace..."
     )
     all_labels = sc_get("/labels")
-    logging.info(f"Processing {len(all_labels)} labels...")
+    len_labels = len(all_labels)
+    logging.info(f"Processing {len_labels} labels...")
     for idx, label in enumerate(all_labels):
         if idx % 10 == 0:
-            logging.info(f"Processing label {idx+1}...")
+            logging.info("Progress: %.0f%%" % (100 * (idx + 1) / len_labels))
         id = label["id"]
         label_stories = sc_get(f"/labels/{id}/stories")
         label_epics = sc_get(f"/labels/{id}/epics")
@@ -83,6 +91,17 @@ def calculate_archivable_labels(include_completed):
     return to_archive
 
 
+def archive_labels(input_csv_file_name):
+    with open(input_csv_file_name) as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            label_id = row.get("id")
+            logging.info(
+                f"Archiving https://app.shortcut.com/settings/label/{label_id}"
+            )
+            sc_put(f"/labels/{label_id}", {"archived": True})
+
+
 def main(argv):
     args = parser.parse_args(argv[1:])
     if args.debug:
@@ -93,10 +112,18 @@ def main(argv):
     validate_environment()
     print_rate_limiting_explanation()
 
-    output_file = args.output_file
-    include_completed = args.include_completed
-    labels = calculate_archivable_labels(include_completed)
-    write_labels_to_archive(output_file, labels)
+    if args.input_file:
+        input_file = args.input_file
+        if not os.path.exists(input_file):
+            print(f"\nERROR: File {input_file} does not exist.\n")
+            parser.print_usage()
+            return 1
+        archive_labels(input_file)
+    else:
+        output_file = args.output_file
+        include_completed = args.include_completed
+        labels = calculate_archivable_labels(include_completed)
+        write_labels_to_archive(output_file, labels)
     return 0
 
 
