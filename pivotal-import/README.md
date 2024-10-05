@@ -63,7 +63,7 @@ Please check [currently open issues](https://github.com/useshortcut/api-cookbook
 
 # Customization
 
-It's possible that this tool does not do exactly what you'd like it to - if that's the case, we have tried to make it straightforward to modify. Make reference to the [Shortcut API](https://developer.shortcut.com/api/rest/v3) and the other examples in this cookbook, and please let us know in [our Discord](https://discord.gg/shortcut-community-887801174496006216) what you're doing with it!
+It's possible that this tool does not do exactly what you'd like it to - if that's the case, we have tried to make it straightforward to modify. Make reference to the [Shortcut API](https://developer.shortcut.com/api/rest/v3) and the other examples in this cookbook, and please let us know in [our Slack](https://shortcut.com/join-slack) what you're doing with it! We have a specific channel there, [#pivotal-migration](https://shortcutcommunity.slack.com/archives/C07QAKTQX43).
 
 # Implementation
 
@@ -202,7 +202,7 @@ If you have a bug report or feature request, please [create a GitHub Issue](http
 
 If you need to share sensitive information or need help specific to your Shortcut workspace, please [submit a help center request](https://help.shortcut.com/hc/en-us/requests/new) instead.
 
-You can also chat with us anytime on our [Shortcut Communuity Discord](https://discord.gg/shortcut-community-887801174496006216).
+You can also chat with us anytime on our [Shortcut Communuity Slack](https://shortcut.com/join-slack). We have a channel there specifically for you, [#pivotal-migration](https://shortcutcommunity.slack.com/archives/C07QAKTQX43). Please note that this is a community Slack and channel, so we urge you not to post information confidential to your company, including the CSV files you may be working with.
 
 If you have code changes that would make this better, please fork this repository and create a pull request. Don't forget to give the project a star! Thanks again!
 
