@@ -22,7 +22,8 @@ In order to run this, you will require a Pivotal account and the ability to sign
    - Copy the primary CSV file to `data/pivotal_export.csv`
    - (Optional) To import your Pivotal story file attachments, ensure you included them when requesting your Pivotal export, and then copy the directories in your Pivotal export that are named after your Pivotal story IDs (which contain their file attachments) into the `data/` folder of this project. This will result in a directory structure like `data/10000/*`, `data/10001/*`, etc.
 1. Create/Invite all users you want to reference into your Shortcut workspace.
-   - **NOTE:** If you're not on a Shortcut trial, please [reach out to our support team](https://help.shortcut.com/hc/en-us/requests/new) before running this import to make sure you're not billed for users that you want to be disabled after import.
+   - **NOTE:** If you're not on a Shortcut trial, please [reach out to our support team](https://help.shortcut.com/hc/en-us/requests/new) before running this import to make sure you're not billed for users that you want to be disabled after import. 
+   - **Also Note:** When you commit your import, there's the potential for many notification emails to be sent to the users in your workspace. [**Contact our support team**](https://help.shortcut.com/hc/en-us/requests/new) to temporarily disable email notifications if you would prefer to keep your inbox clear.
 1. Run `make import` to perform a dry-run of the import.
    - Follow instructions printed to the console to ensure the mapping of Pivotal and Shortcut data is complete and correct.
    - You may edit the following files generated during initialization, to change how story priorities, story workflow states, and users are mapped between your Pivotal export and Shortcut workspace:
