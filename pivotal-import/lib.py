@@ -22,6 +22,36 @@ import requests
 # Logging
 logger = logging.getLogger(__name__)
 
+
+# HTTP / Requests Exception Handling
+# https://github.com/useshortcut/api-cookbook/issues/83
+#
+# When a non 200 status code is received, give the users information about
+# the request and failure
+#
+def requests_error_decorator(func):
+    def inner_function(*args, **kwargs):
+        try:
+            func(*args, **kwargs)
+        except requests.exceptions.HTTPError as errh:
+            error_message = f"\nHTTP Error:\n"
+            error_message += f" Code: {errh.response.status_code}\n"
+            error_message += f" Url:  {errh.request.url}\n"
+            error_message += f"\nServer Response:\n   {errh.response.json()}"
+            raise requests.exceptions.HTTPError(error_message) from errh
+        except requests.exceptions.ConnectionError as errc:
+            print(f"Error Connecting: {errc}")
+            raise requests.exceptions.HTTPError(error_message) from errc
+        except requests.exceptions.Timeout as errt:
+            print(f"Timeout Error: {errt}")
+            raise requests.exceptions.HTTPError(error_message) from errt
+        except requests.exceptions.RequestException as err:
+            print(f"Unknown Http Error: {err}")
+            raise requests.exceptions.HTTPError(error_message) from err
+
+    return inner_function
+
+
 # Rate limiting. See https://developer.shortcut.com/api/rest/v3#Rate-Limiting
 # The Shortcut API limit is 200 per minute; the 200th request within 60 seconds
 # will receive an HTTP 429 response.
@@ -65,6 +95,7 @@ headers = {
 
 
 @rate_decorator(rate_mapping)
+@requests_error_decorator
 def sc_get(path, params={}):
     """
     Make a GET api call.
@@ -75,6 +106,7 @@ def sc_get(path, params={}):
     logger.debug("GET url=%s params=%s headers=%s" % (url, params, headers))
     resp = requests.get(url, headers=headers, params=params)
     resp.raise_for_status()
+    logger.debug("Server Response: %s" % (resp.content))
     return resp.json()
 
 
