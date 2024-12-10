@@ -608,7 +608,8 @@ def test_entity_collector():
 
 
 def test_entity_collector_with_epics():
-    entity_collector = EntityCollector()
+    ctx = create_test_ctx()
+    entity_collector = EntityCollector(emitter=None, ctx=ctx)
 
     # Given: a sequence of stories and epics
     entity_collector.collect(

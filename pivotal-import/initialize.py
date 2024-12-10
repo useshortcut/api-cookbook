@@ -46,6 +46,8 @@ pt_all_states = [
     "accepted",
 ]
 
+# PLACEHOLDER: pt_all_priorities definition
+
 # Pivotal Tracker story priorities. The "None" priority is not mapped
 # because the importer interprets that as "do not set a Priority".
 pt_all_priorities = [
