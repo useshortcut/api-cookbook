@@ -111,6 +111,7 @@ def sc_get(path, params={}):
 
 
 @rate_decorator(rate_mapping)
+@requests_error_decorator
 def sc_post(path, data={}):
     """Make a POST api call.
 
@@ -129,6 +130,7 @@ def sc_post(path, data={}):
 
 
 @rate_decorator(rate_mapping)
+@requests_error_decorator
 def sc_put(path, data={}):
     """
     Make a PUT api call.
@@ -144,6 +146,7 @@ def sc_put(path, data={}):
 
 
 @rate_decorator(rate_mapping)
+@requests_error_decorator
 def sc_upload_files(files):
     """Upload and associate `files` with the story with given `story_id`"""
     url = f"{api_url_base}/files"
@@ -174,6 +177,7 @@ def sc_upload_files(files):
 
 
 @rate_decorator(rate_mapping)
+@requests_error_decorator
 def sc_delete(path):
     """
     Make a DELETE api call.
