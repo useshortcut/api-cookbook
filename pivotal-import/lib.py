@@ -354,8 +354,8 @@ def populate_config():
                 "epic_workflow_states": {
                     "todo": "500000",
                     "in_progress": "500001",
-                    "done": "500002"
-                }
+                    "done": "500002",
+                },
             }
             json.dump(data, f, indent=2)
             # Errors are printed to the console in the default_* functions above

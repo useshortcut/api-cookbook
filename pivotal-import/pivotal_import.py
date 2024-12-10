@@ -588,9 +588,7 @@ class EntityCollector:
             workflow_state_id = calculate_epic_state(ctx, stories)
 
             # Update epic state via API
-            sc_put(f"/epics/{epic_id}", {
-                "workflow_state_id": workflow_state_id
-            })
+            sc_put(f"/epics/{epic_id}", {"workflow_state_id": workflow_state_id})
 
         # Aggregate all the created stories, epics, iterations, and labels into a list of maps
         created_entities = []
