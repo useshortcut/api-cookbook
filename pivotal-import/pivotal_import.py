@@ -412,20 +412,23 @@ def get_mock_emitter():
 
     def mock_emitter(items):
         for item in items:
-            if item["type"] == "epic_state":
-                # For epic state updates, just return success without modifying anything
-                continue
-
             entity = item["entity"]
-            entity["id"] = _get_next_id()
-            entity["app_url"] = f"https://example.com/entity/{entity['id']}"
-            entity["entity_type"] = item["type"]
-            item["imported_entity"] = entity
+            # For new entities, assign an ID
+            if "id" not in entity:
+                entity["id"] = _get_next_id()
+                entity["app_url"] = f"https://example.com/entity/{entity['id']}"
+                entity["entity_type"] = item["type"]
+                item["imported_entity"] = entity
 
-            if item["type"] == "story":
-                print(f'Creating story {entity["id"]} "{entity["name"]}"')
-            elif item["type"] == "epic":
-                print(f'Creating epic {entity["id"]} "{entity["name"]}"')
+                if item["type"] == "story":
+                    print(f'Creating story {entity["id"]} "{entity["name"]}"')
+                elif item["type"] == "epic":
+                    print(f'Creating epic {entity["id"]} "{entity["name"]}"')
+            else:
+                # For updates (entities with existing IDs), maintain the entity structure
+                item["imported_entity"] = entity
+                if item["type"] == "epic":
+                    print(f'Updating epic {entity["id"]} state to workflow {entity["workflow_state_id"]}')
 
         return items
 
@@ -512,8 +515,8 @@ class EntityCollector:
         if emitter is None:
             emitter = get_mock_emitter()
         self.emitter = emitter
-        # Use the same emitter for API calls in test mode
-        self.api_emitter = emitter if emitter == get_mock_emitter() else None
+        # Always use the same emitter for API calls in test mode
+        self.api_emitter = emitter
 
     def collect(self, item):
         if item["type"] == "story":
@@ -606,7 +609,13 @@ class EntityCollector:
 
             # Update epic state via API or mock in test mode
             if self.api_emitter:
-                self.api_emitter([{"type": "epic_state", "entity": {"id": epic_id, "workflow_state_id": workflow_state_id}}])
+                self.api_emitter([{
+                    "type": "epic",
+                    "entity": {
+                        "id": epic_id,
+                        "workflow_state_id": workflow_state_id
+                    }
+                }])
             else:
                 sc_put(f"/epics/{epic_id}", {"workflow_state_id": workflow_state_id})
 
