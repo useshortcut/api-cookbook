@@ -3,3 +3,5 @@ config.json
 
 # Python
 .coverage
+.env
+__pycache__

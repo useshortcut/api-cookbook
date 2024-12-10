@@ -1,0 +1,5 @@
+# Ignore pipenv default cookbook folder
+cookbook/
+
+# Python dev
+.env
