@@ -401,34 +401,67 @@ def load_workflow_states(csv_file):
 
 
 def get_mock_emitter():
-    """Returns a function that can be used to mock entity creation."""
-    _id = 0
+    """Get a mock emitter for testing.
+
+    The mock emitter creates fake entities with incrementing IDs and
+    app_urls. It is used in test mode to verify the import process
+    without making actual API calls.
+    """
+    next_id = 0
+    created_entities = {}  # Store created entities by ID for updates
 
     def _get_next_id():
-        nonlocal _id
-        current = _id
-        _id += 1
+        nonlocal next_id
+        current = next_id
+        next_id += 1
         return current
 
     def mock_emitter(items):
-        for item in items:
-            entity = item["entity"]
-            # For new entities, assign an ID
-            if "id" not in entity:
-                entity["id"] = _get_next_id()
-                entity["app_url"] = f"https://example.com/entity/{entity['id']}"
-                entity["entity_type"] = item["type"]
-                item["imported_entity"] = entity
+        """Mock emitter for testing.
 
-                if item["type"] == "story":
-                    print(f'Creating story {entity["id"]} "{entity["name"]}"')
-                elif item["type"] == "epic":
-                    print(f'Creating epic {entity["id"]} "{entity["name"]}"')
-            else:
-                # For updates (entities with existing IDs), maintain the entity structure
-                item["imported_entity"] = entity
-                if item["type"] == "epic":
-                    print(f'Updating epic {entity["id"]} state to workflow {entity["workflow_state_id"]}')
+        Creates fake entities with incrementing IDs and app_urls.
+        Also handles epic state updates based on story states.
+        """
+        for item in items:
+            entity = item["entity"].copy()  # Make a copy of the entity dict
+
+            # Check if this is an update to an existing entity
+            if "id" in entity:
+                existing_entity = created_entities.get(entity["id"])
+                if existing_entity:
+                    # Create a new copy of the existing entity and update it
+                    updated_entity = existing_entity.copy()
+                    # Update all fields from the new entity
+                    updated_entity.update(entity)
+                    created_entities[entity["id"]] = updated_entity
+                    item["imported_entity"] = updated_entity
+                    if item["type"] == "epic" and "workflow_state_id" in entity:
+                        print(f'Updating epic {entity["id"]} state to workflow {entity["workflow_state_id"]}')
+                    continue
+
+            # For new entities, assign an ID
+            entity_id = _get_next_id()
+            entity["id"] = entity_id
+            entity["app_url"] = f"https://example.com/entity/{entity_id}"
+            entity["entity_type"] = item["type"]
+
+            # Copy epic_id from original entity if it exists
+            if item["type"] == "story" and "epic_id" in item["entity"]:
+                entity["epic_id"] = item["entity"]["epic_id"]
+
+            # Only include workflow_state_id for stories or if explicitly set in the original entity
+            if item["type"] == "story" and "workflow_state_id" in entity:
+                entity["workflow_state_id"] = entity["workflow_state_id"]
+            elif item["type"] == "epic" and "workflow_state_id" in entity and entity["workflow_state_id"]:
+                entity["workflow_state_id"] = entity["workflow_state_id"]
+
+            if item["type"] == "story":
+                print(f'Creating story {entity["id"]} "{entity["name"]}"')
+            elif item["type"] == "epic":
+                print(f'Creating epic {entity["id"]} "{entity["name"]}"')
+
+            created_entities[entity_id] = entity
+            item["imported_entity"] = entity
 
         return items
 
@@ -598,26 +631,46 @@ class EntityCollector:
         # Update epic states based on their stories
         epic_stories = {}
         for story in self.stories:
-            epic_id = story["entity"].get("epic_id")
-            if epic_id:
-                epic_stories.setdefault(epic_id, []).append(story)
+            if "epic_id" in story["imported_entity"]:
+                epic_id = story["imported_entity"]["epic_id"]
+                if "workflow_state_id" in story["imported_entity"]:
+                    epic_stories.setdefault(epic_id, []).append({"entity": story["imported_entity"]})
 
+        # Only update epic states for epics that have associated stories
+        epic_updates = []
         for epic in self.epics:
             epic_id = epic["imported_entity"]["id"]
             stories = epic_stories.get(epic_id, [])
-            workflow_state_id = calculate_epic_state(self.ctx, stories)
 
-            # Update epic state via API or mock in test mode
-            if self.api_emitter:
-                self.api_emitter([{
+            # Only update if:
+            # 1. The epic has stories OR
+            # 2. The epic already has a workflow_state_id in its original entity (meaning it was set explicitly)
+            if stories or ("workflow_state_id" in epic["entity"] and epic["entity"]["workflow_state_id"]):
+                workflow_state_id = calculate_epic_state(self.ctx, stories)
+                print(f"Updating epic {epic_id} state to workflow {workflow_state_id} with {len(stories)} stories")
+                epic_update = {
                     "type": "epic",
                     "entity": {
                         "id": epic_id,
-                        "workflow_state_id": workflow_state_id
+                        "workflow_state_id": workflow_state_id,
+                        "entity_type": "epic",
+                        "name": epic["imported_entity"]["name"]
                     }
-                }])
-            else:
-                sc_put(f"/epics/{epic_id}", {"workflow_state_id": workflow_state_id})
+                }
+                epic_updates.append(epic_update)
+                if self.api_emitter:
+                    self.api_emitter([epic_update])
+                else:
+                    sc_put(f"/epics/{epic_id}", {"workflow_state_id": workflow_state_id})
+
+        # Make sure to update epics with their final states
+        if epic_updates:
+            updated_epics = self.emitter(epic_updates)
+            # Update our epic list with the latest versions
+            for updated_epic in updated_epics:
+                for epic in self.epics:
+                    if epic["imported_entity"]["id"] == updated_epic["imported_entity"]["id"]:
+                        epic["imported_entity"] = updated_epic["imported_entity"]
 
         # Aggregate all the created stories, epics, iterations, and labels into a list of maps
         created_entities = []

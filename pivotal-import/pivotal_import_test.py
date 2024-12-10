@@ -13,7 +13,7 @@ def create_test_ctx():
             "Giorgio Parisi": "giorgio_member_id",
             "Piper | Barnes": "piper_member_id",
         },
-        "workflow_config": {"unstarted": 400001, "started": 400002, "done": 400003},
+        "workflow_config": {"unstarted": 500000, "started": 500001, "done": 500002},
     }
 
 
@@ -703,3 +703,100 @@ def test_entity_collector_with_epics():
             "external_id": "3456",
         },
     ] == created
+
+
+def test_calculate_epic_state():
+    ctx = create_test_ctx()
+
+    # Test empty stories list
+    assert calculate_epic_state(ctx, []) == epic_states["todo"]
+
+    # Test all stories done
+    stories_done = [{
+        "entity": {"workflow_state_id": ctx["workflow_config"]["done"]}
+    }]
+    assert calculate_epic_state(ctx, stories_done) == epic_states["done"]
+
+    # Test mixed states
+    stories_mixed = [
+        {"entity": {"workflow_state_id": ctx["workflow_config"]["done"]}},
+        {"entity": {"workflow_state_id": ctx["workflow_config"]["started"]}},
+        {"entity": {"workflow_state_id": ctx["workflow_config"]["unstarted"]}}
+    ]
+    assert calculate_epic_state(ctx, stories_mixed) == epic_states["in_progress"]
+
+    # Test all stories todo
+    stories_todo = [{
+        "entity": {"workflow_state_id": ctx["workflow_config"]["unstarted"]}
+    }]
+    assert calculate_epic_state(ctx, stories_todo) == epic_states["todo"]
+
+    # Test all stories in progress
+    stories_progress = [{
+        "entity": {"workflow_state_id": ctx["workflow_config"]["started"]}
+    }]
+    assert calculate_epic_state(ctx, stories_progress) == epic_states["in_progress"]
+
+
+def test_entity_collector_epic_state_updates():
+    ctx = create_test_ctx()
+    entity_collector = EntityCollector(emitter=get_mock_emitter(), ctx=ctx)
+
+    # Create an epic with initial state
+    epic = {
+        "type": "epic",
+        "entity": {
+            "name": "Test Epic",
+            "workflow_state_id": epic_states["todo"],  # Set initial state
+            "labels": [
+                {"name": PIVOTAL_TO_SHORTCUT_LABEL},
+                {"name": PIVOTAL_TO_SHORTCUT_RUN_LABEL}
+            ]
+        }
+    }
+    entity_collector.collect(epic)
+
+    # Create stories in different states
+    story1 = {
+        "type": "story",
+        "entity": {
+            "name": "Story 1",
+            "workflow_state_id": ctx["workflow_config"]["done"],
+            "epic_id": 0,  # Will be assigned by mock emitter
+            "external_id": "PT1",  # Add external_id for Pivotal tracking
+            "labels": [
+                {"name": PIVOTAL_TO_SHORTCUT_LABEL},
+                {"name": PIVOTAL_TO_SHORTCUT_RUN_LABEL}
+            ],
+            "story_type": "feature"  # Add story_type as required by build_entity
+        },
+        "iteration": None,
+        "pt_iteration_id": None
+    }
+    story2 = {
+        "type": "story",
+        "entity": {
+            "name": "Story 2",
+            "workflow_state_id": ctx["workflow_config"]["started"],
+            "epic_id": 0,
+            "external_id": "PT2",  # Add external_id for Pivotal tracking
+            "labels": [
+                {"name": PIVOTAL_TO_SHORTCUT_LABEL},
+                {"name": PIVOTAL_TO_SHORTCUT_RUN_LABEL}
+            ],
+            "story_type": "feature"  # Add story_type as required by build_entity
+        },
+        "iteration": None,
+        "pt_iteration_id": None
+    }
+
+    entity_collector.collect(story1)
+    entity_collector.collect(story2)
+
+    # Commit and verify epic state updates
+    created_entities = entity_collector.commit()
+
+    # Find the epic in created entities
+    epic_updates = [e for e in created_entities if e["entity_type"] == "epic"]
+    assert len(epic_updates) > 0
+    assert epic_updates[0]["workflow_state_id"] == epic_states["in_progress"]
