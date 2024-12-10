@@ -11,7 +11,25 @@ import sys
 from collections import Counter
 from datetime import datetime
 
-from lib import *
+from lib import (
+    sc_get,
+    sc_post,
+    sc_put,
+    sc_upload_files,
+    calculate_epic_state,
+    parse_date_time,
+    parse_date,
+    parse_comment,
+    identity,
+    logger,
+    fetch_members,
+    epic_states,
+    load_config,
+    validate_environment,
+    print_rate_limiting_explanation,
+    print_stats,
+    shortcut_imported_entities_csv,
+)
 
 parser = argparse.ArgumentParser(
     description="Imports the Pivotal Tracker CSV export to Shortcut",
