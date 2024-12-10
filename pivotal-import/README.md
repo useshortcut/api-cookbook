@@ -56,7 +56,7 @@ The following are known limitations:
 - **No story blockers:** Pivotal story blockers (the relationships between stories) are not imported.
 - **Epics are imported as unstarted:** Imported epics are set to an unstarted "Todo" state.
 - **No redirects:** The URLs in the descriptions and comments of your Pivotal stories/epics are not rewritten to point to imported Shortcut stories/epics; they remain unchanged.
-- **No history:** Project history is not imported into Shortcut.
+- **No history:** Project history and story history are not included in Pivotal Tracker's CSV export format and therefore cannot be imported into Shortcut.
 
 Our intention is to attend to items higher on the list sooner than those lower.
 
