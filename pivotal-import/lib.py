@@ -22,6 +22,13 @@ import requests
 # Logging
 logger = logging.getLogger(__name__)
 
+# Epic states for mapping Pivotal epics to Shortcut workflow states
+epic_states = {
+    "todo": "500000",  # Default Todo state
+    "in_progress": "500001",  # In Progress state
+    "done": "500002",  # Done state
+}
+
 # Rate limiting. See https://developer.shortcut.com/api/rest/v3#Rate-Limiting
 # The Shortcut API limit is 200 per minute; the 200th request within 60 seconds
 # will receive an HTTP 429 response.
@@ -351,11 +358,7 @@ def populate_config():
                 "states_csv_file": data_states_csv,
                 "users_csv_file": data_users_csv,
                 "workflow_id": workflow_id,
-                "epic_workflow_states": {
-                    "todo": "500000",
-                    "in_progress": "500001",
-                    "done": "500002",
-                },
+                "epic_workflow_states": epic_states,  # Use the constant defined above
             }
             json.dump(data, f, indent=2)
             # Errors are printed to the console in the default_* functions above
@@ -468,6 +471,38 @@ def get_user_info(member):
 
 def fetch_members():
     return [get_user_info(member) for member in sc_get("/members")]
+
+
+def calculate_epic_state(ctx, stories):
+    """Calculate epic state based on its stories' states.
+
+    Args:
+        ctx: Context dictionary containing workflow configuration
+        stories: List of story dictionaries with workflow state information
+
+    Returns:
+        str: Epic state ID from epic_states dictionary
+    """
+    if not stories:
+        return epic_states["todo"]
+
+    # Count stories in each state
+    state_counts = {"todo": 0, "in_progress": 0, "done": 0}
+    for story in stories:
+        workflow_state_id = story["entity"].get("workflow_state_id")
+        if workflow_state_id == ctx["workflow_config"]["done"]:
+            state_counts["done"] += 1
+        elif workflow_state_id == ctx["workflow_config"]["started"]:
+            state_counts["in_progress"] += 1
+        else:
+            state_counts["todo"] += 1
+
+    # Determine epic state
+    if state_counts["todo"] == 0 and state_counts["in_progress"] == 0:
+        return epic_states["done"]
+    elif state_counts["in_progress"] > 0 or state_counts["done"] > 0:
+        return epic_states["in_progress"]
+    return epic_states["todo"]
 
 
 #

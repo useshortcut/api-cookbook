@@ -46,12 +46,7 @@ pt_all_states = [
     "accepted",
 ]
 
-# Epic states for mapping Pivotal epics to Shortcut workflow states
-epic_states = {
-    "todo": "500000",  # Default Todo state
-    "in_progress": "500001",  # In Progress state
-    "done": "500002",  # Done state
-}
+# PLACEHOLDER: pt_all_priorities definition
 
 # Pivotal Tracker story priorities. The "None" priority is not mapped
 # because the importer interprets that as "do not set a Priority".

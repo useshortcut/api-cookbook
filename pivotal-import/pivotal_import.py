@@ -4,17 +4,20 @@
 # See README.md for prerequisites, setup, and usage.
 import argparse
 import csv
+import logging
 import os
 import re
 import sys
 from collections import Counter
 from datetime import datetime
 
-from initialize import ctx
 from lib import (
-    sc_get, sc_post, sc_put, calculate_epic_state,
-    parse_date_time, parse_date, parse_comment,
-    identity, logger, fetch_members,
+    sc_get, sc_post, sc_put, sc_upload_files,
+    calculate_epic_state, parse_date_time, parse_date,
+    parse_comment, identity, logger, fetch_members,
+    epic_states, load_config, validate_environment,
+    print_rate_limiting_explanation, print_stats,
+    shortcut_imported_entities_csv
 )
 
 parser = argparse.ArgumentParser(
@@ -398,27 +401,32 @@ def load_workflow_states(csv_file):
 
 
 def get_mock_emitter():
-    _mock_global_id = 0
+    """Returns a function that can be used to mock entity creation."""
+    _id = 0
 
     def _get_next_id():
-        nonlocal _mock_global_id
-        id = _mock_global_id
-        _mock_global_id += 1
-        return id
+        nonlocal _id
+        current = _id
+        _id += 1
+        return current
 
     def mock_emitter(items):
         for item in items:
-            entity_id = _get_next_id()
-            created_entity = item["entity"].copy()
-            created_entity["id"] = entity_id
-            created_entity["entity_type"] = item["type"]
-            created_entity["app_url"] = f"https://example.com/entity/{entity_id}"
-            item["imported_entity"] = created_entity
-            print(
-                'Creating {} {} "{}"'.format(
-                    item["type"], entity_id, item["entity"]["name"]
-                )
-            )
+            if item["type"] == "epic_state":
+                # For epic state updates, just return success without modifying anything
+                continue
+
+            entity = item["entity"]
+            entity["id"] = _get_next_id()
+            entity["app_url"] = f"https://example.com/entity/{entity['id']}"
+            entity["entity_type"] = item["type"]
+            item["imported_entity"] = entity
+
+            if item["type"] == "story":
+                print(f'Creating story {entity["id"]} "{entity["name"]}"')
+            elif item["type"] == "epic":
+                print(f'Creating epic {entity["id"]} "{entity["name"]}"')
+
         return items
 
     return mock_emitter
@@ -489,7 +497,7 @@ class EntityCollector:
     entities.
     """
 
-    def __init__(self, emitter=None):
+    def __init__(self, emitter=None, ctx=None):
         _mock_global_id = 0
         self.stories = []
         self.epics = []
@@ -500,9 +508,12 @@ class EntityCollector:
         # to be populated at commit()
         self.iterations = []
         self.labels = []
+        self.ctx = ctx
         if emitter is None:
             emitter = get_mock_emitter()
         self.emitter = emitter
+        # Use the same emitter for API calls in test mode
+        self.api_emitter = emitter if emitter == get_mock_emitter() else None
 
     def collect(self, item):
         if item["type"] == "story":
@@ -591,10 +602,13 @@ class EntityCollector:
         for epic in self.epics:
             epic_id = epic["imported_entity"]["id"]
             stories = epic_stories.get(epic_id, [])
-            workflow_state_id = calculate_epic_state(ctx, stories)
+            workflow_state_id = calculate_epic_state(self.ctx, stories)
 
-            # Update epic state via API
-            sc_put(f"/epics/{epic_id}", {"workflow_state_id": workflow_state_id})
+            # Update epic state via API or mock in test mode
+            if self.api_emitter:
+                self.api_emitter([{"type": "epic_state", "entity": {"id": epic_id, "workflow_state_id": workflow_state_id}}])
+            else:
+                sc_put(f"/epics/{epic_id}", {"workflow_state_id": workflow_state_id})
 
         # Aggregate all the created stories, epics, iterations, and labels into a list of maps
         created_entities = []
@@ -666,12 +680,11 @@ def main(argv):
     if args.apply:
         emitter = sc_creator
 
-    entity_collector = EntityCollector(emitter)
-
     # We need to make API requests before fully validating local config.
     validate_environment()
     cfg = load_config()
     ctx = build_ctx(cfg)
+    entity_collector = EntityCollector(emitter, ctx)
     print_rate_limiting_explanation()
     process_pt_csv_export(ctx, cfg["pt_csv_file"], entity_collector)
 
