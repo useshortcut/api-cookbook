@@ -575,6 +575,23 @@ class EntityCollector:
         self.stories = self.emitter(self.stories)
         print("Finished creating {} stories".format(len(self.stories)))
 
+        # Update epic states based on their stories
+        epic_stories = {}
+        for story in self.stories:
+            epic_id = story["entity"].get("epic_id")
+            if epic_id:
+                epic_stories.setdefault(epic_id, []).append(story)
+
+        for epic in self.epics:
+            epic_id = epic["imported_entity"]["id"]
+            stories = epic_stories.get(epic_id, [])
+            workflow_state_id = calculate_epic_state(ctx, stories)
+
+            # Update epic state via API
+            sc_put(f"/epics/{epic_id}", {
+                "workflow_state_id": workflow_state_id
+            })
+
         # Aggregate all the created stories, epics, iterations, and labels into a list of maps
         created_entities = []
         created_set = set()
