@@ -4,12 +4,18 @@
 # See README.md for prerequisites, setup, and usage.
 import argparse
 import csv
+import os
 import re
 import sys
-from datetime import datetime
 from collections import Counter
+from datetime import datetime
 
-from lib import *
+from initialize import ctx
+from lib import (
+    sc_get, sc_post, sc_put, calculate_epic_state,
+    parse_date_time, parse_date, parse_comment,
+    identity, logger, fetch_members,
+)
 
 parser = argparse.ArgumentParser(
     description="Imports the Pivotal Tracker CSV export to Shortcut",
