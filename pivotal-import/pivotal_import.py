@@ -11,14 +11,7 @@ import sys
 from collections import Counter
 from datetime import datetime
 
-from lib import (
-    sc_get, sc_post, sc_put, sc_upload_files,
-    calculate_epic_state, parse_date_time, parse_date,
-    parse_comment, identity, logger, fetch_members,
-    epic_states, load_config, validate_environment,
-    print_rate_limiting_explanation, print_stats,
-    shortcut_imported_entities_csv
-)
+from lib import *
 
 parser = argparse.ArgumentParser(
     description="Imports the Pivotal Tracker CSV export to Shortcut",
@@ -428,7 +421,9 @@ def get_mock_emitter():
                 # For updates (entities with existing IDs), maintain the entity structure
                 item["imported_entity"] = entity
                 if item["type"] == "epic":
-                    print(f'Updating epic {entity["id"]} state to workflow {entity["workflow_state_id"]}')
+                    print(
+                        f'Updating epic {entity["id"]} state to workflow {entity["workflow_state_id"]}'
+                    )
 
         return items
 
@@ -609,13 +604,17 @@ class EntityCollector:
 
             # Update epic state via API or mock in test mode
             if self.api_emitter:
-                self.api_emitter([{
-                    "type": "epic",
-                    "entity": {
-                        "id": epic_id,
-                        "workflow_state_id": workflow_state_id
-                    }
-                }])
+                self.api_emitter(
+                    [
+                        {
+                            "type": "epic",
+                            "entity": {
+                                "id": epic_id,
+                                "workflow_state_id": workflow_state_id,
+                            },
+                        }
+                    ]
+                )
             else:
                 sc_put(f"/epics/{epic_id}", {"workflow_state_id": workflow_state_id})
 
