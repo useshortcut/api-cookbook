@@ -18,10 +18,12 @@ def create_test_ctx():
 
 
 def test_parse_row_basic():
+    """Test basic row parsing without link transformation."""
+    # No ctx provided, so no link transformation should occur
     assert {
         "name": "My Story Name",
         "description": "My Story Description",
-    } == parse_row(["My Story Name", "My Story Description"], ["title", "description"])
+    } == parse_row(["My Story Name", "My Story Description"], ["title", "description"], None)
 
 
 def test_parse_comments():
@@ -656,7 +658,7 @@ def test_entity_collector_with_epics():
         }
     )
 
-    # When: the entities are commited/crread
+    # When: the entities are committed/created
     created = entity_collector.commit()
 
     # Then: All epics are created before the stories
@@ -702,3 +704,71 @@ def test_entity_collector_with_epics():
             "external_id": "3456",
         },
     ] == created
+
+
+def test_transform_pivotal_link():
+    """Test Pivotal Tracker link transformation."""
+    ctx = create_test_ctx()
+    ctx["id_mapping"] = {"12345": "sc-789", "67890": "sc-012"}
+
+    # Test URL format
+    assert transform_pivotal_link(
+        "https://www.pivotaltracker.com/story/show/12345",
+        ctx
+    ) == "https://app.shortcut.com/shortcut/story/sc-789"
+
+    # Test ID reference format
+    assert transform_pivotal_link("#12345", ctx) == "[sc-789]"
+
+    # Test mixed content
+    text = "See #12345 and https://www.pivotaltracker.com/story/show/67890 for details"
+    expected = "See [sc-789] and https://app.shortcut.com/shortcut/story/sc-012 for details"
+    assert transform_pivotal_link(text, ctx) == expected
+
+    # Test unmapped ID
+    assert transform_pivotal_link("#99999", ctx) == "#99999"
+
+    # Test unmapped URL
+    assert transform_pivotal_link(
+        "https://www.pivotaltracker.com/story/show/99999",
+        ctx
+    ) == "https://app.shortcut.com/shortcut/story/99999"
+
+
+def test_transform_github_link():
+    """Test GitHub link transformation."""
+    # Test PR link format
+    assert transform_github_link(
+        "https://github.com/org/repo/pull/123"
+    ) == "https://github.com/org/repo/pull/123"
+
+    # Test branch link format
+    assert transform_github_link(
+        "https://github.com/org/repo/tree/feature-branch"
+    ) == "https://github.com/org/repo/tree/feature-branch"
+
+    # Test other GitHub links (should remain unchanged)
+    assert transform_github_link(
+        "https://github.com/org/repo/issues/456"
+    ) == "https://github.com/org/repo/issues/456"
+
+
+def test_url_to_external_links():
+    """Test URL to external links conversion."""
+    ctx = create_test_ctx()
+
+    # Test Pivotal links (should be skipped)
+    assert url_to_external_links(
+        "https://www.pivotaltracker.com/story/show/12345"
+    ) == []
+
+    # Test GitHub links
+    github_pr = "https://github.com/org/repo/pull/123"
+    assert url_to_external_links(github_pr) == [github_pr]
+
+    github_branch = "https://github.com/org/repo/tree/feature-branch"
+    assert url_to_external_links(github_branch) == [github_branch]
+
+    # Test other external links
+    other_link = "https://example.com/page"
+    assert url_to_external_links(other_link) == [other_link]
