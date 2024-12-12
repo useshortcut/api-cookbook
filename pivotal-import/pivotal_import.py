@@ -84,8 +84,50 @@ def sc_creator(items):
     return items
 
 
+def transform_pivotal_link(text, ctx):
+    """Transform Pivotal Tracker links to Shortcut story links.
+
+    Args:
+        text: Text containing Pivotal Tracker links
+        ctx: Context dictionary containing ID mappings
+
+    Returns:
+        str: Text with transformed links
+    """
+    # Transform full URLs
+    url_pattern = r'https://www\.pivotaltracker\.com/story/show/(\d+)'
+    def url_replace(match):
+        pt_id = match.group(1)
+        sc_id = ctx.get("id_mapping", {}).get(pt_id)
+        return f'https://app.shortcut.com/shortcut/story/{sc_id if sc_id else pt_id}'
+    text = re.sub(url_pattern, url_replace, text)
+
+    # Transform ID references (#123)
+    id_pattern = r'#(\d+)'
+    def id_replace(match):
+        pt_id = match.group(1)
+        sc_id = ctx.get("id_mapping", {}).get(pt_id)
+        return f'[{sc_id}]' if sc_id else f'#{pt_id}'
+    return re.sub(id_pattern, id_replace, text)
+
+def transform_github_link(url):
+    """Transform GitHub PR/branch links to external link format.
+
+    Args:
+        url (str): GitHub URL for PR or branch
+
+    Returns:
+        str: Standardized external link format
+    """
+    # Already in standard format - GitHub URLs work as-is
+    return url
+
 def url_to_external_links(url):
-    return [url]
+    if "pivotaltracker.com" in url:
+        return []  # Skip Pivotal links - they'll be transformed in text
+    if "github.com" in url:
+        return [transform_github_link(url)]
+    return [url]  # Preserve existing behavior for other URLs
 
 
 def parse_labels(labels: str):
@@ -177,7 +219,7 @@ def escape_md_table_syntax(s):
     return s.replace("|", "\\|")
 
 
-def parse_row(row, headers):
+def parse_row(row, headers, ctx=None):
     d = dict()
     for ix, val in enumerate(row):
         v = val.strip()
@@ -188,10 +230,17 @@ def parse_row(row, headers):
         if col in col_map:
             col_info = col_map[col]
             if isinstance(col_info, str):
+                if col == "description" and ctx and "id_mapping" in ctx:
+                    # Transform Pivotal links in description
+                    v = transform_pivotal_link(v, ctx)
                 d[col_info] = v
             else:
                 (key, translator) = col_info
-                d[key] = translator(v)
+                if col == "url":
+                    # URL field uses url_to_external_links translator
+                    d[key] = translator(v)
+                else:
+                    d[key] = translator(v)
 
         if col in nested_col_map:
             col_info = nested_col_map[col]
@@ -202,6 +251,11 @@ def parse_row(row, headers):
                 (key, translator) = col_info
                 v = translator(v)
             d.setdefault(key, []).append(v)
+
+        # Handle GitHub PR/branch links
+        if col in ["pull_request", "git_branch"] and v:
+            d.setdefault("external_links", []).append(transform_github_link(v))
+
     return d
 
 
@@ -594,9 +648,28 @@ def process_pt_csv_export(ctx, pt_csv_file, entity_collector):
     with open(pt_csv_file) as csvfile:
         reader = csv.reader(csvfile)
         header = [col.lower() for col in next(reader)]
+
+        # First pass: collect all stories to build ID mapping
+        story_rows = []
         for row in reader:
-            row_info = parse_row(row, header)
+            story_rows.append(row)
+            row_info = parse_row(row, header, ctx)
+            if "id" in row_info:
+                ctx["id_mapping"][row_info["id"]] = None  # Placeholder for Shortcut ID
+
+        # Reset file pointer for second pass
+        csvfile.seek(0)
+        next(reader)  # Skip header
+
+        # Second pass: process stories with complete mapping
+        for row in story_rows:
+            row_info = parse_row(row, header, ctx)
             entity = build_entity(ctx, row_info)
+            if entity["type"] == "story":
+                # Update ID mapping with new Shortcut ID
+                pt_id = entity["parsed_row"]["id"]
+                if "imported_entity" in entity:
+                    ctx["id_mapping"][pt_id] = entity["imported_entity"]["id"]
             logger.debug("Emitting Entity: %s", entity)
             stats.update(entity_collector.collect(entity))
 
@@ -632,6 +705,7 @@ def build_ctx(cfg):
         "priority_custom_field_id": cfg["priority_custom_field_id"],
         "user_config": load_users(cfg["users_csv_file"]),
         "workflow_config": load_workflow_states(cfg["states_csv_file"]),
+        "id_mapping": {},  # Initialize empty mapping for Pivotal->Shortcut IDs
     }
     logger.debug("Built context %s", ctx)
     return ctx
