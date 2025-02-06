@@ -5,7 +5,11 @@ This script imports a Pivotal Tracker CSV export file into a Shortcut workspace.
 This README contains detailed usage instructions, but if you just want to jump in, clone this repository and at its root run:
 
 ```
+# Dry run:
 make import
+
+# Real run:
+make import-apply
 ```
 
 Follow the instructions printed to the console to configure and complete your import.
@@ -22,7 +26,7 @@ In order to run this, you will require a Pivotal account and the ability to sign
    - Copy the primary CSV file to `data/pivotal_export.csv`
    - (Optional) To import your Pivotal story file attachments, ensure you included them when requesting your Pivotal export, and then copy the directories in your Pivotal export that are named after your Pivotal story IDs (which contain their file attachments) into the `data/` folder of this project. This will result in a directory structure like `data/10000/*`, `data/10001/*`, etc.
 1. Create/Invite all users you want to reference into your Shortcut workspace.
-   - **NOTE:** If you're not on a Shortcut trial, please [reach out to our support team](https://help.shortcut.com/hc/en-us/requests/new) before running this import to make sure you're not billed for users that you want to be disabled after import. 
+   - **NOTE:** If you're not on a Shortcut trial, please [reach out to our support team](https://help.shortcut.com/hc/en-us/requests/new) before running this import to make sure you're not billed for users that you want to be disabled after import.
    - **Also Note:** When you commit your import, there's the potential for many notification emails to be sent to the users in your workspace. [**Contact our support team**](https://help.shortcut.com/hc/en-us/requests/new) to temporarily disable email notifications if you would prefer to keep your inbox clear.
 1. Run `make import` to perform a dry-run of the import.
    - Follow instructions printed to the console to ensure the mapping of Pivotal and Shortcut data is complete and correct.
@@ -35,7 +39,7 @@ In order to run this, you will require a Pivotal account and the ability to sign
      - `data/shortcut_users.csv` is a listing of all users in your Shortcut workspace
      - `data/shortcut_imported_entities.csv` contains a listing of all entities created during import
    - Ensure a `group_id` is set in your `config.json` file if you want to assign the epics and stories you import to a Shortcut Team/Group.
-1. If the dry-run output looks correct, you can apply the import to your Shortcut workspace by running `make import-apply`
+1. 🚀 Run `make import-apply` to actually import your data into Shortcut, if the dry run looked correct.
    - The console should print a link to an import-specific Shortcut label page that you can review to find all imported Stories and Epics.
    - If you run the importer multiple times, you can review all imported Stories and Epics by visiting Settings > Labels and then searching for the `pivotal->shortcut` label and clicking on it.
 1. If you find that you need to adjust your configuration or your Pivotal data and try again, you can run `make delete` to review a dry-run and `make delete-apply` to actually delete the imported Shortcut epics and stories listed in `data/shortcut_imported_entities.csv`. You can also archive or delete content in the Shortcut application if needed.
