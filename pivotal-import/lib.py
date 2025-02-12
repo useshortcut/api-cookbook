@@ -60,7 +60,7 @@ headers = {
     "Shortcut-Token": sc_token,
     "Accept": "application/json; charset=utf-8",
     "Content-Type": "application/json",
-    "User-Agent": "pivotal-to-shortcut/0.0.1-alpha1",
+    "User-Agent": "pivotal-to-shortcut/0.0.1-alpha2",
 }
 
 
