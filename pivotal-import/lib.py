@@ -330,6 +330,13 @@ def default_workflow_id():
     else:
         return workflow_id
 
+def current_member_id():
+    """
+    Returns the member id that this token belongs to.
+    """
+    member = sc_get("/member")
+    return member["id"]
+
 
 def populate_config():
     """
