@@ -60,7 +60,7 @@ headers = {
     "Shortcut-Token": sc_token,
     "Accept": "application/json; charset=utf-8",
     "Content-Type": "application/json",
-    "User-Agent": "pivotal-to-shortcut/0.0.1-alpha1",
+    "User-Agent": "pivotal-to-shortcut/0.0.1-alpha2",
 }
 
 
@@ -286,7 +286,7 @@ def default_priority_custom_field_id():
     priority_custom_field_id = None
     custom_fields = sc_get("/custom-fields")
     for custom_field in custom_fields:
-        if custom_field["canonical_name"] == "priority" and custom_field["enabled"]:
+        if "canonical_name" in custom_field and custom_field["canonical_name"] == "priority" and custom_field["enabled"]:
             priority_custom_field_id = custom_field["id"]
 
     if priority_custom_field_id is None:
@@ -329,6 +329,13 @@ def default_workflow_id():
         return None
     else:
         return workflow_id
+
+def current_member_id():
+    """
+    Returns the member id that this token belongs to.
+    """
+    member = sc_get("/member")
+    return member["id"]
 
 
 def populate_config():

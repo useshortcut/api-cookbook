@@ -305,7 +305,7 @@ def build_entity(ctx, d):
                 review_status = escape_md_table_syntax(review_status)
                 comment_text += f"\n|{reviewer}|{review_type}|{review_status}|"
             comments.append(
-                {"author_id": d.get("requested_by_id", None), "text": comment_text}
+                {"author_id": d.get("requested_by_id", ctx.get("token_member")), "text": comment_text}
             )
 
         # Custom Fields
@@ -626,7 +626,10 @@ def write_created_entities_csv(created_entities):
 
 
 def build_ctx(cfg):
+    member_id = current_member_id()
+
     ctx = {
+        "token_member": member_id,
         "group_id": cfg["group_id"],
         "priority_config": load_priorities(cfg["priorities_csv_file"]),
         "priority_custom_field_id": cfg["priority_custom_field_id"],
