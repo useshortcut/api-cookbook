@@ -286,7 +286,7 @@ def default_priority_custom_field_id():
     priority_custom_field_id = None
     custom_fields = sc_get("/custom-fields")
     for custom_field in custom_fields:
-        if custom_field["canonical_name"] == "priority" and custom_field["enabled"]:
+        if "canonical_name" in custom_field and custom_field["canonical_name"] == "priority" and custom_field["enabled"]:
             priority_custom_field_id = custom_field["id"]
 
     if priority_custom_field_id is None:
