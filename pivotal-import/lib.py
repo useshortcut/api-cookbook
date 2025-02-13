@@ -74,6 +74,8 @@ def sc_get(path, params={}):
     url = api_url_base + path
     logger.debug("GET url=%s params=%s headers=%s" % (url, params, headers))
     resp = requests.get(url, headers=headers, params=params)
+    if resp.status_code >= 400:
+        logger.error(f"\n>>> ERROR GET response: {resp.status_code} {resp.text}\n")
     resp.raise_for_status()
     return resp.json()
 
@@ -91,7 +93,8 @@ def sc_post(path, data={}):
     url = api_url_base + path
     logger.debug("POST url=%s params=%s headers=%s" % (url, data, headers))
     resp = requests.post(url, headers=headers, json=data)
-    logger.debug(f"POST response: {resp.status_code} {resp.text}")
+    if resp.status_code >= 400:
+        logger.error(f"\n>>> ERROR POST response: {resp.status_code} {resp.text}\n")
     resp.raise_for_status()
     return resp.json()
 
@@ -107,6 +110,8 @@ def sc_put(path, data={}):
     url = api_url_base + path
     logger.debug("PUT url=%s params=%s headers=%s" % (url, data, headers))
     resp = requests.put(url, headers=headers, json=data)
+    if resp.status_code >= 400:
+        logger.error(f"\n>>> ERROR PUT response: {resp.status_code} {resp.text}\n")
     resp.raise_for_status()
     return resp.json()
 
@@ -151,6 +156,8 @@ def sc_delete(path):
     url = api_url_base + path
     logger.debug("DELETE url=%s headers=%s" % (url, headers))
     resp = requests.delete(url, headers=headers)
+    if resp.status_code >= 400:
+        logger.error(f"\n>>> ERROR DELETE response: {resp.status_code} {resp.text}\n")
     resp.raise_for_status()
     return resp
 
