@@ -52,6 +52,7 @@ You can run `make clean` if you want to start over, but be aware this will delet
 
 The following are known limitations:
 
+- **Release stories:** Shortcut does not have a dedicated release story type (only feature, bug, and chore). Pivotal Tracker stories of type `release` are imported as Shortcut chore stories with a label of `pivotal-release`.
 - **Story reviews:** Shortcut does not have a feature equivalent to Pivotal story reviews, so they are imported as follows:
   - Pivotal story reviewers are imported as Shortcut story followers on the stories they were assigned for review. Shortcut story followers receive updates in their Shortcut Activity Feed for all story updates.
   - Imported stories that had Pivotal reviews have an additional comment with a table that lists all of the story reviews from Pivotal (reviewer, review type, and review status).
