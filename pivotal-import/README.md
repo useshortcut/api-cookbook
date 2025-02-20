@@ -20,7 +20,7 @@ In order to run this, you will require a Pivotal account and the ability to sign
 
 1. Sign up for a Shortcut account at [https://www.shortcut.com/signup](https://www.shortcut.com/signup).
    - **NOTE:** Do not run this importer against an existing Shortcut workspace that already has data you wish to keep.
-1. [Create a new Shortcut API token](https://app.shortcut.com/settings/account/api-tokens) and [export it into your environment](../Authentication.md).
+1. As an admin in your Shortcut workspace, [create a new Shortcut API token](https://app.shortcut.com/settings/account/api-tokens) and [export it into your environment](../Authentication.md).
 1. Export your Pivotal project to CSV.
    - Unarchive the ZIP file provided by Pivotal.
    - Copy the primary CSV file to `data/pivotal_export.csv`
