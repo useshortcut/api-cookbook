@@ -21,7 +21,7 @@ parser.add_argument("--debug", action="store_true", help="Turns on debugging log
 
 
 """The batch size when running in batch mode"""
-BATCH_SIZE = 100
+BATCH_SIZE = 50
 
 """The labels associated with all stories and epics that are created with this import script."""
 PIVOTAL_TO_SHORTCUT_LABEL = "pivotal->shortcut"
