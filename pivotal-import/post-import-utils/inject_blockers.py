@@ -56,7 +56,6 @@ def main():
         ( scid, pb )
         for pb in pe.gen_blockers()
         if pb.blockee_type not in { 'epic', 'release' } # All others become Shortcut stories
-        if not pb.is_resolved
         if ( scid := sm.scid_from_ptid['story'].get(pb.blockee_id,None) )
     )
 

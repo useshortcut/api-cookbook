@@ -154,3 +154,22 @@ python merge_users.py  # edit first; see Parameters subsection above
 python assign_favorite_epic_per_story.py
 ```
 
+## Possible exception during `inject_blockers.py`
+
+While running `inject_blockers.py`, you may receive an exception like this. That's the Shortcut API saying that you already have a relationship "61265 blocks 60953", so you can't also have "61265 blocks 60953" or you will never start either one. 
+```
+WRITING  : ShortcutStoryLink(subject_id=60953, verb='blocks', object_id=61265)
+...
+AssertionError: FAILED: {"message":"Cannot have an inverse duplicated story link."}
+```
+One solution is to skip the story being blocked. In our case, we had two of these. Adding the last if statement was a convenient way to skip any relationship in which either of the two IDs was the blocked story.
+```python
+    # Consolidate PivotalBlocker objects by Shortcut ID of 'blockee' in preparation for iterating over Shortcut stories
+    md = OrderedMultiDict(
+        ( scid, pb )
+        for pb in pe.gen_blockers()
+        if pb.blockee_type not in { 'epic', 'release' } # All others become Shortcut stories
+        if ( scid := sm.scid_from_ptid['story'].get(pb.blockee_id,None) )
+        if scid not in { 61265, 61257 }
+    )
+```
