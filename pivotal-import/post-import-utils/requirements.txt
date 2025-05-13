@@ -1,0 +1,5 @@
+backoff==2.2.1
+boltons==25.0.0
+regex==2024.11.6
+throttlex==1.0.0
+tzlocal==5.3.1
