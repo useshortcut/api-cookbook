@@ -591,7 +591,7 @@ def process_pt_csv_export(ctx, pt_csv_file, entity_collector):
     stats = Counter()
     stats.update(entity_collector.collect(build_run_label_entity()))
 
-    with open(pt_csv_file) as csvfile:
+    with open(pt_csv_file, mode="r", encoding="utf-8") as csvfile:
         reader = csv.reader(csvfile)
         header = [col.lower() for col in next(reader)]
         for row in reader:
