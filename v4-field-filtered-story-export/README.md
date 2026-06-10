@@ -39,13 +39,13 @@ export SHORTCUT_WORKSPACE_SLUG="your-workspace-slug"
 By default the CSV includes `id`, `name`, `workflow_state`, and `owners`.
 
 ```shell
-python field_filtered_search.py --workflow-state-id <state-id>
+python field_filtered_story_export.py --workflow-state-id <state-id>
 ```
 
 Request a custom set of fields:
 
 ```shell
-python field_filtered_search.py --workflow-state-id <state-id> --fields id,name,workflow_state,owners,deadline
+python field_filtered_story_export.py --workflow-state-id <state-id> --fields id,name,workflow_state,owners,deadline
 ```
 
 Available fields (see [Story documentation](https://developer.shortcut.com/api/rest/v4#Story)): `app_url`, `archived`, `blocked`, `blocker`, `branches`,
@@ -63,6 +63,6 @@ By default the CSV is written to `~/Downloads/workflow-state-<id>-stories_<times
 You can override the output path:
 
 ```shell
-python field_filtered_search.py --workflow-state-id <state-id> --output-file my-stories.csv
+python field_filtered_story_export.py --workflow-state-id <state-id> --output-file my-stories.csv
 ```
 
